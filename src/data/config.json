@@ -1,0 +1,12 @@
+{
+  "game": {
+    "initialHandSize": 5,
+    "starterDeckSize": 5,
+    "starterCardId": "starter_supply",
+    "shopSize": 10,
+    "shopCardCopies": 10
+  },
+  "phases": {
+    "drawCount": 5
+  }
+}

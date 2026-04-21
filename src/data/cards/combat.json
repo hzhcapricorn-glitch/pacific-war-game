@@ -1,0 +1,163 @@
+[
+  {
+    "id": "starter_supply",
+    "type": "combat",
+    "name": "基础补给",
+    "cardCategory": "supply",
+    "cost": 0,
+    "redeployCost": 0,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      { "type": "supply", "value": 1 }
+    ],
+    "description": "提供1点补给",
+    "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础"
+  },
+  {
+    "id": "f4f_wildcat",
+    "type": "combat",
+    "name": "F4F野猫战斗机",
+    "cardCategory": "combat",
+    "unitType": "air",
+    "cost": 3,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 1,
+    "airPower": 4,
+    "abilities": [],
+    "description": "空中优势战斗机，对空火力4，对海火力1",
+    "flavor": "在中途岛上空守护我们的舰队"
+  },
+  {
+    "id": "sbd_dauntless",
+    "type": "combat",
+    "name": "SBD无畏式俯冲轰炸机",
+    "cardCategory": "combat",
+    "unitType": "air",
+    "cost": 4,
+    "redeployCost": 1,
+    "groundPower": 1,
+    "seaPower": 5,
+    "airPower": 1,
+    "abilities": [],
+    "description": "反舰轰炸机，对海火力5，对地火力1，对空火力1",
+    "flavor": "日本航母的噩梦"
+  },
+  {
+    "id": "b25_mitchell",
+    "type": "combat",
+    "name": "B-25米切尔轰炸机",
+    "cardCategory": "combat",
+    "unitType": "air",
+    "cost": 5,
+    "redeployCost": 2,
+    "groundPower": 5,
+    "seaPower": 2,
+    "airPower": 0,
+    "abilities": [
+      { "type": "supply", "value": 1 }
+    ],
+    "description": "中型轰炸机，对地火力5，对海火力2，提供1点补给",
+    "flavor": "杜立特空袭的传奇机型"
+  },
+  {
+    "id": "destroyer",
+    "type": "combat",
+    "name": "弗莱彻级驱逐舰",
+    "cardCategory": "combat",
+    "unitType": "navy",
+    "cost": 3,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 3,
+    "airPower": 2,
+    "abilities": [],
+    "description": "多用途舰艇，对海火力3，对空火力2",
+    "flavor": "舰队的守护者，反潜反舰样样精通"
+  },
+  {
+    "id": "cruiser",
+    "type": "combat",
+    "name": "巴尔的摩级巡洋舰",
+    "cardCategory": "combat",
+    "unitType": "navy",
+    "cost": 5,
+    "redeployCost": 2,
+    "groundPower": 2,
+    "seaPower": 6,
+    "airPower": 3,
+    "abilities": [],
+    "description": "重型巡洋舰，对海火力6，对空火力3，对地火力2",
+    "flavor": "海上的钢铁巨兽"
+  },
+  {
+    "id": "battleship",
+    "type": "combat",
+    "name": "衣阿华级战列舰",
+    "cardCategory": "combat",
+    "unitType": "navy",
+    "cost": 8,
+    "redeployCost": 3,
+    "groundPower": 5,
+    "seaPower": 8,
+    "airPower": 4,
+    "abilities": [
+      { "type": "supply", "value": 2 }
+    ],
+    "description": "最强战舰，对海火力8，对地火力5，对空火力4，提供2点补给",
+    "flavor": "16英寸主炮的咆哮震撼敌人心魄"
+  },
+  {
+    "id": "carrier_essex",
+    "type": "combat",
+    "name": "埃塞克斯级航空母舰",
+    "cardCategory": "support",
+    "unitType": "navy",
+    "cost": 6,
+    "redeployCost": 2,
+    "groundPower": 0,
+    "seaPower": 2,
+    "airPower": 5,
+    "airSlots": 4,
+    "abilities": [
+      { "type": "draw", "value": 1 }
+    ],
+    "description": "舰队核心，提供4个航空槽位，对空火力5，对海火力2，抽1张卡牌",
+    "flavor": "移动的海上机场，制空权的关键"
+  },
+  {
+    "id": "marines",
+    "type": "combat",
+    "name": "海军陆战队",
+    "cardCategory": "combat",
+    "unitType": "army",
+    "cost": 4,
+    "redeployCost": 1,
+    "groundPower": 5,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [],
+    "description": "精锐陆战单位，对地火力5",
+    "flavor": "硫磺岛、瓜岛，他们战无不胜"
+  },
+  {
+    "id": "supply_ship",
+    "type": "combat",
+    "name": "补给舰",
+    "cardCategory": "logistics",
+    "unitType": "navy",
+    "cost": 4,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 1,
+    "abilities": [
+      { "type": "supply", "value": 3 },
+      { "type": "max_supply", "value": 2 }
+    ],
+    "description": "后勤支援舰，提供3点补给，增加2点最大补给保留，对空火力1",
+    "flavor": "舰队的生命线"
+  }
+]

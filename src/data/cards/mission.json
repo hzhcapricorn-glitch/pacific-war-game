@@ -1,0 +1,101 @@
+[
+  {
+    "id": "mission_coral_sea",
+    "type": "mission",
+    "name": "珊瑚海海战",
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 6,
+    "requiredAirPower": 3,
+    "reward": {
+      "type": "supply",
+      "value": 3,
+      "description": "获得3点补给"
+    },
+    "loss": {
+      "type": "random_discard",
+      "count": 1,
+      "description": "随机损失1张参战卡牌"
+    },
+    "description": "首次航母对决，需要对海火力6、对空火力3（不足则损失加倍）",
+    "flavor": "1942年5月，历史上第一次航母对航母的海战"
+  },
+  {
+    "id": "mission_midway",
+    "type": "mission",
+    "name": "中途岛海战",
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 10,
+    "requiredAirPower": 8,
+    "reward": {
+      "type": "max_supply",
+      "value": 2,
+      "description": "最大补给保留+2"
+    },
+    "loss": {
+      "type": "random_discard",
+      "count": 1,
+      "description": "随机损失1张参战卡牌"
+    },
+    "description": "太平洋战争的转折点，需要对海火力10、对空火力8（不足则损失加倍）",
+    "flavor": "1942年6月，击沉四艘日本航母，扭转战局"
+  },
+  {
+    "id": "mission_guadalcanal",
+    "type": "mission",
+    "name": "瓜达尔卡纳尔战役",
+    "requiredGroundPower": 8,
+    "requiredSeaPower": 12,
+    "requiredAirPower": 10,
+    "reward": {
+      "type": "supply",
+      "value": 5,
+      "description": "获得5点补给"
+    },
+    "loss": {
+      "type": "random_discard",
+      "count": 2,
+      "description": "随机损失2张参战卡牌"
+    },
+    "description": "海陆空联合作战，需要对地火力8、对海火力12、对空火力10（不足则损失加倍）",
+    "flavor": "1942-1943年，血战半年夺取所罗门群岛"
+  },
+  {
+    "id": "mission_philippine_sea",
+    "type": "mission",
+    "name": "菲律宾海海战",
+    "requiredGroundPower": 5,
+    "requiredSeaPower": 18,
+    "requiredAirPower": 15,
+    "reward": {
+      "type": "supply",
+      "value": 8,
+      "description": "获得8点补给"
+    },
+    "loss": {
+      "type": "random_discard",
+      "count": 2,
+      "description": "随机损失2张参战卡牌"
+    },
+    "description": "马里亚纳猎火鸡大赛，需要对地火力5、对海火力18、对空火力15（不足则损失加倍）",
+    "flavor": "1944年6月，摧毁日本海军航空兵主力"
+  },
+  {
+    "id": "mission_okinawa",
+    "type": "mission",
+    "name": "冲绳战役",
+    "requiredGroundPower": 15,
+    "requiredSeaPower": 25,
+    "requiredAirPower": 20,
+    "reward": {
+      "type": "victory",
+      "description": "完成游戏，胜利！"
+    },
+    "loss": {
+      "type": "random_discard",
+      "count": 3,
+      "description": "随机损失3张参战卡牌"
+    },
+    "description": "最后的堡垒，需要对地火力15、对海火力25、对空火力20（不足则损失加倍）",
+    "flavor": "1945年4月，通向日本本土的最后一战"
+  }
+]
