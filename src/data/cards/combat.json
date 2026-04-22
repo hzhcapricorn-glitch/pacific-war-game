@@ -3,14 +3,14 @@
     "id": "starter_supply",
     "type": "combat",
     "name": "基础补给",
-    "cardCategory": "supply",
+    "cardCategory": "tactical",
     "cost": 0,
-    "redeployCost": 0,
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
     "abilities": [
-      { "type": "supply", "value": 1 }
+      { "type": "supply", "value": 1, "trigger": "on_play" },
+      { "type": "goes_to_discard", "trigger": "after_play" }
     ],
     "description": "提供1点补给",
     "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础"
@@ -20,6 +20,8 @@
     "type": "combat",
     "name": "F4F野猫战斗机",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "air",
     "cost": 3,
     "redeployCost": 1,
@@ -35,6 +37,8 @@
     "type": "combat",
     "name": "SBD无畏式俯冲轰炸机",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "air",
     "cost": 4,
     "redeployCost": 1,
@@ -50,6 +54,8 @@
     "type": "combat",
     "name": "B-25米切尔轰炸机",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "air",
     "cost": 5,
     "redeployCost": 2,
@@ -57,7 +63,7 @@
     "seaPower": 2,
     "airPower": 0,
     "abilities": [
-      { "type": "supply", "value": 1 }
+      { "type": "supply", "value": 1, "trigger": "on_play" }
     ],
     "description": "中型轰炸机，对地火力5，对海火力2，提供1点补给",
     "flavor": "杜立特空袭的传奇机型"
@@ -67,6 +73,8 @@
     "type": "combat",
     "name": "弗莱彻级驱逐舰",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "navy",
     "cost": 3,
     "redeployCost": 1,
@@ -82,6 +90,8 @@
     "type": "combat",
     "name": "巴尔的摩级巡洋舰",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "navy",
     "cost": 5,
     "redeployCost": 2,
@@ -97,6 +107,8 @@
     "type": "combat",
     "name": "衣阿华级战列舰",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "navy",
     "cost": 8,
     "redeployCost": 3,
@@ -104,7 +116,7 @@
     "seaPower": 8,
     "airPower": 4,
     "abilities": [
-      { "type": "supply", "value": 2 }
+      { "type": "supply", "value": 2, "trigger": "on_play" }
     ],
     "description": "最强战舰，对海火力8，对地火力5，对空火力4，提供2点补给",
     "flavor": "16英寸主炮的咆哮震撼敌人心魄"
@@ -114,6 +126,8 @@
     "type": "combat",
     "name": "埃塞克斯级航空母舰",
     "cardCategory": "support",
+    "shopType": "essential",
+    "shopCopies": 10,
     "unitType": "navy",
     "cost": 6,
     "redeployCost": 2,
@@ -122,7 +136,7 @@
     "airPower": 5,
     "airSlots": 4,
     "abilities": [
-      { "type": "draw", "value": 1 }
+      { "type": "draw", "value": 1, "trigger": "on_play" }
     ],
     "description": "舰队核心，提供4个航空槽位，对空火力5，对海火力2，抽1张卡牌",
     "flavor": "移动的海上机场，制空权的关键"
@@ -132,6 +146,8 @@
     "type": "combat",
     "name": "海军陆战队",
     "cardCategory": "combat",
+    "shopType": "random",
+    "shopCopies": 10,
     "unitType": "army",
     "cost": 4,
     "redeployCost": 1,
@@ -147,6 +163,8 @@
     "type": "combat",
     "name": "补给舰",
     "cardCategory": "logistics",
+    "shopType": "essential",
+    "shopCopies": 10,
     "unitType": "navy",
     "cost": 4,
     "redeployCost": 1,
@@ -154,10 +172,46 @@
     "seaPower": 0,
     "airPower": 1,
     "abilities": [
-      { "type": "supply", "value": 3 },
-      { "type": "max_supply", "value": 2 }
+      { "type": "supply", "value": 3, "trigger": "on_play" },
+      { "type": "max_supply", "value": 2, "trigger": "on_play" },
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "during_combat",
+        "ui": { "blockMessage": "后勤卡不能参加战斗" }
+      }
     ],
     "description": "后勤支援舰，提供3点补给，增加2点最大补给保留，对空火力1",
     "flavor": "舰队的生命线"
+  },
+  {
+    "id": "retirement_office",
+    "type": "combat",
+    "name": "退役",
+    "cardCategory": "tactical",
+    "shopType": "random",
+    "shopCopies": 10,
+    "cost": 3,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "retire",
+        "value": 1,
+        "trigger": "on_play",
+        "constraints": ["requires_discard_pile"],
+        "ui": {
+          "interaction": "select_from_zone",
+          "zone": "discard",
+          "title": "选择要退役的卡牌"
+        }
+      },
+      {
+        "type": "goes_to_discard",
+        "trigger": "after_play"
+      }
+    ],
+    "description": "从弃牌堆中选择一张卡牌移除游戏",
+    "flavor": "老兵不死，只是逐渐凋零"
   }
 ]

@@ -3,8 +3,9 @@
     "initialHandSize": 5,
     "starterDeckSize": 5,
     "starterCardId": "starter_supply",
-    "shopSize": 10,
-    "shopCardCopies": 10
+    "essentialShopCopies": 10,
+    "randomShopCopies": 10,
+    "randomShopSlots": 6
   },
   "phases": {
     "drawCount": 5

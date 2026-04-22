@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 import { GamePhase, getNextPhase } from '../models/GamePhase';
 import { drawCards, moveCard, setCardStatus, shuffleDeck, createDeck } from './CardEngine';
 import { getCardAbilityEffects, isSupplyCard } from '../models/Card';
+import { processAbilities, getCardDestination, applyAbilityResults } from './AbilitySystem';
 
 /**
  * 初始游戏状态
@@ -16,7 +17,10 @@ const initialState = {
     hand: [],
     deployed: [],
     discard: [],
-    shop: []
+    essentialShop: [], // 必要卡牌商店（固定，堆叠显示）
+    randomShop: [], // 随机卡牌商店（每回合刷新）
+    randomShopDeck: [], // 随机商店牌堆（不显示）
+    removed: [] // 已移除游戏的卡牌
   },
   missions: [],
   currentMission: null,
@@ -28,7 +32,9 @@ const initialState = {
     cardsPurchased: 0
   },
   selectedForCombat: [], // 选中参与战斗的卡牌ID
-  battleLog: [] // 战场简讯日志（最多20条）
+  battleLog: [], // 战场简讯日志（最多20条）
+  retireUsedThisTurn: false, // 退役能力本回合是否已使用
+  usedAbilitiesThisTurn: {} // 追踪本回合已使用的能力（用于once_per_turn约束）
 };
 
 const MAX_LOG_ENTRIES = 20;
@@ -58,9 +64,12 @@ const ActionTypes = {
   END_TURN: 'END_TURN',
   UPDATE_MISSIONS: 'UPDATE_MISSIONS',
   SET_SHOP: 'SET_SHOP',
+  REFRESH_RANDOM_SHOP: 'REFRESH_RANDOM_SHOP',
   GAME_OVER: 'GAME_OVER',
   RESET_GAME: 'RESET_GAME',
-  ADD_LOG: 'ADD_LOG'
+  ADD_LOG: 'ADD_LOG',
+  RETIRE_CARD: 'RETIRE_CARD',
+  CLEAR_PENDING_INTERACTION: 'CLEAR_PENDING_INTERACTION'
 };
 
 /**
@@ -90,16 +99,27 @@ function addLogEntry(state, message, type = 'info') {
 function gameStateReducer(state, action) {
   switch (action.type) {
     case ActionTypes.INIT_GAME: {
-      const { starterCards, missions, shopCards } = action.payload;
+      const { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots } = action.payload;
+
+      // 从随机商店堆中抽取初始卡牌
+      const shuffledRandomDeck = shuffleDeck([...randomShopDeck]);
+      const initialRandomShop = shuffledRandomDeck.slice(0, randomShopSlots);
+      const remainingRandomDeck = shuffledRandomDeck.slice(randomShopSlots);
+
       const newState = {
         ...initialState,
         zones: {
           ...initialState.zones,
           discard: starterCards,
-          shop: shopCards
+          essentialShop: essentialShopCards,
+          randomShop: initialRandomShop,
+          randomShopDeck: remainingRandomDeck,
+          removed: []
         },
         missions: missions,
-        currentMission: missions[0] || null
+        currentMission: missions[0] || null,
+        retireUsedThisTurn: false,
+        usedAbilitiesThisTurn: {}
       };
       newState.battleLog = addLogEntry(newState, '🎮 游戏开始！准备迎接挑战...', 'system');
       return newState;
@@ -110,11 +130,34 @@ function gameStateReducer(state, action) {
 
     case ActionTypes.NEXT_PHASE: {
       const nextPhase = getNextPhase(state.phase);
-      return {
+      let newState = {
         ...state,
         phase: nextPhase,
-        turn: nextPhase === GamePhase.PREPARE ? state.turn + 1 : state.turn
+        turn: nextPhase === GamePhase.PREPARE ? state.turn + 1 : state.turn,
+        retireUsedThisTurn: nextPhase === GamePhase.PREPARE ? false : state.retireUsedThisTurn,
+        usedAbilitiesThisTurn: nextPhase === GamePhase.PREPARE ? {} : state.usedAbilitiesThisTurn
       };
+
+      // 在准备阶段刷新随机商店
+      if (nextPhase === GamePhase.PREPARE && state.turn > 1) {
+        const randomShopSlots = 6; // 默认每次抽6张
+
+        // 将当前随机商店中未购买的卡牌送回随机商店堆
+        const returnedCards = state.zones.randomShop || [];
+        const newRandomDeck = shuffleDeck([...state.zones.randomShopDeck, ...returnedCards]);
+
+        // 从随机商店堆中抽取新卡牌
+        const newRandomShop = newRandomDeck.slice(0, randomShopSlots);
+        const remainingDeck = newRandomDeck.slice(randomShopSlots);
+
+        newState.zones = {
+          ...newState.zones,
+          randomShop: newRandomShop,
+          randomShopDeck: remainingDeck
+        };
+      }
+
+      return newState;
     }
 
     case ActionTypes.DRAW_CARDS: {
@@ -137,15 +180,19 @@ function gameStateReducer(state, action) {
 
       if (!card) return state;
 
-      // 执行卡牌能力
-      const effects = getCardAbilityEffects(card);
+      // 使用AbilitySystem处理能力
+      const abilityResults = processAbilities(card, 'on_play', {
+        state,
+        card,
+        phase: state.phase
+      });
 
-      // 判断卡牌是否应该直接进弃牌堆
-      // 补给类卡牌直接进弃牌堆
-      const shouldDiscard = isSupplyCard(card);
+      // 使用AbilitySystem确定目标位置
+      const destination = getCardDestination(card);
 
+      // 移动卡牌到正确位置
       let newZones;
-      if (shouldDiscard) {
+      if (destination === 'discard') {
         // 直接从手牌移动到弃牌堆
         const result = moveCard(cardId, state.zones.hand, state.zones.discard);
         if (!result) return state;
@@ -169,23 +216,60 @@ function gameStateReducer(state, action) {
         };
       }
 
-      const newState = {
-        ...state,
-        zones: newZones,
-        supply: state.supply + effects.supply,
-        maxSupplyRetention: state.maxSupplyRetention + effects.maxSupply,
+      // 应用能力效果
+      let newState = applyAbilityResults(state, abilityResults, newZones);
+
+      // 更新统计
+      newState = {
+        ...newState,
         stats: {
-          ...state.stats,
-          cardsPlayed: state.stats.cardsPlayed + 1
+          ...newState.stats,
+          cardsPlayed: newState.stats.cardsPlayed + 1
         }
       };
 
-      // 添加日志
+      // 添加主日志
       let logMessage = `🃏 使用了「${card.name}」`;
-      if (effects.supply > 0) logMessage += `，获得 ${effects.supply} 点补给`;
-      if (effects.draw > 0) logMessage += `，抽取 ${effects.draw} 张卡牌`;
-      if (effects.maxSupply > 0) logMessage += `，最大补给保留 +${effects.maxSupply}`;
       newState.battleLog = addLogEntry(newState, logMessage, 'action');
+
+      // 添加能力日志
+      if (newState.abilityLogs && newState.abilityLogs.length > 0) {
+        newState.abilityLogs.forEach(log => {
+          newState.battleLog = addLogEntry(newState, `  ↳ ${log}`, 'ability');
+        });
+        // 清除临时日志
+        delete newState.abilityLogs;
+      }
+
+      // 处理待执行的actions（如draw cards）
+      if (newState.pendingActions && newState.pendingActions.length > 0) {
+        newState.pendingActions.forEach(({ action: actionType, payload }) => {
+          if (actionType === 'DRAW_CARDS') {
+            const drawResult = drawCards(newState.zones.deck, newState.zones.discard, payload.count);
+            newState.zones = {
+              ...newState.zones,
+              deck: drawResult.newDeck,
+              hand: [...newState.zones.hand, ...drawResult.drawnCards],
+              discard: drawResult.newDiscard
+            };
+          }
+        });
+        // 清除已执行的actions
+        delete newState.pendingActions;
+      }
+
+      // 标记使用过的能力（用于once_per_turn约束）
+      const abilitiesWithConstraints = card.abilities?.filter(a =>
+        a.constraints && a.constraints.includes('once_per_turn')
+      ) || [];
+      if (abilitiesWithConstraints.length > 0) {
+        const newUsedAbilities = { ...newState.usedAbilitiesThisTurn };
+        abilitiesWithConstraints.forEach(ability => {
+          const key = `${card.instanceId}_${ability.type}`;
+          newUsedAbilities[key] = true;
+        });
+        newState.usedAbilitiesThisTurn = newUsedAbilities;
+      }
 
       return newState;
     }
@@ -222,15 +306,30 @@ function gameStateReducer(state, action) {
     }
 
     case ActionTypes.PURCHASE_CARD: {
-      const { cardId } = action.payload;
-      const result = moveCard(cardId, state.zones.shop, state.zones.discard);
-      if (!result) return state;
+      const { cardId, shopType } = action.payload;
+
+      let result;
+      let newEssentialShop = state.zones.essentialShop;
+      let newRandomShop = state.zones.randomShop;
+
+      if (shopType === 'essential') {
+        // 从必要商店购买（堆叠卡牌，保留在商店）
+        result = moveCard(cardId, state.zones.essentialShop, state.zones.discard);
+        if (!result) return state;
+        newEssentialShop = result.newFromZone;
+      } else {
+        // 从随机商店购买（移除该卡牌）
+        result = moveCard(cardId, state.zones.randomShop, state.zones.discard);
+        if (!result) return state;
+        newRandomShop = result.newFromZone;
+      }
 
       const newState = {
         ...state,
         zones: {
           ...state.zones,
-          shop: result.newFromZone,
+          essentialShop: newEssentialShop,
+          randomShop: newRandomShop,
           discard: result.newToZone
         },
         stats: {
@@ -286,14 +385,22 @@ function gameStateReducer(state, action) {
           : card
       );
 
-      // 移除损失的卡牌，返回商店（重置状态为ready）
-      let newShop = [...state.zones.shop];
+      // 移除损失的卡牌，根据shopType返回到相应位置
+      let newEssentialShop = [...state.zones.essentialShop];
+      let newRandomShopDeck = [...state.zones.randomShopDeck];
+
       if (cardsLost.length > 0) {
         cardsLost.forEach(lostCardId => {
           const cardIndex = newDeployed.findIndex(c => c.instanceId === lostCardId);
           if (cardIndex !== -1) {
             const lostCard = { ...newDeployed[cardIndex], status: 'ready' };
-            newShop.push(lostCard);
+            // 根据shopType决定返回位置
+            if (lostCard.shopType === 'essential') {
+              newEssentialShop.push(lostCard);
+            } else if (lostCard.shopType === 'random') {
+              newRandomShopDeck.push(lostCard);
+            }
+            // 如果没有shopType（如战术卡），则移除
             newDeployed.splice(cardIndex, 1);
           }
         });
@@ -304,7 +411,8 @@ function gameStateReducer(state, action) {
         zones: {
           ...state.zones,
           deployed: newDeployed,
-          shop: newShop
+          essentialShop: newEssentialShop,
+          randomShopDeck: newRandomShopDeck
         },
         missions: newMissions,
         currentMission: newCurrentMission,
@@ -379,6 +487,27 @@ function gameStateReducer(state, action) {
         }
       };
 
+    case ActionTypes.REFRESH_RANDOM_SHOP: {
+      const randomShopSlots = action.payload || 6;
+
+      // 将当前随机商店中未购买的卡牌送回随机商店堆
+      const returnedCards = state.zones.randomShop || [];
+      const newRandomDeck = shuffleDeck([...state.zones.randomShopDeck, ...returnedCards]);
+
+      // 从随机商店堆中抽取新卡牌
+      const newRandomShop = newRandomDeck.slice(0, randomShopSlots);
+      const remainingDeck = newRandomDeck.slice(randomShopSlots);
+
+      return {
+        ...state,
+        zones: {
+          ...state.zones,
+          randomShop: newRandomShop,
+          randomShopDeck: remainingDeck
+        }
+      };
+    }
+
     case ActionTypes.GAME_OVER:
       return {
         ...state,
@@ -391,6 +520,37 @@ function gameStateReducer(state, action) {
 
     case ActionTypes.RESET_GAME:
       return initialState;
+
+    case ActionTypes.RETIRE_CARD: {
+      const { cardId } = action.payload;
+      const result = moveCard(cardId, state.zones.discard, state.zones.removed);
+      if (!result) return state;
+
+      const newState = {
+        ...state,
+        zones: {
+          ...state.zones,
+          discard: result.newFromZone,
+          removed: result.newToZone
+        },
+        retireUsedThisTurn: true
+      };
+
+      // 添加日志
+      newState.battleLog = addLogEntry(
+        newState,
+        `🗑️ 退役了「${result.movedCard.name}」，该卡牌已移除游戏`,
+        'action'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.CLEAR_PENDING_INTERACTION: {
+      const newState = { ...state };
+      delete newState.pendingInteraction;
+      return newState;
+    }
 
     default:
       return state;
@@ -405,10 +565,10 @@ export function GameStateProvider({ children }) {
 
   // Actions
   const actions = {
-    initGame: useCallback((starterCards, missions, shopCards) => {
+    initGame: useCallback((starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots) => {
       dispatch({
         type: ActionTypes.INIT_GAME,
-        payload: { starterCards, missions, shopCards }
+        payload: { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots }
       });
     }, []),
 
@@ -444,8 +604,8 @@ export function GameStateProvider({ children }) {
       dispatch({ type: ActionTypes.SPEND_SUPPLY, payload: amount });
     }, []),
 
-    purchaseCard: useCallback((cardId) => {
-      dispatch({ type: ActionTypes.PURCHASE_CARD, payload: { cardId } });
+    purchaseCard: useCallback((cardId, shopType) => {
+      dispatch({ type: ActionTypes.PURCHASE_CARD, payload: { cardId, shopType } });
     }, []),
 
     selectForCombat: useCallback((cardId) => {
@@ -475,12 +635,24 @@ export function GameStateProvider({ children }) {
       dispatch({ type: ActionTypes.SET_SHOP, payload: shopCards });
     }, []),
 
+    refreshRandomShop: useCallback((slots = 6) => {
+      dispatch({ type: ActionTypes.REFRESH_RANDOM_SHOP, payload: slots });
+    }, []),
+
     gameOver: useCallback(() => {
       dispatch({ type: ActionTypes.GAME_OVER });
     }, []),
 
     resetGame: useCallback(() => {
       dispatch({ type: ActionTypes.RESET_GAME });
+    }, []),
+
+    retireCard: useCallback((cardId) => {
+      dispatch({ type: ActionTypes.RETIRE_CARD, payload: { cardId } });
+    }, []),
+
+    clearPendingInteraction: useCallback(() => {
+      dispatch({ type: ActionTypes.CLEAR_PENDING_INTERACTION });
     }, [])
   };
 

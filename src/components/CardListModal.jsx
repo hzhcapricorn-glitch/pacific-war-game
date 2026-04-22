@@ -3,9 +3,16 @@ import Card from './Card';
 
 /**
  * CardListModal - 显示卡牌列表的弹窗
+ * @param {Function} onCardSelect - 可选，如果提供则弹窗为选择模式，点击卡牌会触发此回调
  */
-function CardListModal({ isOpen, onClose, cards, title, onCardHover, onCardHoverEnd }) {
+function CardListModal({ isOpen, onClose, cards, title, onCardHover, onCardHoverEnd, onCardSelect }) {
   if (!isOpen) return null;
+
+  const handleCardClick = (card) => {
+    if (onCardSelect) {
+      onCardSelect(card);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -25,8 +32,10 @@ function CardListModal({ isOpen, onClose, cards, title, onCardHover, onCardHover
                 <Card
                   key={card.instanceId || card.id}
                   card={card}
+                  onClick={onCardSelect ? () => handleCardClick(card) : undefined}
                   onHover={onCardHover}
                   onHoverEnd={onCardHoverEnd}
+                  className={onCardSelect ? 'selectable' : ''}
                 />
               ))}
             </div>
@@ -34,7 +43,7 @@ function CardListModal({ isOpen, onClose, cards, title, onCardHover, onCardHover
         </div>
         <div className="modal-footer">
           <button onClick={onClose} className="btn-modal-close">
-            关闭
+            {onCardSelect ? '取消' : '关闭'}
           </button>
         </div>
       </div>

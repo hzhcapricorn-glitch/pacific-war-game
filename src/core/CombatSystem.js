@@ -1,4 +1,5 @@
 import { getCardFirePower } from '../models/Card';
+import { processAbilities } from './AbilitySystem';
 
 /**
  * CombatSystem - 处理战斗相关的逻辑（太平洋战争版本）
@@ -19,14 +20,50 @@ export function calculateFirePower(cards, powerType) {
 /**
  * 计算所有类型的火力
  * @param {Array} cards - 参战卡牌数组
+ * @param {Object} context - 可选的上下文对象（包含state等，用于能力处理）
  * @returns {Object} { groundPower, seaPower, airPower }
  */
-export function calculateAllFirePowers(cards) {
-  return {
+export function calculateAllFirePowers(cards, context = null) {
+  // 计算基础火力
+  const basePowers = {
     groundPower: calculateFirePower(cards, 'ground'),
     seaPower: calculateFirePower(cards, 'sea'),
     airPower: calculateFirePower(cards, 'air')
   };
+
+  // 如果没有提供context，返回基础火力
+  if (!context) {
+    return basePowers;
+  }
+
+  // 处理combat_boost能力
+  const combatModifiers = cards.flatMap(card =>
+    processAbilities(card, 'during_combat', {
+      state: context.state,
+      card,
+      cards
+    })
+  ).filter(result => result.type === 'combat_modifier');
+
+  // 应用修正值
+  combatModifiers.forEach(modifierResult => {
+    const { powerType, value, scope } = modifierResult.modifier;
+
+    // 根据powerType应用增益
+    if (powerType === 'all') {
+      basePowers.groundPower += value;
+      basePowers.seaPower += value;
+      basePowers.airPower += value;
+    } else if (powerType === 'groundPower' || powerType === 'ground') {
+      basePowers.groundPower += value;
+    } else if (powerType === 'seaPower' || powerType === 'sea') {
+      basePowers.seaPower += value;
+    } else if (powerType === 'airPower' || powerType === 'air') {
+      basePowers.airPower += value;
+    }
+  });
+
+  return basePowers;
 }
 
 /**
@@ -121,11 +158,11 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
  * @param {Array} selectedCards - 选中参战的卡牌
  * @param {Object} mission - 当前任务
  * @param {Object} gameState - 当前游戏状态
- * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, airDefenseSufficient }
+ * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, airDefenseSufficient }
  */
 export function resolveCombat(selectedCards, mission, gameState) {
-  // 计算己方火力
-  const attackPowers = calculateAllFirePowers(selectedCards);
+  // 计算己方火力（包括combat_boost能力）
+  const attackPowers = calculateAllFirePowers(selectedCards, { state: gameState });
   const requiredPowers = {
     groundPower: mission.requiredGroundPower || 0,
     seaPower: mission.requiredSeaPower || 0,
@@ -144,12 +181,16 @@ export function resolveCombat(selectedCards, mission, gameState) {
   // 计算损失（无论胜负都会有损失，对空不足时加倍）
   const lostCardIds = calculateLosses(selectedCards, mission.loss, airDefenseSufficient);
 
+  // 获取损失的卡牌对象（用于显示具体卡牌名称）
+  const lostCards = selectedCards.filter(card => lostCardIds.includes(card.instanceId));
+
   return {
     victory,
     attackPowers,
     requiredPowers,
     rewards,
     lostCardIds,
+    lostCards,
     airDefenseSufficient
   };
 }
@@ -160,7 +201,7 @@ export function resolveCombat(selectedCards, mission, gameState) {
  * @returns {string} 摘要文本
  */
 export function getCombatSummary(combatResult) {
-  const { victory, attackPowers, requiredPowers, rewards, lostCardIds, airDefenseSufficient } = combatResult;
+  const { victory, attackPowers, requiredPowers, rewards, lostCards, airDefenseSufficient } = combatResult;
 
   let summary = victory ? '🎉 战斗胜利！\n\n' : '❌ 战斗失败...\n\n';
 
@@ -182,8 +223,11 @@ export function getCombatSummary(combatResult) {
     if (rewards.victory) summary += '- 完成最终任务！\n';
   }
 
-  if (lostCardIds.length > 0) {
-    summary += `\n损失卡牌: ${lostCardIds.length}张`;
+  if (lostCards && lostCards.length > 0) {
+    summary += `\n损失卡牌 (${lostCards.length}张):\n`;
+    lostCards.forEach(card => {
+      summary += `  - ${card.name}\n`;
+    });
   }
 
   return summary;

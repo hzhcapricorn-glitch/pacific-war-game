@@ -14,8 +14,8 @@ import missionCardsData from '../data/cards/mission.json';
 import gameConfig from '../data/config.json';
 import { createCard } from '../models/Card';
 import { shuffleDeck } from '../core/CardEngine';
-import { resolveCombat, getCombatSummary, calculateCombatPower } from '../core/CombatSystem';
-import { canParticipateInCombat } from '../models/Card';
+import { resolveCombat, getCombatSummary, calculateCombatPower, calculateAllFirePowers } from '../core/CombatSystem';
+import { canParticipateInCombat } from '../core/AbilitySystem';
 
 /**
  * GameBoard Component - 主游戏面板
@@ -25,6 +25,7 @@ function GameBoard() {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [gameInitialized, setGameInitialized] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [showRetireModal, setShowRetireModal] = useState(false);
   const [supplyChanged, setSupplyChanged] = useState(false);
   const [prevSupply, setPrevSupply] = useState(0);
 
@@ -88,6 +89,16 @@ function GameBoard() {
     }
   }, [state.supply]);
 
+  // 监听pending interaction（如retire能力）
+  useEffect(() => {
+    if (state.pendingInteraction) {
+      const { zone, title } = state.pendingInteraction;
+      if (zone === 'discard') {
+        setShowRetireModal(true);
+      }
+    }
+  }, [state.pendingInteraction]);
+
   const initializeGame = () => {
     // 创建初始牌组（5张初级补给卡）
     const starterCard = combatCardsData.find(c => c.id === gameConfig.game.starterCardId);
@@ -101,15 +112,36 @@ function GameBoard() {
 
     // 创建商店卡牌（排除初级补给卡）
     const shopCardDefinitions = combatCardsData.filter(c => c.id !== gameConfig.game.starterCardId);
-    const shopCards = [];
-    shopCardDefinitions.forEach((cardDef, idx) => {
-      // 每种卡牌10张
-      for (let i = 0; i < gameConfig.game.shopCardCopies; i++) {
-        shopCards.push(createCard(cardDef, `${cardDef.id}_shop_${idx}_${i}`));
+
+    // 分离必要卡牌和随机卡牌
+    const essentialCardDefs = shopCardDefinitions.filter(c => c.shopType === 'essential');
+    const randomCardDefs = shopCardDefinitions.filter(c => c.shopType === 'random');
+
+    // 创建必要商店卡牌
+    const essentialShopCards = [];
+    essentialCardDefs.forEach((cardDef, idx) => {
+      const copies = cardDef.shopCopies || gameConfig.game.essentialShopCopies || 10;
+      for (let i = 0; i < copies; i++) {
+        essentialShopCards.push(createCard(cardDef, `${cardDef.id}_essential_${idx}_${i}`));
       }
     });
 
-    actions.initGame(starterDeck, missions, shuffleDeck(shopCards));
+    // 创建随机商店卡牌堆
+    const randomShopDeck = [];
+    randomCardDefs.forEach((cardDef, idx) => {
+      const copies = cardDef.shopCopies || gameConfig.game.randomShopCopies || 10;
+      for (let i = 0; i < copies; i++) {
+        randomShopDeck.push(createCard(cardDef, `${cardDef.id}_random_${idx}_${i}`));
+      }
+    });
+
+    actions.initGame(
+      starterDeck,
+      missions,
+      essentialShopCards,
+      randomShopDeck,
+      gameConfig.game.randomShopSlots || 6
+    );
   };
 
   const handleNextPhase = () => {
@@ -190,14 +222,30 @@ function GameBoard() {
     }
   };
 
-  const handleShopCardClick = (card) => {
+  const handleAbilitySelect = (selectedCard) => {
+    // 执行退役
+    actions.retireCard(selectedCard.instanceId);
+    // 清除pending interaction
+    actions.clearPendingInteraction();
+    // 关闭弹窗
+    setShowRetireModal(false);
+  };
+
+  const handleShopCardClick = (card, shopType) => {
     if (state.phase === GamePhase.SHOP) {
       if (state.supply >= card.cost) {
-        // 从商店中找到这个类型的第一张卡牌实例
-        const actualCard = state.zones.shop.find(c => c.id === card.id);
+        let actualCard;
+        if (shopType === 'essential') {
+          // 从必要商店中找到这个类型的第一张卡牌实例
+          actualCard = state.zones.essentialShop.find(c => c.id === card.id);
+        } else {
+          // 随机商店直接使用传入的card（已经是实例）
+          actualCard = card;
+        }
+
         if (actualCard) {
           actions.spendSupply(card.cost);
-          actions.purchaseCard(actualCard.instanceId);
+          actions.purchaseCard(actualCard.instanceId, shopType);
         }
       } else {
         alert('补给不足！');
@@ -263,12 +311,12 @@ function GameBoard() {
     actions.resetGame();
   };
 
-  // 计算当前选中卡牌的总战斗力
-  const selectedCombatPower = () => {
+  // 计算当前选中卡牌的火力
+  const selectedFirePowers = () => {
     const selectedCards = state.zones.deployed.filter(card =>
       state.selectedForCombat.includes(card.instanceId)
     );
-    return calculateCombatPower(selectedCards);
+    return calculateAllFirePowers(selectedCards, { state });
   };
 
   // 计算航空槽位相关信息
@@ -322,21 +370,15 @@ function GameBoard() {
             <span className="label">阶段:</span>
             <span className="value phase">{PhaseDisplayName[state.phase]}</span>
           </div>
-          <div className="info-item supply-container">
-            <span className="label">补给:</span>
-            <span className={`value supply ${supplyChanged ? 'supply-changed' : ''}`}>
-              {state.supply} / {state.maxSupplyRetention}
-            </span>
-            {supplyChanged && state.supply > prevSupply && (
-              <span className="supply-increase">+{state.supply - prevSupply}</span>
-            )}
-          </div>
         </div>
         <div className="header-controls">
           {/* Debug控制 */}
           <div className="debug-controls">
             <button onClick={() => actions.addSupply(10)} className="btn-debug">
               补给+10
+            </button>
+            <button onClick={() => actions.refreshRandomShop()} className="btn-debug">
+              刷新商店
             </button>
             <button onClick={handleStartNewGame} className="btn-debug">
               重新开始
@@ -352,17 +394,25 @@ function GameBoard() {
       </div>
 
       {/* 战斗控制面板 */}
-      {state.phase === GamePhase.COMBAT && (
+      {state.phase === GamePhase.COMBAT && state.currentMission && (
         <div className="combat-controls">
           <div className="combat-info">
             <div className="combat-stat">
-              <span className="label">己方战斗力:</span>
-              <span className="value combat-power">{selectedCombatPower()}</span>
+              <span className="label">对地火力:</span>
+              <span className="value" style={{color: selectedFirePowers().groundPower >= (state.currentMission.requiredGroundPower || 0) ? '#34d399' : '#ef4444'}}>
+                {selectedFirePowers().groundPower} / {state.currentMission.requiredGroundPower || 0}
+              </span>
             </div>
             <div className="combat-stat">
-              <span className="label">需要战斗力:</span>
-              <span className="value required-power">
-                {state.currentMission ? state.currentMission.requiredCombat : 0}
+              <span className="label">对海火力:</span>
+              <span className="value" style={{color: selectedFirePowers().seaPower >= (state.currentMission.requiredSeaPower || 0) ? '#34d399' : '#ef4444'}}>
+                {selectedFirePowers().seaPower} / {state.currentMission.requiredSeaPower || 0}
+              </span>
+            </div>
+            <div className="combat-stat">
+              <span className="label">对空火力:</span>
+              <span className="value" style={{color: selectedFirePowers().airPower >= (state.currentMission.requiredAirPower || 0) ? '#34d399' : '#f59e0b'}}>
+                {selectedFirePowers().airPower} / {state.currentMission.requiredAirPower || 0}
               </span>
             </div>
             <div className="combat-stat">
@@ -372,8 +422,8 @@ function GameBoard() {
               </span>
             </div>
             <div className="combat-stat">
-              <span className="label">已选择卡牌:</span>
-              <span className="value">{state.selectedForCombat.length}</span>
+              <span className="label">已选择:</span>
+              <span className="value">{state.selectedForCombat.length}张</span>
             </div>
           </div>
           <div className="combat-buttons">
@@ -404,21 +454,25 @@ function GameBoard() {
           {/* 商店区 */}
           <div className="top-zone">
             <Shop
-              shopCards={state.zones.shop}
-              allCardTypes={combatCardsData.filter(c => c.id !== gameConfig.game.starterCardId)}
+              essentialShopCards={state.zones.essentialShop || []}
+              randomShopCards={state.zones.randomShop || []}
+              allEssentialCardTypes={combatCardsData.filter(c => c.shopType === 'essential')}
               onCardClick={handleShopCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
               currentSupply={state.supply}
+              maxSupplyRetention={state.maxSupplyRetention}
+              currentPhase={state.phase}
+              isShopPhase={state.phase === GamePhase.SHOP}
             />
           </div>
 
           {/* 部署区 */}
-          <div className="middle-zone">
+          <div className={`middle-zone ${state.phase === GamePhase.SHOP ? 'zone-disabled' : ''}`}>
             <CardZone
               title="部署区"
               cards={state.zones.deployed}
-              onCardClick={handleCardClick}
+              onCardClick={state.phase === GamePhase.SHOP ? undefined : handleCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
               className="deployed-zone"
@@ -451,10 +505,8 @@ function GameBoard() {
                 cards={state.zones.discard}
                 className="discard-zone"
                 emptyMessage="无"
-                showLastOnly={true}
+                showCountOnly={true}
                 onZoneClick={() => setShowDiscardModal(true)}
-                onCardHover={setHoveredCard}
-                onCardHoverEnd={() => setHoveredCard(null)}
               />
             </div>
           </div>
@@ -484,6 +536,20 @@ function GameBoard() {
         title="弃牌堆"
         onCardHover={setHoveredCard}
         onCardHoverEnd={() => setHoveredCard(null)}
+      />
+
+      {/* 退役选择弹窗 */}
+      <CardListModal
+        isOpen={showRetireModal}
+        onClose={() => {
+          setShowRetireModal(false);
+          actions.clearPendingInteraction();
+        }}
+        cards={state.zones.discard}
+        title="选择要退役的卡牌"
+        onCardHover={setHoveredCard}
+        onCardHoverEnd={() => setHoveredCard(null)}
+        onCardSelect={handleAbilitySelect}
       />
     </div>
   );

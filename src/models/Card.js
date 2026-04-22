@@ -36,7 +36,8 @@ export const AbilityType = {
   COMBAT_BOOST: 'combat_boost',       // 战斗力加成
   MAX_SUPPLY: 'max_supply',           // 增加最大补给保留
   REDUCE_COST: 'reduce_cost',         // 降低购买成本
-  PROTECT: 'protect'                  // 保护卡牌不被损失
+  PROTECT: 'protect',                 // 保护卡牌不被损失
+  RETIRE: 'retire'                    // 退役能力（从弃牌堆移除卡牌）
 };
 
 /**

@@ -2,98 +2,112 @@ import React, { useState, useEffect } from 'react';
 import Card from './Card';
 
 /**
- * Shop Component - 显示商店（堆叠卡牌）
+ * Shop Component - 显示商店（分为必要卡牌和随机卡牌）
  */
-function Shop({ shopCards, onCardClick, onCardHover, onCardHoverEnd, currentSupply, allCardTypes }) {
-  // 保存所有见过的卡牌种类
-  const [knownCardTypes, setKnownCardTypes] = useState([]);
+function Shop({
+  essentialShopCards,
+  randomShopCards,
+  onCardClick,
+  onCardHover,
+  onCardHoverEnd,
+  currentSupply,
+  maxSupplyRetention,
+  allEssentialCardTypes,
+  currentPhase,
+  isShopPhase
+}) {
+  // 保存所有见过的必要卡牌种类
+  const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
 
+  // 初始化时从所有卡牌中提取必要卡牌种类
   useEffect(() => {
-    // 收集所有卡牌种类（包括当前存在的）
-    const currentTypes = {};
-    shopCards.forEach(card => {
-      if (!currentTypes[card.id]) {
-        currentTypes[card.id] = card;
-      }
-    });
-
-    // 合并已知的卡牌种类
-    setKnownCardTypes(prev => {
-      const merged = { ...prev };
-      Object.keys(currentTypes).forEach(id => {
-        if (!merged[id]) {
-          merged[id] = currentTypes[id];
-        }
-      });
-      return merged;
-    });
-  }, [shopCards]);
-
-  // 初始化时从所有卡牌中提取种类
-  useEffect(() => {
-    if (allCardTypes && allCardTypes.length > 0) {
+    if (allEssentialCardTypes && allEssentialCardTypes.length > 0) {
       const types = {};
-      allCardTypes.forEach(card => {
+      allEssentialCardTypes.forEach(card => {
         if (!types[card.id]) {
           types[card.id] = card;
         }
       });
-      setKnownCardTypes(types);
+      setKnownEssentialTypes(types);
     }
-  }, [allCardTypes]);
+  }, [allEssentialCardTypes]);
 
-  // 按卡牌种类分组
-  const groupedCards = {};
+  // 按卡牌种类分组必要卡牌
+  const groupedEssentialCards = {};
 
   // 首先基于已知的所有种类创建空堆
-  Object.values(knownCardTypes).forEach(cardDef => {
-    groupedCards[cardDef.id] = {
+  Object.values(knownEssentialTypes).forEach(cardDef => {
+    groupedEssentialCards[cardDef.id] = {
       card: cardDef,
       count: 0
     };
   });
 
   // 然后计算实际数量
-  shopCards.forEach(card => {
-    if (groupedCards[card.id]) {
-      groupedCards[card.id].count++;
+  essentialShopCards.forEach(card => {
+    if (groupedEssentialCards[card.id]) {
+      groupedEssentialCards[card.id].count++;
     }
   });
 
-  const cardStacks = Object.values(groupedCards);
+  const essentialStacks = Object.values(groupedEssentialCards);
 
   return (
-    <div className="shop">
+    <div className={`shop ${!isShopPhase ? 'shop-disabled' : ''}`}>
       <div className="shop-header">
         <h3>商店</h3>
         <div className="supply-display">
-          补给: <span className="supply-value">{currentSupply}</span>
+          补给: <span className="supply-value">{currentSupply} / {maxSupplyRetention}</span>
         </div>
       </div>
       <div className="shop-content">
-        {cardStacks.length === 0 ? (
-          <div className="shop-empty">商店已售空</div>
-        ) : (
-          <div className="shop-cards">
-            {cardStacks.map((stack) => (
-              <div
-                key={stack.card.id}
-                className={`shop-card-stack ${stack.count === 0 ? 'empty' : ''}`}
-              >
-                <Card
-                  card={stack.card}
-                  onClick={stack.count > 0 ? onCardClick : undefined}
-                  onHover={onCardHover}
-                  onHoverEnd={onCardHoverEnd}
-                  className={`shop-card ${stack.count === 0 ? 'sold-out' : ''}`}
-                />
-                <div className={`card-stack-count ${stack.count === 0 ? 'empty' : ''}`}>
-                  {stack.count}
+        <div className="shop-section">
+          <h4 className="shop-section-title">必要卡牌</h4>
+          <div className="shop-cards essential-shop">
+            {essentialStacks.length === 0 ? (
+              <div className="shop-empty">暂无必要卡牌</div>
+            ) : (
+              essentialStacks.map((stack) => (
+                <div
+                  key={stack.card.id}
+                  className={`shop-card-stack ${stack.count === 0 ? 'empty' : ''}`}
+                >
+                  <Card
+                    card={stack.card}
+                    onClick={stack.count > 0 && isShopPhase ? () => onCardClick(stack.card, 'essential') : undefined}
+                    onHover={onCardHover}
+                    onHoverEnd={onCardHoverEnd}
+                    className={`shop-card ${stack.count === 0 ? 'sold-out' : ''}`}
+                  />
+                  <div className={`card-stack-count ${stack.count === 0 ? 'empty' : ''}`}>
+                    {stack.count}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-        )}
+        </div>
+
+        <div className="shop-section">
+          <h4 className="shop-section-title">随机卡牌</h4>
+          <div className="shop-cards random-shop">
+            {randomShopCards.length === 0 ? (
+              <div className="shop-empty">暂无随机卡牌</div>
+            ) : (
+              randomShopCards.map((card) => (
+                <div key={card.instanceId} className="shop-card-single">
+                  <Card
+                    card={card}
+                    onClick={isShopPhase ? () => onCardClick(card, 'random') : undefined}
+                    onHover={onCardHover}
+                    onHoverEnd={onCardHoverEnd}
+                    className="shop-card"
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
