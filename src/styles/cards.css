@@ -13,6 +13,33 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Rarity Colors - N (Normal) */
+.card[data-rarity="N"] {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  border-color: #4a5568;
+}
+
+/* Rarity Colors - R (Rare) */
+.card[data-rarity="R"] {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Rarity Colors - SR (Super Rare) */
+.card[data-rarity="SR"] {
+  background: linear-gradient(135deg, #581c87 0%, #1e1b4b 100%);
+  border-color: #a855f7;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+}
+
+/* Rarity Colors - UR (Ultra Rare) */
+.card[data-rarity="UR"] {
+  background: linear-gradient(135deg, #92400e 0%, #451a03 100%);
+  border-color: #fbbf24;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}
+
 /* Card in detailed view mode */
 .card:has(.card-detailed) {
   min-width: 260px;

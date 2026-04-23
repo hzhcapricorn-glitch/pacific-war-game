@@ -9,5 +9,33 @@
   },
   "phases": {
     "drawCount": 5
+  },
+  "rarity": {
+    "N": {
+      "name": "普通",
+      "minCopies": 8,
+      "color": "#4a5568",
+      "bgColor": "#2d3748"
+    },
+    "R": {
+      "name": "稀有",
+      "minCopies": 5,
+      "maxCopies": 7,
+      "color": "#3b82f6",
+      "bgColor": "#1e3a8a"
+    },
+    "SR": {
+      "name": "超稀有",
+      "minCopies": 2,
+      "maxCopies": 4,
+      "color": "#a855f7",
+      "bgColor": "#581c87"
+    },
+    "UR": {
+      "name": "终极稀有",
+      "maxCopies": 1,
+      "color": "#fbbf24",
+      "bgColor": "#92400e"
+    }
   }
 }

@@ -2,10 +2,20 @@
  * 卡牌类型枚举
  */
 export const CardType = {
-  COMBAT: 'combat',           // 战斗卡牌
+  COMBAT: 'combat',           // 单位卡
   MISSION: 'mission',         // 任务卡牌
   ENVIRONMENT: 'environment', // 环境卡牌（未来实现）
   CHARACTER: 'character'      // 角色卡牌（未来实现）
+};
+
+/**
+ * 卡牌稀有度枚举
+ */
+export const CardRarity = {
+  N: 'N',       // 普通
+  R: 'R',       // 稀有
+  SR: 'SR',     // 超稀有
+  UR: 'UR'      // 终极稀有
 };
 
 /**
@@ -21,10 +31,9 @@ export const UnitType = {
  * 卡牌类别枚举
  */
 export const CardCategory = {
-  SUPPLY: 'supply',       // 补给卡 - 使用后直接进弃牌堆
-  SUPPORT: 'support',     // 支援卡 - 正常进入部署区
+  TACTICAL: 'tactical',   // 战术卡 - 使用后直接进弃牌堆
   LOGISTICS: 'logistics', // 后勤卡 - 不能参加战斗
-  COMBAT: 'combat'        // 战斗卡 - 可以参加战斗
+  COMBAT: 'combat'        // 单位卡 - 可以参加战斗
 };
 
 /**
@@ -74,12 +83,18 @@ export function createCard(cardData, instanceId) {
     status: CardStatus.READY,
     description: cardData.description || '',
     flavor: cardData.flavor || '',
+    // 稀有度和商店配置
+    rarity: cardData.rarity || CardRarity.N,
+    shopType: cardData.shopType,
+    shopCopies: cardData.shopCopies,
     // 任务卡特有属性
     requiredGroundPower: cardData.requiredGroundPower,
     requiredSeaPower: cardData.requiredSeaPower,
     requiredAirPower: cardData.requiredAirPower,
     reward: cardData.reward,
-    loss: cardData.loss
+    loss: cardData.loss,
+    // AI指令（未实现功能的设计说明）
+    aiNotes: cardData.aiNotes
   };
 }
 
@@ -102,12 +117,12 @@ export function isMissionCard(card) {
 }
 
 /**
- * 检查卡牌是否为补给卡（使用后直接进弃牌堆）
+ * 检查卡牌是否为战术卡（使用后直接进弃牌堆）
  * @param {Object} card - 卡牌对象
  * @returns {boolean}
  */
 export function isSupplyCard(card) {
-  return card.cardCategory === CardCategory.SUPPLY;
+  return card.cardCategory === CardCategory.TACTICAL;
 }
 
 /**
@@ -125,7 +140,7 @@ export function isLogisticsCard(card) {
  * @returns {boolean}
  */
 export function canParticipateInCombat(card) {
-  return card.cardCategory === CardCategory.COMBAT || card.cardCategory === CardCategory.SUPPORT;
+  return card.cardCategory === CardCategory.COMBAT;
 }
 
 /**

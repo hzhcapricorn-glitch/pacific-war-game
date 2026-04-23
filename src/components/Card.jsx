@@ -28,6 +28,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
   return (
     <div
       className={`card ${isTapped ? 'tapped' : ''} ${isMission ? 'mission-card' : ''} ${isSelected ? 'selected' : ''} ${className}`}
+      data-rarity={card.rarity || 'N'}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -73,18 +74,26 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
           ) : (
             <>
               <div className="card-stats">
+                {card.rarity && card.rarity !== 'N' && (
+                  <div className="card-stat">
+                    <span className="label">稀有度:</span>
+                    <span className="value" style={{
+                      color: card.rarity === 'R' ? '#60a5fa' :
+                             card.rarity === 'SR' ? '#c084fc' :
+                             card.rarity === 'UR' ? '#fbbf24' : '#fff'
+                    }}>{card.rarity}</span>
+                  </div>
+                )}
                 {card.cardCategory && (
                   <div className="card-stat">
                     <span className="label">类别:</span>
                     <span className="value" style={{
-                      color: card.cardCategory === 'supply' ? '#34d399' :
-                             card.cardCategory === 'logistics' ? '#60a5fa' :
-                             card.cardCategory === 'support' ? '#a78bfa' : '#fff'
+                      color: card.cardCategory === 'tactical' ? '#34d399' :
+                             card.cardCategory === 'logistics' ? '#60a5fa' : '#fff'
                     }}>{
-                      card.cardCategory === 'supply' ? '补给' :
+                      card.cardCategory === 'tactical' ? '战术' :
                       card.cardCategory === 'logistics' ? '后勤' :
-                      card.cardCategory === 'support' ? '支援' :
-                      card.cardCategory === 'combat' ? '战斗' : card.cardCategory
+                      card.cardCategory === 'combat' ? '单位' : card.cardCategory
                     }</span>
                   </div>
                 )}
