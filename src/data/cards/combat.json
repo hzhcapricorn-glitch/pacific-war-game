@@ -1,8 +1,8 @@
 [
   {
     "id": "starter_supply",
-    "type": "combat",
-    "name": "基础补给",
+    "type": "logistics",
+    "name": "小型货轮",
     "cardCategory": "tactical",
     "rarity": "N",
     "cost": 0,
@@ -13,8 +13,74 @@
       { "type": "supply", "value": 1, "trigger": "on_play" },
       { "type": "goes_to_discard", "trigger": "after_play" }
     ],
-    "description": "提供1点补给",
     "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础"
+  },
+  {
+    "id": "medium_supply",
+    "type": "logistics",
+    "name": "中型货轮",
+    "cardCategory": "tactical",
+    "rarity": "R",
+    "shopType": "essential",
+    "shopCopies": 7,
+    "cost": 3,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      { "type": "supply", "value": 2, "trigger": "on_play" },
+      { "type": "goes_to_discard", "trigger": "after_play" }
+    ],
+    "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础"
+  },
+  {
+    "id": "large_supply",
+    "type": "logistics",
+    "name": "自由轮",
+    "cardCategory": "tactical",
+    "rarity": "SR",
+    "shopType": "random",
+    "shopCopies": 4,
+    "cost": 5,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      { "type": "supply", "value": 3, "trigger": "on_play" },
+      { "type": "goes_to_discard", "trigger": "after_play" }
+    ],
+    "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础"
+  },
+  {
+    "id": "retirement_office",
+    "type": "combat",
+    "name": "退役",
+    "cardCategory": "tactical",
+    "rarity": "R",
+    "shopType": "random",
+    "shopCopies": 6,
+    "cost": 3,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "retire",
+        "value": 1,
+        "trigger": "on_play",
+        "constraints": ["requires_discard_pile"],
+        "ui": {
+          "interaction": "select_from_zone",
+          "zone": "discard",
+          "title": "选择要退役的卡牌"
+        }
+      },
+      {
+        "type": "goes_to_discard",
+        "trigger": "after_play"
+      }
+    ],
+    "flavor": "老兵不死，只是逐渐凋零"
   },
   {
     "id": "f4f_wildcat",
@@ -31,7 +97,6 @@
     "seaPower": 1,
     "airPower": 4,
     "abilities": [],
-    "description": "空中优势战斗机，对空火力4，对海火力1",
     "flavor": "在中途岛上空守护我们的舰队"
   },
   {
@@ -49,7 +114,6 @@
     "seaPower": 5,
     "airPower": 1,
     "abilities": [],
-    "description": "反舰轰炸机，对海火力5，对地火力1，对空火力1",
     "flavor": "日本航母的噩梦"
   },
   {
@@ -69,7 +133,6 @@
     "abilities": [
       { "type": "supply", "value": 1, "trigger": "on_play" }
     ],
-    "description": "中型轰炸机，对地火力5，对海火力2，提供1点补给",
     "flavor": "杜立特空袭的传奇机型"
   },
   {
@@ -87,7 +150,6 @@
     "seaPower": 3,
     "airPower": 2,
     "abilities": [],
-    "description": "多用途舰艇，对海火力3，对空火力2",
     "flavor": "舰队的守护者，反潜反舰样样精通"
   },
   {
@@ -105,7 +167,6 @@
     "seaPower": 6,
     "airPower": 3,
     "abilities": [],
-    "description": "重型巡洋舰，对海火力6，对空火力3，对地火力2",
     "flavor": "海上的钢铁巨兽"
   },
   {
@@ -125,7 +186,6 @@
     "abilities": [
       { "type": "supply", "value": 2, "trigger": "on_play" }
     ],
-    "description": "最强战舰，对海火力8，对地火力5，对空火力4，提供2点补给",
     "flavor": "16英寸主炮的咆哮震撼敌人心魄"
   },
   {
@@ -144,7 +204,6 @@
     "airPower": 5,
     "airSlots": 4,
     "abilities": [],
-    "description": "舰队核心，提供4个航空槽位，对空火力5，对海火力2",
     "flavor": "移动的海上机场，制空权的关键"
   },
   {
@@ -162,7 +221,6 @@
     "seaPower": 0,
     "airPower": 0,
     "abilities": [],
-    "description": "精锐陆战单位，对地火力5",
     "flavor": "硫磺岛、瓜岛，他们战无不胜"
   },
   {
@@ -188,39 +246,6 @@
         "ui": { "blockMessage": "后勤卡不能参加战斗" }
       }
     ],
-    "description": "后勤支援舰，提供3点补给，增加2点最大补给保留，对空火力1",
     "flavor": "舰队的生命线"
-  },
-  {
-    "id": "retirement_office",
-    "type": "combat",
-    "name": "退役",
-    "cardCategory": "tactical",
-    "rarity": "N",
-    "shopType": "random",
-    "shopCopies": 8,
-    "cost": 3,
-    "groundPower": 0,
-    "seaPower": 0,
-    "airPower": 0,
-    "abilities": [
-      {
-        "type": "retire",
-        "value": 1,
-        "trigger": "on_play",
-        "constraints": ["requires_discard_pile"],
-        "ui": {
-          "interaction": "select_from_zone",
-          "zone": "discard",
-          "title": "选择要退役的卡牌"
-        }
-      },
-      {
-        "type": "goes_to_discard",
-        "trigger": "after_play"
-      }
-    ],
-    "description": "从弃牌堆中选择一张卡牌移除游戏",
-    "flavor": "老兵不死，只是逐渐凋零"
   }
 ]
