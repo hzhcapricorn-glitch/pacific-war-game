@@ -135,10 +135,8 @@
     "seaPower": 2,
     "airPower": 5,
     "airSlots": 4,
-    "abilities": [
-      { "type": "draw", "value": 1, "trigger": "on_play" }
-    ],
-    "description": "舰队核心，提供4个航空槽位，对空火力5，对海火力2，抽1张卡牌",
+    "abilities": [],
+    "description": "舰队核心，提供4个航空槽位，对空火力5，对海火力2",
     "flavor": "移动的海上机场，制空权的关键"
   },
   {

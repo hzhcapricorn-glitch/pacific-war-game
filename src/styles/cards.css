@@ -254,8 +254,21 @@
 
 .deck-zone,
 .discard-zone {
-  min-width: 120px;
-  max-width: 120px;
+  min-width: 100px;
+  max-width: 100px;
+  min-height: 80px;
+  padding: 8px;
+}
+
+.deck-zone .zone-title,
+.discard-zone .zone-title {
+  font-size: 14px;
+}
+
+.deck-zone .zone-count,
+.discard-zone .zone-count {
+  font-size: 18px;
+  font-weight: bold;
 }
 
 /* Mission Display */
@@ -337,6 +350,13 @@
 }
 
 .shop-content {
+  min-height: 100px;
+}
+
+.shop-content-horizontal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
   min-height: 100px;
 }
 
@@ -441,6 +461,16 @@
 /* Shop Sections */
 .shop-section {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-section-left,
+.shop-section-right {
+  margin-bottom: 0;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
 }
 
 .shop-section-title {
@@ -449,6 +479,7 @@
   margin-bottom: 10px;
   padding-bottom: 5px;
   border-bottom: 1px solid #4a5568;
+  flex-shrink: 0;
 }
 
 .essential-shop {

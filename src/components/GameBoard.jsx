@@ -149,8 +149,9 @@ function GameBoard() {
 
     // 商店阶段特殊检查：如果商店还有卡牌可以购买，提示确认
     if (currentPhase === GamePhase.SHOP) {
-      // 检查是否还有可以购买的卡牌
-      const affordableCards = state.zones.shop.filter(card => card.cost <= state.supply);
+      // 检查是否还有可以购买的卡牌（包括必要商店和随机商店）
+      const allShopCards = [...(state.zones.essentialShop || []), ...(state.zones.randomShop || [])];
+      const affordableCards = allShopCards.filter(card => card.cost <= state.supply);
 
       if (state.supply > 0 && affordableCards.length > 0) {
         const confirmed = window.confirm(
@@ -234,19 +235,9 @@ function GameBoard() {
   const handleShopCardClick = (card, shopType) => {
     if (state.phase === GamePhase.SHOP) {
       if (state.supply >= card.cost) {
-        let actualCard;
-        if (shopType === 'essential') {
-          // 从必要商店中找到这个类型的第一张卡牌实例
-          actualCard = state.zones.essentialShop.find(c => c.id === card.id);
-        } else {
-          // 随机商店直接使用传入的card（已经是实例）
-          actualCard = card;
-        }
-
-        if (actualCard) {
-          actions.spendSupply(card.cost);
-          actions.purchaseCard(actualCard.instanceId, shopType);
-        }
+        // card 已经是实际的卡牌实例，直接使用
+        actions.spendSupply(card.cost);
+        actions.purchaseCard(card.instanceId, shopType);
       } else {
         alert('补给不足！');
       }

@@ -12,6 +12,7 @@ const initialState = {
   turn: 1,
   supply: 0,
   maxSupplyRetention: 0,
+  randomShopSlots: 6, // 随机商店槽位数量（可通过卡牌能力提升）
   zones: {
     deck: [],
     hand: [],
@@ -108,6 +109,7 @@ function gameStateReducer(state, action) {
 
       const newState = {
         ...initialState,
+        randomShopSlots: randomShopSlots || 6, // 保存随机商店槽位数
         zones: {
           ...initialState.zones,
           discard: starterCards,
@@ -130,17 +132,19 @@ function gameStateReducer(state, action) {
 
     case ActionTypes.NEXT_PHASE: {
       const nextPhase = getNextPhase(state.phase);
+      const isNewTurn = nextPhase === GamePhase.PREPARE;
+
       let newState = {
         ...state,
         phase: nextPhase,
-        turn: nextPhase === GamePhase.PREPARE ? state.turn + 1 : state.turn,
-        retireUsedThisTurn: nextPhase === GamePhase.PREPARE ? false : state.retireUsedThisTurn,
-        usedAbilitiesThisTurn: nextPhase === GamePhase.PREPARE ? {} : state.usedAbilitiesThisTurn
+        turn: isNewTurn ? state.turn + 1 : state.turn,
+        retireUsedThisTurn: isNewTurn ? false : state.retireUsedThisTurn,
+        usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn
       };
 
-      // 在准备阶段刷新随机商店
-      if (nextPhase === GamePhase.PREPARE && state.turn > 1) {
-        const randomShopSlots = 6; // 默认每次抽6张
+      // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
+      if (isNewTurn && state.turn >= 1) {
+        const randomShopSlots = state.randomShopSlots || 6; // 默认6张，可通过状态调整
 
         // 将当前随机商店中未购买的卡牌送回随机商店堆
         const returnedCards = state.zones.randomShop || [];
@@ -155,6 +159,13 @@ function gameStateReducer(state, action) {
           randomShop: newRandomShop,
           randomShopDeck: remainingDeck
         };
+
+        // 添加日志
+        newState.battleLog = addLogEntry(
+          newState,
+          `🔄 随机商店已刷新 (${newRandomShop.length}/${randomShopSlots} 张卡牌)`,
+          'system'
+        );
       }
 
       return newState;

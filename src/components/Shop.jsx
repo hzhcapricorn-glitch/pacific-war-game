@@ -39,14 +39,16 @@ function Shop({
   Object.values(knownEssentialTypes).forEach(cardDef => {
     groupedEssentialCards[cardDef.id] = {
       card: cardDef,
-      count: 0
+      count: 0,
+      actualCards: [] // 存储实际的卡牌实例
     };
   });
 
-  // 然后计算实际数量
+  // 然后计算实际数量并保存实例
   essentialShopCards.forEach(card => {
     if (groupedEssentialCards[card.id]) {
       groupedEssentialCards[card.id].count++;
+      groupedEssentialCards[card.id].actualCards.push(card);
     }
   });
 
@@ -60,8 +62,8 @@ function Shop({
           补给: <span className="supply-value">{currentSupply} / {maxSupplyRetention}</span>
         </div>
       </div>
-      <div className="shop-content">
-        <div className="shop-section">
+      <div className="shop-content-horizontal">
+        <div className="shop-section shop-section-left">
           <h4 className="shop-section-title">必要卡牌</h4>
           <div className="shop-cards essential-shop">
             {essentialStacks.length === 0 ? (
@@ -74,7 +76,7 @@ function Shop({
                 >
                   <Card
                     card={stack.card}
-                    onClick={stack.count > 0 && isShopPhase ? () => onCardClick(stack.card, 'essential') : undefined}
+                    onClick={stack.count > 0 && isShopPhase ? () => onCardClick(stack.actualCards[0], 'essential') : undefined}
                     onHover={onCardHover}
                     onHoverEnd={onCardHoverEnd}
                     className={`shop-card ${stack.count === 0 ? 'sold-out' : ''}`}
@@ -88,7 +90,7 @@ function Shop({
           </div>
         </div>
 
-        <div className="shop-section">
+        <div className="shop-section shop-section-right">
           <h4 className="shop-section-title">随机卡牌</h4>
           <div className="shop-cards random-shop">
             {randomShopCards.length === 0 ? (
