@@ -19,6 +19,16 @@ export const CardRarity = {
 };
 
 /**
+ * 任务难度枚举
+ */
+export const MissionDifficulty = {
+  EASY: 'easy',       // 简单
+  NORMAL: 'normal',   // 普通
+  HARD: 'hard',       // 困难
+  HELL: 'hell'        // 地狱
+};
+
+/**
  * 单位类型枚举
  */
 export const UnitType = {
@@ -88,6 +98,7 @@ export function createCard(cardData, instanceId) {
     shopType: cardData.shopType,
     shopCopies: cardData.shopCopies,
     // 任务卡特有属性
+    difficulty: cardData.difficulty,
     requiredGroundPower: cardData.requiredGroundPower,
     requiredSeaPower: cardData.requiredSeaPower,
     requiredAirPower: cardData.requiredAirPower,

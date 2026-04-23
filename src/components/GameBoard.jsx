@@ -506,7 +506,6 @@ function GameBoard() {
         {/* 右侧：显示区 */}
         <div className="game-right">
           <div className="card-preview">
-            <h3>详细信息</h3>
             {hoveredCard ? (
               <Card card={hoveredCard} showDetailed={true} />
             ) : (

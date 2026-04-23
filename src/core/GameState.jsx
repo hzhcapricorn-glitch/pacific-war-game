@@ -220,10 +220,14 @@ function gameStateReducer(state, action) {
         const result = moveCard(cardId, state.zones.hand, state.zones.deployed);
         if (!result) return state;
 
+        // 单位卡部署时默认横置（本回合不可用）
+        const deployedCard = { ...result.movedCard, status: 'tapped' };
+        const newDeployedZone = [...result.newToZone.slice(0, -1), deployedCard];
+
         newZones = {
           ...state.zones,
           hand: result.newFromZone,
-          deployed: result.newToZone
+          deployed: newDeployedZone
         };
       }
 
