@@ -93,6 +93,7 @@ export function createCard(cardData, instanceId) {
     status: CardStatus.READY,
     description: cardData.description || '',
     flavor: cardData.flavor || '',
+    image: cardData.image || null,
     // 稀有度和商店配置
     rarity: cardData.rarity || CardRarity.N,
     shopType: cardData.shopType,

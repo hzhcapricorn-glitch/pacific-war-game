@@ -157,7 +157,17 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
           {/* 区域2: 图片区 */}
           <div className="detail-image-container">
             <div className="detail-image-placeholder">
-              {/* 未来放置卡牌插画 */}
+              {card.image && (
+                <img
+                  src={card.image}
+                  alt={card.name}
+                  onError={(e) => {
+                    console.error('图片加载失败:', card.image);
+                    e.target.style.display = 'none';
+                  }}
+                  onLoad={() => console.log('图片加载成功:', card.image)}
+                />
+              )}
             </div>
             <div className="detail-type-badge">
               {isMission ? '任务卡' :

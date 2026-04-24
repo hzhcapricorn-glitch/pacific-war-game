@@ -431,6 +431,7 @@
     "seaPower": 0,
     "airPower": 2,
     "airSlots": 3,
+    "image": "/pacific-war-game/img/enterprise.jpeg",
     "abilities": [
       {
         "type": "protect",
