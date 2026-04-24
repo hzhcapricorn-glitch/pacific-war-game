@@ -1,5 +1,5 @@
 import { getCardFirePower } from '../models/Card';
-import { processAbilities } from './AbilitySystem';
+import { processAbilities, hasProtectAbility } from './AbilitySystem';
 
 /**
  * CombatSystem - 处理战斗相关的逻辑（太平洋战争版本）
@@ -140,13 +140,34 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
   }
 
   lossCount = Math.min(lossCount, participatingCards.length);
+
+  // 将卡牌分为两组：有幸运能力的和没有的
+  const vulnerableCards = []; // 没有幸运能力的卡牌（优先损失）
+  const luckyCards = [];      // 有幸运能力的卡牌（最后损失）
+
+  participatingCards.forEach(card => {
+    if (hasProtectAbility(card)) {
+      luckyCards.push(card);
+    } else {
+      vulnerableCards.push(card);
+    }
+  });
+
   const lostCards = [];
 
-  // 随机选择要损失的卡牌
-  const availableCards = [...participatingCards];
-  for (let i = 0; i < lossCount; i++) {
-    const randomIndex = Math.floor(Math.random() * availableCards.length);
-    const lostCard = availableCards.splice(randomIndex, 1)[0];
+  // 第一阶段：优先从普通卡牌中随机选择
+  const availableVulnerable = [...vulnerableCards];
+  while (lostCards.length < lossCount && availableVulnerable.length > 0) {
+    const randomIndex = Math.floor(Math.random() * availableVulnerable.length);
+    const lostCard = availableVulnerable.splice(randomIndex, 1)[0];
+    lostCards.push(lostCard.instanceId);
+  }
+
+  // 第二阶段：如果还需要更多损失，从幸运卡牌中选择
+  const availableLucky = [...luckyCards];
+  while (lostCards.length < lossCount && availableLucky.length > 0) {
+    const randomIndex = Math.floor(Math.random() * availableLucky.length);
+    const lostCard = availableLucky.splice(randomIndex, 1)[0];
     lostCards.push(lostCard.instanceId);
   }
 

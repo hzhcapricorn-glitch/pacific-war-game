@@ -381,6 +381,15 @@ export function hasAbility(card, abilityType) {
 }
 
 /**
+ * 检查卡牌是否有幸运能力（战斗损失时优先损失其他卡牌）
+ * @param {Object} card - 卡牌对象
+ * @returns {boolean}
+ */
+export function hasProtectAbility(card) {
+  return hasAbility(card, 'protect');
+}
+
+/**
  * 检查卡牌是否可以参加战斗
  * @param {Object} card - 卡牌对象
  * @returns {Object} { canParticipate: boolean, reason?: string }
