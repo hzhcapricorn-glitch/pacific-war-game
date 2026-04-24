@@ -63,8 +63,8 @@ export const AbilityType = {
  * 卡牌状态枚举
  */
 export const CardStatus = {
-  READY: 'ready',     // 准备状态（未横置）
-  TAPPED: 'tapped'    // 横置状态
+  READY: 'ready',     // 已就绪状态
+  TAPPED: 'tapped'    // 整备中状态
 };
 
 /**

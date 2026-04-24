@@ -135,7 +135,7 @@ export function createDeck(cardDefinitions, copies = 1) {
 }
 
 /**
- * 将卡牌状态设置为横置(tapped)或重置(ready)
+ * 将卡牌状态设置为整备中(tapped)或已就绪(ready)
  * @param {string} cardId - 卡牌ID或实例ID
  * @param {Array} zone - 卡牌所在区域
  * @param {string} status - 'tapped' 或 'ready'
@@ -150,18 +150,18 @@ export function setCardStatus(cardId, zone, status) {
 }
 
 /**
- * 获取区域中所有未横置的卡牌
+ * 获取区域中所有已就绪的卡牌
  * @param {Array} zone - 卡牌区域
- * @returns {Array} 未横置的卡牌数组
+ * @returns {Array} 已就绪的卡牌数组
  */
 export function getReadyCards(zone) {
   return zone.filter(card => card.status === 'ready');
 }
 
 /**
- * 获取区域中所有横置的卡牌
+ * 获取区域中所有整备中的卡牌
  * @param {Array} zone - 卡牌区域
- * @returns {Array} 横置的卡牌数组
+ * @returns {Array} 整备中的卡牌数组
  */
 export function getTappedCards(zone) {
   return zone.filter(card => card.status === 'tapped');

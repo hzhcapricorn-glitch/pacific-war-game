@@ -26,6 +26,8 @@ function GameBoard() {
   const [gameInitialized, setGameInitialized] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   const [showRetireModal, setShowRetireModal] = useState(false);
+  const [showQuickResponseModal, setShowQuickResponseModal] = useState(false);
+  const [activeAbilityCardId, setActiveAbilityCardId] = useState(null); // 记录正在使用能力的卡牌ID（用于排除自身）
   const [supplyChanged, setSupplyChanged] = useState(false);
   const [prevSupply, setPrevSupply] = useState(0);
 
@@ -44,14 +46,9 @@ function GameBoard() {
     const autoExecutePhase = () => {
       const currentPhase = state.phase;
 
-      // 准备阶段：自动重置所有横置卡牌
+      // 准备阶段：不再自动整备，直接进入下一阶段
       if (currentPhase === GamePhase.PREPARE) {
         setTimeout(() => {
-          state.zones.deployed.forEach(card => {
-            if (card.status === 'tapped') {
-              actions.untapCard(card.instanceId);
-            }
-          });
           actions.nextPhase();
         }, 500); // 延迟500ms让玩家看到阶段变化
       }
@@ -89,12 +86,17 @@ function GameBoard() {
     }
   }, [state.supply]);
 
-  // 监听pending interaction（如retire能力）
+  // 监听pending interaction（如retire能力、快速响应能力）
   useEffect(() => {
     if (state.pendingInteraction) {
-      const { zone, title } = state.pendingInteraction;
+      const { zone, title, filter, excludeCardId } = state.pendingInteraction;
+      if (excludeCardId) {
+        setActiveAbilityCardId(excludeCardId);
+      }
       if (zone === 'discard') {
         setShowRetireModal(true);
+      } else if (zone === 'deployed' && filter === 'tapped') {
+        setShowQuickResponseModal(true);
       }
     }
   }, [state.pendingInteraction]);
@@ -147,16 +149,30 @@ function GameBoard() {
   const handleNextPhase = () => {
     const currentPhase = state.phase;
 
-    // 商店阶段特殊检查：如果商店还有卡牌可以购买，提示确认
+    // 商店阶段特殊检查：如果商店还有卡牌可以购买或有卡牌可以整备，提示确认
     if (currentPhase === GamePhase.SHOP) {
       // 检查是否还有可以购买的卡牌（包括必要商店和随机商店）
       const allShopCards = [...(state.zones.essentialShop || []), ...(state.zones.randomShop || [])];
       const affordableCards = allShopCards.filter(card => card.cost <= state.supply);
 
-      if (state.supply > 0 && affordableCards.length > 0) {
-        const confirmed = window.confirm(
-          `您还有 ${state.supply} 点补给未使用，商店中还有卡牌可以购买。\n\n确定要进入下一阶段吗？`
-        );
+      // 检查是否还有可以整备的卡牌
+      const tappedCards = state.zones.deployed.filter(card => card.status === 'tapped');
+      const affordableRedeployCards = tappedCards.filter(card => card.redeployCost <= state.supply);
+
+      const hasAffordableShopCards = state.supply > 0 && affordableCards.length > 0;
+      const hasAffordableRedeployCards = state.supply > 0 && affordableRedeployCards.length > 0;
+
+      if (hasAffordableShopCards || hasAffordableRedeployCards) {
+        let message = '您还有补给未使用：\n\n';
+        if (hasAffordableShopCards) {
+          message += `- 商店中有 ${affordableCards.length} 张可购买的卡牌\n`;
+        }
+        if (hasAffordableRedeployCards) {
+          message += `- 部署区有 ${affordableRedeployCards.length} 张可整备的卡牌\n`;
+        }
+        message += '\n确定要进入下一阶段吗？';
+
+        const confirmed = window.confirm(message);
         if (!confirmed) {
           return; // 用户取消，不进入下一阶段
         }
@@ -164,14 +180,7 @@ function GameBoard() {
     }
 
     // 根据不同阶段执行不同逻辑
-    if (currentPhase === GamePhase.PREPARE) {
-      // 准备阶段：重置所有部署卡牌
-      state.zones.deployed.forEach(card => {
-        if (card.status === 'tapped') {
-          actions.untapCard(card.instanceId);
-        }
-      });
-    } else if (currentPhase === GamePhase.DRAW) {
+    if (currentPhase === GamePhase.DRAW) {
       // 抽卡阶段：抽5张牌
       actions.drawCards(gameConfig.phases.drawCount);
     } else if (currentPhase === GamePhase.DISCARD) {
@@ -193,23 +202,50 @@ function GameBoard() {
       if (isInHand) {
         // 行动阶段：打出手牌
         actions.playCard(card.instanceId);
-      } else if (isInDeployed && card.status === 'tapped') {
-        // 行动阶段：重置横置的卡牌
-        if (state.supply >= card.redeployCost) {
-          actions.spendSupply(card.redeployCost);
-          actions.untapCard(card.instanceId);
-        } else {
-          alert(`补给不足！需要 ${card.redeployCost} 点补给来重置此卡牌`);
+      } else if (isInDeployed && card.status === 'ready') {
+        // 行动阶段：使用部署区已就绪卡牌的主动能力（如侦查、快速整备）
+        const activeAbility = card.abilities?.find(ability =>
+          ability.trigger === 'on_tap' &&
+          ['scout', 'draw', 'supply', 'quick_response'].includes(ability.type)
+        );
+
+        if (activeAbility) {
+          if (activeAbility.type === 'scout') {
+            // 使用侦查能力
+            actions.scoutAndTap(activeAbility.value, card.instanceId);
+          } else if (activeAbility.type === 'draw') {
+            // 使用抽卡能力
+            actions.drawCards(activeAbility.value);
+            actions.tapCard(card.instanceId);
+          } else if (activeAbility.type === 'supply') {
+            // 使用补给能力
+            actions.addSupply(activeAbility.value);
+            actions.tapCard(card.instanceId);
+          } else if (activeAbility.type === 'quick_response') {
+            // 使用快速整备能力
+            const tappedCards = state.zones.deployed.filter(c => c.status === 'tapped' && c.instanceId !== card.instanceId);
+            if (tappedCards.length === 0) {
+              alert('没有可以激活的整备中卡牌');
+            } else {
+              // 整备使用能力的卡牌
+              actions.tapCard(card.instanceId);
+              // 触发快速整备能力
+              actions.triggerDeployedAbility(card.instanceId, 'quick_response');
+            }
+          }
         }
+        // 如果没有主动能力，点击不做任何事
       }
+      // 行动阶段不允许整备卡牌
     } else if (currentPhase === GamePhase.COMBAT) {
       // 检查卡牌是否在部署区
       const isInDeployed = state.zones.deployed.some(c => c.instanceId === card.instanceId);
 
       if (isInDeployed && card.status === 'ready') {
         // 检查卡牌是否可以参加战斗（后勤卡不能参加战斗）
-        if (!canParticipateInCombat(card)) {
-          alert(`「${card.name}」是后勤卡，不能参加战斗！`);
+        const combatCheck = canParticipateInCombat(card);
+        if (!combatCheck.canParticipate) {
+          alert(combatCheck.reason || `「${card.name}」不能参加战斗！`);
           return;
         }
 
@@ -220,6 +256,18 @@ function GameBoard() {
           actions.selectForCombat(card.instanceId);
         }
       }
+    } else if (currentPhase === GamePhase.SHOP) {
+      // 购买阶段：整备部署区的整备中卡牌
+      const isInDeployed = state.zones.deployed.some(c => c.instanceId === card.instanceId);
+
+      if (isInDeployed && card.status === 'tapped') {
+        if (state.supply >= card.redeployCost) {
+          actions.spendSupply(card.redeployCost);
+          actions.untapCard(card.instanceId);
+        } else {
+          alert(`补给不足！需要 ${card.redeployCost} 点补给来整备此卡牌`);
+        }
+      }
     }
   };
 
@@ -228,8 +276,21 @@ function GameBoard() {
     actions.retireCard(selectedCard.instanceId);
     // 清除pending interaction
     actions.clearPendingInteraction();
+    // 清除正在使用能力的卡牌ID
+    setActiveAbilityCardId(null);
     // 关闭弹窗
     setShowRetireModal(false);
+  };
+
+  const handleQuickResponseSelect = (selectedCard) => {
+    // 执行激活
+    actions.untapCard(selectedCard.instanceId);
+    // 清除pending interaction
+    actions.clearPendingInteraction();
+    // 清除正在使用能力的卡牌ID
+    setActiveAbilityCardId(null);
+    // 关闭弹窗
+    setShowQuickResponseModal(false);
   };
 
   const handleShopCardClick = (card, shopType) => {
@@ -465,11 +526,13 @@ function GameBoard() {
           </div>
 
           {/* 部署区 */}
-          <div className={`middle-zone ${state.phase === GamePhase.SHOP ? 'zone-disabled' : ''}`}>
+          <div className={`middle-zone ${
+            [GamePhase.PREPARE, GamePhase.DRAW, GamePhase.DISCARD].includes(state.phase) ? 'zone-disabled' : ''
+          }`}>
             <CardZone
               title="部署区"
               cards={state.zones.deployed}
-              onCardClick={state.phase === GamePhase.SHOP ? undefined : handleCardClick}
+              onCardClick={handleCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
               className="deployed-zone"
@@ -540,12 +603,32 @@ function GameBoard() {
         onClose={() => {
           setShowRetireModal(false);
           actions.clearPendingInteraction();
+          setActiveAbilityCardId(null);
         }}
-        cards={state.zones.discard}
+        cards={state.zones.discard.filter(card =>
+          card.instanceId !== activeAbilityCardId
+        )}
         title="选择要退役的卡牌"
         onCardHover={setHoveredCard}
         onCardHoverEnd={() => setHoveredCard(null)}
         onCardSelect={handleAbilitySelect}
+      />
+
+      {/* 快速响应选择弹窗 */}
+      <CardListModal
+        isOpen={showQuickResponseModal}
+        onClose={() => {
+          setShowQuickResponseModal(false);
+          actions.clearPendingInteraction();
+          setActiveAbilityCardId(null);
+        }}
+        cards={state.zones.deployed.filter(card =>
+          card.status === 'tapped' && card.instanceId !== activeAbilityCardId
+        )}
+        title="选择要激活的卡牌"
+        onCardHover={setHoveredCard}
+        onCardHoverEnd={() => setHoveredCard(null)}
+        onCardSelect={handleQuickResponseSelect}
       />
     </div>
   );

@@ -69,23 +69,27 @@ function Shop({
             {essentialStacks.length === 0 ? (
               <div className="shop-empty">暂无必要卡牌</div>
             ) : (
-              essentialStacks.map((stack) => (
-                <div
-                  key={stack.card.id}
-                  className={`shop-card-stack ${stack.count === 0 ? 'empty' : ''}`}
-                >
-                  <Card
-                    card={stack.card}
-                    onClick={stack.count > 0 && isShopPhase ? () => onCardClick(stack.actualCards[0], 'essential') : undefined}
-                    onHover={onCardHover}
-                    onHoverEnd={onCardHoverEnd}
-                    className={`shop-card ${stack.count === 0 ? 'sold-out' : ''}`}
-                  />
-                  <div className={`card-stack-count ${stack.count === 0 ? 'empty' : ''}`}>
-                    {stack.count}
+              essentialStacks.map((stack) => {
+                const canAfford = stack.card.cost <= currentSupply;
+                const isAvailable = stack.count > 0 && isShopPhase && canAfford;
+                return (
+                  <div
+                    key={stack.card.id}
+                    className={`shop-card-stack ${stack.count === 0 ? 'empty' : ''} ${!canAfford && stack.count > 0 && isShopPhase ? 'unaffordable' : ''}`}
+                  >
+                    <Card
+                      card={stack.card}
+                      onClick={isAvailable ? () => onCardClick(stack.actualCards[0], 'essential') : undefined}
+                      onHover={onCardHover}
+                      onHoverEnd={onCardHoverEnd}
+                      className={`shop-card ${stack.count === 0 ? 'sold-out' : ''} ${!canAfford && stack.count > 0 && isShopPhase ? 'unaffordable' : ''}`}
+                    />
+                    <div className={`card-stack-count ${stack.count === 0 ? 'empty' : ''}`}>
+                      {stack.count}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -96,17 +100,21 @@ function Shop({
             {randomShopCards.length === 0 ? (
               <div className="shop-empty">暂无随机卡牌</div>
             ) : (
-              randomShopCards.map((card) => (
-                <div key={card.instanceId} className="shop-card-single">
-                  <Card
-                    card={card}
-                    onClick={isShopPhase ? () => onCardClick(card, 'random') : undefined}
-                    onHover={onCardHover}
-                    onHoverEnd={onCardHoverEnd}
-                    className="shop-card"
-                  />
-                </div>
-              ))
+              randomShopCards.map((card) => {
+                const canAfford = card.cost <= currentSupply;
+                const isAvailable = isShopPhase && canAfford;
+                return (
+                  <div key={card.instanceId} className={`shop-card-single ${!canAfford && isShopPhase ? 'unaffordable' : ''}`}>
+                    <Card
+                      card={card}
+                      onClick={isAvailable ? () => onCardClick(card, 'random') : undefined}
+                      onHover={onCardHover}
+                      onHoverEnd={onCardHoverEnd}
+                      className={`shop-card ${!canAfford && isShopPhase ? 'unaffordable' : ''}`}
+                    />
+                  </div>
+                );
+              })
             )}
           </div>
         </div>

@@ -83,9 +83,43 @@
     "flavor": "老兵不死，只是逐渐凋零"
   },
   {
+    "id": "quick_response",
+    "type": "combat",
+    "name": "维修舰",
+    "cardCategory": "logistics",
+    "rarity": "SR",
+    "shopType": "random",
+    "shopCopies": 3,
+    "unitType": "navy",
+    "cost": 3,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "quick_response",
+        "value": 1,
+        "trigger": "on_tap",
+        "ui": {
+          "interaction": "select_from_zone",
+          "zone": "deployed",
+          "filter": "tapped",
+          "title": "选择要激活的卡牌"
+        }
+      },
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "during_combat",
+        "ui": { "blockMessage": "后勤卡不能参加战斗" }
+      }
+    ],
+    "flavor": "海上的浮动船坞"
+  },
+  {
     "id": "basic_navy_airforce",
     "type": "combat",
-    "name": "TBD破坏者鱼雷机",
+    "name": "TBD鱼雷机“破坏者”",
     "cardCategory": "combat",
     "rarity": "N",
     "shopType": "essential",
@@ -129,7 +163,7 @@
   {
     "id": "f6f_hellcat",
     "type": "combat",
-    "name": "F6F 地狱猫",
+    "name": "F6F地狱猫战斗机",
     "cardCategory": "combat",
     "rarity": "R",
     "shopType": "random",
@@ -144,6 +178,11 @@
       {
         "type": "return_to_base",
         "trigger": "on_combat_loss"
+      },
+      {
+        "type": "scout",
+        "value": 1,
+        "trigger": "on_play"
       }
     ],
     "flavor": "猎火鸡啦，猎火鸡啦"
@@ -166,9 +205,14 @@
       {
         "type": "return_to_base",
         "trigger": "on_combat_loss"
+      },
+      {
+        "type": "scout",
+        "value": 1,
+        "trigger": "on_play"
       }
     ],
-    "flavor": "日本航母的噩梦"
+    "flavor": "日本航母的噩梦，六边形战士"
   },
   {
     "id": "tbm_avenger",
@@ -244,6 +288,29 @@
     "airPower": 0,
     "abilities": [],
     "flavor": "二战美军最成功的驱逐舰，太平洋劳模"
+  },
+  {
+    "id": "gato_submarine",
+    "type": "combat",
+    "name": "猫鲨级潜艇",
+    "cardCategory": "combat",
+    "rarity": "N",
+    "shopType": "random",
+    "shopCopies": 8,
+    "unitType": "navy",
+    "cost": 2,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 1,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "scout",
+        "value": 1,
+        "trigger": "on_play"
+      }
+    ],
+    "flavor": "太平洋战场的静默猎手"
   },
   {
     "id": "basic_cruiser",
@@ -381,9 +448,9 @@
     "shopType": "random",
     "shopCopies": 6,
     "unitType": "army",
-    "cost": 4,
+    "cost": 2,
     "redeployCost": 1,
-    "groundPower": 5,
+    "groundPower": 4,
     "seaPower": 0,
     "airPower": 0,
     "abilities": [],
@@ -404,7 +471,7 @@
     "seaPower": 0,
     "airPower": 0,
     "abilities": [
-      { "type": "max_supply", "value": 2, "trigger": "on_play" },
+      { "type": "max_supply", "value": 2, "trigger": "on_deploy" },
       {
         "type": "cannot_participate_in_combat",
         "trigger": "during_combat",
@@ -412,5 +479,29 @@
       }
     ],
     "flavor": "舰队的生命线"
+  },
+  {
+    "id": "frontline_factory",
+    "type": "combat",
+    "name": "前线工厂",
+    "cardCategory": "logistics",
+    "rarity": "SR",
+    "shopType": "random",
+    "shopCopies": 3,
+    "unitType": "navy",
+    "cost": 3,
+    "redeployCost": 0,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      { "type": "expand_shop", "value": 1, "trigger": "passive" },
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "during_combat",
+        "ui": { "blockMessage": "后勤卡不能参加战斗" }
+      }
+    ],
+    "flavor": "战场上的军工奇迹"
   }
 ]

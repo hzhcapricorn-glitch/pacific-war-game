@@ -37,7 +37,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
     return diffMap[card.difficulty] || '';
   };
 
-  // 获取战斗力显示（详细视图：只显示三种火力，不含重置费用）
+  // 获取战斗力显示（详细视图：只显示三种火力，不含整备费用）
   const getCombatLine = () => {
     const ground = `💣${card.groundPower || 0}`;
     const sea = `🌊${card.seaPower || 0}`;
@@ -68,6 +68,12 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         names.push('幸运');
       } else if (ability.type === 'return_to_base') {
         names.push('返航');
+      } else if (ability.type === 'scout') {
+        names.push('侦查');
+      } else if (ability.type === 'expand_shop') {
+        names.push('扩容');
+      } else if (ability.type === 'quick_response') {
+        names.push('快整');
       }
     });
 
@@ -102,6 +108,12 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         descriptions.push(`幸运：战斗损失时优先损失其他卡牌🍀`);
       } else if (ability.type === 'return_to_base') {
         descriptions.push(`返航：对空充足时损失后进入弃牌堆`);
+      } else if (ability.type === 'scout') {
+        descriptions.push(`侦查：抽${ability.value}张卡后整备🔍`);
+      } else if (ability.type === 'expand_shop') {
+        descriptions.push(`扩容：商店刷新时+${ability.value}张卡牌🏪`);
+      } else if (ability.type === 'quick_response') {
+        descriptions.push(`快速整备：激活一张整备中的卡牌⚡`);
       } else if (ability.type !== 'goes_to_discard' && ability.type !== 'cannot_participate_in_combat') {
         descriptions.push(ability.type);
       }
@@ -123,7 +135,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* 横置卡牌重置提示 */}
+      {/* 整备中卡牌整备提示 */}
       {isTapped && !isMission && card.redeployCost > 0 && (
         <div className="card-redeploy-overlay">
           🛠️{card.redeployCost}

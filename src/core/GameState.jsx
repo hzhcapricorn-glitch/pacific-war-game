@@ -70,7 +70,9 @@ const ActionTypes = {
   RESET_GAME: 'RESET_GAME',
   ADD_LOG: 'ADD_LOG',
   RETIRE_CARD: 'RETIRE_CARD',
-  CLEAR_PENDING_INTERACTION: 'CLEAR_PENDING_INTERACTION'
+  CLEAR_PENDING_INTERACTION: 'CLEAR_PENDING_INTERACTION',
+  SCOUT_AND_TAP: 'SCOUT_AND_TAP',
+  TRIGGER_DEPLOYED_ABILITY: 'TRIGGER_DEPLOYED_ABILITY'
 };
 
 /**
@@ -144,15 +146,21 @@ function gameStateReducer(state, action) {
 
       // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
       if (isNewTurn && state.turn >= 1) {
-        const randomShopSlots = state.randomShopSlots || 6; // 默认6张，可通过状态调整
+        // 计算实际槽位数量：基础槽位 + 部署区中expand_shop能力的总和
+        const baseSlots = state.randomShopSlots || 6;
+        const expandShopBonus = (state.zones.deployed || []).reduce((total, card) => {
+          const expandAbility = card.abilities?.find(ab => ab.type === 'expand_shop');
+          return total + (expandAbility?.value || 0);
+        }, 0);
+        const actualSlots = baseSlots + expandShopBonus;
 
         // 将当前随机商店中未购买的卡牌送回随机商店堆
         const returnedCards = state.zones.randomShop || [];
         const newRandomDeck = shuffleDeck([...state.zones.randomShopDeck, ...returnedCards]);
 
         // 从随机商店堆中抽取新卡牌
-        const newRandomShop = newRandomDeck.slice(0, randomShopSlots);
-        const remainingDeck = newRandomDeck.slice(randomShopSlots);
+        const newRandomShop = newRandomDeck.slice(0, actualSlots);
+        const remainingDeck = newRandomDeck.slice(actualSlots);
 
         newState.zones = {
           ...newState.zones,
@@ -161,11 +169,11 @@ function gameStateReducer(state, action) {
         };
 
         // 添加日志
-        newState.battleLog = addLogEntry(
-          newState,
-          `🔄 随机商店已刷新 (${newRandomShop.length}/${randomShopSlots} 张卡牌)`,
-          'system'
-        );
+        let logMessage = `🔄 随机商店已刷新 (${newRandomShop.length}/${actualSlots} 张卡牌)`;
+        if (expandShopBonus > 0) {
+          logMessage += ` [+${expandShopBonus}]`;
+        }
+        newState.battleLog = addLogEntry(newState, logMessage, 'system');
       }
 
       return newState;
@@ -208,7 +216,7 @@ function gameStateReducer(state, action) {
         const result = moveCard(cardId, state.zones.hand, state.zones.discard);
         if (!result) return state;
 
-        // 确保进入弃牌堆的卡牌状态为ready（不横置）
+        // 确保进入弃牌堆的卡牌状态为ready（已就绪）
         const discardedCard = { ...result.movedCard, status: 'ready' };
         newZones = {
           ...state.zones,
@@ -220,8 +228,11 @@ function gameStateReducer(state, action) {
         const result = moveCard(cardId, state.zones.hand, state.zones.deployed);
         if (!result) return state;
 
-        // 单位卡部署时默认横置（本回合不可用）
-        const deployedCard = { ...result.movedCard, status: 'tapped' };
+        // 所有单位卡和后勤卡部署时默认为整备中状态
+        const deployedCard = {
+          ...result.movedCard,
+          status: 'tapped'
+        };
         const newDeployedZone = [...result.newToZone.slice(0, -1), deployedCard];
 
         newZones = {
@@ -231,8 +242,16 @@ function gameStateReducer(state, action) {
         };
       }
 
-      // 应用能力效果
-      let newState = applyAbilityResults(state, abilityResults, newZones);
+      // 处理on_deploy触发的能力（部署时立即生效）
+      const onDeployAbilities = processAbilities(card, 'on_deploy', {
+        state,
+        card,
+        phase: state.phase
+      });
+
+      // 应用能力效果（on_play + on_deploy）
+      const allAbilityResults = [...abilityResults, ...onDeployAbilities];
+      let newState = applyAbilityResults(state, allAbilityResults, newZones);
 
       // 更新统计
       newState = {
@@ -393,7 +412,7 @@ function gameStateReducer(state, action) {
         newStats.battlesWon++;
       }
 
-      // 横置所有参战卡牌
+      // 将所有参战卡牌设为整备中状态
       let newDeployed = state.zones.deployed.map(card =>
         state.selectedForCombat.includes(card.instanceId)
           ? { ...card, status: 'tapped' }
@@ -567,6 +586,63 @@ function gameStateReducer(state, action) {
       return newState;
     }
 
+    case ActionTypes.SCOUT_AND_TAP: {
+      const { count, cardInstanceId } = action.payload;
+
+      // 抽取卡牌
+      const result = drawCards(state.zones.deck, state.zones.discard, count);
+
+      // 将使用侦查能力的卡牌设为整备中状态
+      const newDeployed = state.zones.deployed.map(card =>
+        card.instanceId === cardInstanceId
+          ? { ...card, status: 'tapped' }
+          : card
+      );
+
+      const newState = {
+        ...state,
+        zones: {
+          ...state.zones,
+          deck: result.newDeck,
+          hand: [...state.zones.hand, ...result.drawnCards],
+          discard: result.newDiscard,
+          deployed: newDeployed
+        }
+      };
+
+      // 添加日志
+      newState.battleLog = addLogEntry(
+        newState,
+        `🔍 侦查：抽取了 ${result.drawnCards.length} 张卡牌`,
+        'action'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.TRIGGER_DEPLOYED_ABILITY: {
+      const { cardId, abilityType } = action.payload;
+
+      // 找到部署区中的卡牌
+      const card = state.zones.deployed.find(c => c.instanceId === cardId);
+      if (!card) {
+        console.error('Card not found in deployed zone:', cardId);
+        return state;
+      }
+
+      // 处理能力
+      const abilityResults = processAbilities(card, 'on_tap', {
+        state,
+        card,
+        phase: state.phase
+      });
+
+      // 应用能力结果
+      const newState = applyAbilityResults(state, abilityResults, state.zones);
+
+      return newState;
+    }
+
     default:
       return state;
   }
@@ -668,6 +744,17 @@ export function GameStateProvider({ children }) {
 
     clearPendingInteraction: useCallback(() => {
       dispatch({ type: ActionTypes.CLEAR_PENDING_INTERACTION });
+    }, []),
+
+    triggerDeployedAbility: useCallback((cardId, abilityType) => {
+      dispatch({ type: ActionTypes.TRIGGER_DEPLOYED_ABILITY, payload: { cardId, abilityType } });
+    }, []),
+
+    scoutAndTap: useCallback((count, cardInstanceId) => {
+      dispatch({
+        type: ActionTypes.SCOUT_AND_TAP,
+        payload: { count, cardInstanceId }
+      });
     }, [])
   };
 

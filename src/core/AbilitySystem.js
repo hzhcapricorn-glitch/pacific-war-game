@@ -84,12 +84,34 @@ function handleRetireAbility(ability, card, context) {
     data: {
       zone: ability.ui?.zone || 'discard',
       title: ability.ui?.title || '选择要退役的卡牌',
+      excludeCardId: card.instanceId, // 排除触发能力的卡牌自身
       onSelect: (selectedCard) => ({
         action: 'RETIRE_CARD',
         payload: { cardId: selectedCard.instanceId }
       })
     },
     log: null  // 退役时会在action中记录日志
+  };
+}
+
+/**
+ * 快速响应能力 - 将整备中的卡牌转为已就绪
+ */
+function handleQuickResponseAbility(ability, card, context) {
+  return {
+    type: 'interactive',
+    interaction: ability.ui?.interaction || 'select_from_zone',
+    data: {
+      zone: ability.ui?.zone || 'deployed',
+      filter: ability.ui?.filter || 'tapped',
+      title: ability.ui?.title || '选择要激活的卡牌',
+      excludeCardId: card.instanceId, // 排除触发能力的卡牌自身
+      onSelect: (selectedCard) => ({
+        action: 'UNTAP_CARD',
+        payload: { cardId: selectedCard.instanceId }
+      })
+    },
+    log: null  // 激活时会在action中记录日志
   };
 }
 
@@ -105,6 +127,21 @@ function handleCannotParticipateInCombatAbility(ability, card, context) {
   };
 }
 
+/**
+ * 侦查能力 - 抽取X张卡牌后整备
+ */
+function handleScoutAbility(ability, card, context) {
+  return {
+    type: 'action',
+    action: 'SCOUT_AND_TAP',
+    payload: {
+      count: ability.value,
+      cardInstanceId: card.instanceId
+    },
+    log: `侦查：抽取 ${ability.value} 张卡牌`
+  };
+}
+
 // 能力类型 -> 处理器函数映射表
 const ABILITY_HANDLERS = {
   supply: handleSupplyAbility,
@@ -113,7 +150,9 @@ const ABILITY_HANDLERS = {
   goes_to_discard: handleGoesToDiscardAbility,
   combat_boost: handleCombatBoostAbility,
   retire: handleRetireAbility,
-  cannot_participate_in_combat: handleCannotParticipateInCombatAbility
+  cannot_participate_in_combat: handleCannotParticipateInCombatAbility,
+  scout: handleScoutAbility,
+  quick_response: handleQuickResponseAbility
 };
 
 // ============= 约束验证器 =============

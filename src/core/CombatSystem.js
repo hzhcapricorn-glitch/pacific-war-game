@@ -313,7 +313,7 @@ export function canStartCombat(selectedCards, currentMission) {
   // 检查选中的卡牌是否都是ready状态
   const hasTappedCard = selectedCards.some(card => card.status === 'tapped');
   if (hasTappedCard) {
-    return { canFight: false, reason: '选中的卡牌中有已横置的卡牌' };
+    return { canFight: false, reason: '选中的卡牌中有已整备中的卡牌' };
   }
 
   return { canFight: true, reason: '' };
