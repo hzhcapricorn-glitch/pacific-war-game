@@ -401,9 +401,15 @@ function GameBoard() {
               </span>
             </div>
             <div className="combat-stat">
-              <span className="label">对空火力:</span>
-              <span className="value" style={{color: selectedFirePowers().airPower >= (state.currentMission.requiredAirPower || 0) ? '#34d399' : '#f59e0b'}}>
-                {selectedFirePowers().airPower} / {state.currentMission.requiredAirPower || 0}
+              <span className="label">防空火力:</span>
+              <span className="value" style={{color: selectedFirePowers().airDefense >= (state.currentMission.requiredAirDefense || 0) ? '#34d399' : '#f59e0b'}}>
+                {selectedFirePowers().airDefense} / {state.currentMission.requiredAirDefense || 0}
+              </span>
+            </div>
+            <div className="combat-stat">
+              <span className="label">制空火力:</span>
+              <span className="value" style={{color: selectedFirePowers().airSuperiority >= (state.currentMission.requiredAirSuperiority || 0) ? '#34d399' : '#f59e0b'}}>
+                {selectedFirePowers().airSuperiority} / {state.currentMission.requiredAirSuperiority || 0}
               </span>
             </div>
             <div className="combat-stat">

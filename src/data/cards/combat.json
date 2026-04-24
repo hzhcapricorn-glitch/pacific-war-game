@@ -2,7 +2,7 @@
   {
     "id": "starter_supply",
     "type": "logistics",
-    "name": "小型货轮",
+    "name": "商船",
     "cardCategory": "tactical",
     "rarity": "N",
     "cost": 0,
@@ -18,7 +18,7 @@
   {
     "id": "medium_supply",
     "type": "logistics",
-    "name": "中型货轮",
+    "name": "自由轮",
     "cardCategory": "tactical",
     "rarity": "R",
     "shopType": "essential",
@@ -36,7 +36,7 @@
   {
     "id": "large_supply",
     "type": "logistics",
-    "name": "自由轮",
+    "name": "综合补给舰",
     "cardCategory": "tactical",
     "rarity": "SR",
     "shopType": "random",
@@ -83,6 +83,28 @@
     "flavor": "老兵不死，只是逐渐凋零"
   },
   {
+    "id": "basic_navy_airforce",
+    "type": "combat",
+    "name": "TBD破坏者鱼雷机",
+    "cardCategory": "combat",
+    "rarity": "N",
+    "shopType": "essential",
+    "shopCopies": 10,
+    "unitType": "air",
+    "cost": 2,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 1,
+    "airPower": 1,
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
+    "flavor": "飞行的棺材"
+  },
+  {
     "id": "f4f_wildcat",
     "type": "combat",
     "name": "F4F野猫战斗机",
@@ -91,13 +113,40 @@
     "shopType": "random",
     "shopCopies": 8,
     "unitType": "air",
+    "cost": 2,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 2,
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
+    "flavor": "在中途岛上空守护我们的舰队"
+  },
+  {
+    "id": "f6f_hellcat",
+    "type": "combat",
+    "name": "F6F 地狱猫",
+    "cardCategory": "combat",
+    "rarity": "R",
+    "shopType": "random",
+    "shopCopies": 5,
+    "unitType": "air",
     "cost": 3,
     "redeployCost": 1,
     "groundPower": 0,
-    "seaPower": 1,
+    "seaPower": 0,
     "airPower": 4,
-    "abilities": [],
-    "flavor": "在中途岛上空守护我们的舰队"
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
+    "flavor": "猎火鸡啦，猎火鸡啦"
   },
   {
     "id": "sbd_dauntless",
@@ -108,18 +157,45 @@
     "shopType": "random",
     "shopCopies": 6,
     "unitType": "air",
-    "cost": 4,
+    "cost": 2,
     "redeployCost": 1,
     "groundPower": 1,
-    "seaPower": 5,
-    "airPower": 1,
-    "abilities": [],
+    "seaPower": 2,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
+    "flavor": "日本航母的噩梦"
+  },
+  {
+    "id": "tbm_avenger",
+    "type": "combat",
+    "name": "TBM复仇者鱼雷机",
+    "cardCategory": "combat",
+    "rarity": "SR",
+    "shopType": "random",
+    "shopCopies": 4,
+    "unitType": "air",
+    "cost": 3,
+    "redeployCost": 1,
+    "groundPower": 2,
+    "seaPower": 3,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
     "flavor": "日本航母的噩梦"
   },
   {
     "id": "b25_mitchell",
     "type": "combat",
-    "name": "B-25米切尔轰炸机",
+    "name": "B-25轰炸机",
     "cardCategory": "combat",
     "rarity": "SR",
     "shopType": "random",
@@ -127,11 +203,14 @@
     "unitType": "air",
     "cost": 5,
     "redeployCost": 2,
-    "groundPower": 5,
-    "seaPower": 2,
+    "groundPower": 4,
+    "seaPower": 0,
     "airPower": 0,
     "abilities": [
-      { "type": "supply", "value": 1, "trigger": "on_play" }
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
     ],
     "flavor": "杜立特空袭的传奇机型"
   },
@@ -311,21 +390,20 @@
     "flavor": "硫磺岛、瓜岛，他们战无不胜"
   },
   {
-    "id": "supply_ship",
+    "id": "forward_base",
     "type": "combat",
-    "name": "补给舰",
+    "name": "前进基地",
     "cardCategory": "logistics",
     "rarity": "R",
     "shopType": "essential",
-    "shopCopies": 7,
+    "shopCopies": 6,
     "unitType": "navy",
     "cost": 4,
-    "redeployCost": 1,
+    "redeployCost": 0,
     "groundPower": 0,
     "seaPower": 0,
-    "airPower": 1,
+    "airPower": 0,
     "abilities": [
-      { "type": "supply", "value": 3, "trigger": "on_play" },
       { "type": "max_supply", "value": 2, "trigger": "on_play" },
       {
         "type": "cannot_participate_in_combat",

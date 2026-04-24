@@ -18,17 +18,39 @@ export function calculateFirePower(cards, powerType) {
 }
 
 /**
+ * 计算防空火力（所有单位的对空火力之和）
+ * @param {Array} cards - 参战卡牌数组
+ * @returns {number} 防空火力
+ */
+export function calculateAirDefense(cards) {
+  return calculateFirePower(cards, 'air');
+}
+
+/**
+ * 计算制空火力（仅空军单位的对空火力之和）
+ * @param {Array} cards - 参战卡牌数组
+ * @returns {number} 制空火力
+ */
+export function calculateAirSuperiority(cards) {
+  return cards
+    .filter(card => card.unitType === 'air')
+    .reduce((total, card) => total + getCardFirePower(card, 'air'), 0);
+}
+
+/**
  * 计算所有类型的火力
  * @param {Array} cards - 参战卡牌数组
  * @param {Object} context - 可选的上下文对象（包含state等，用于能力处理）
- * @returns {Object} { groundPower, seaPower, airPower }
+ * @returns {Object} { groundPower, seaPower, airPower, airDefense, airSuperiority }
  */
 export function calculateAllFirePowers(cards, context = null) {
   // 计算基础火力
   const basePowers = {
     groundPower: calculateFirePower(cards, 'ground'),
     seaPower: calculateFirePower(cards, 'sea'),
-    airPower: calculateFirePower(cards, 'air')
+    airPower: calculateFirePower(cards, 'air'),
+    airDefense: calculateAirDefense(cards),
+    airSuperiority: calculateAirSuperiority(cards)
   };
 
   // 如果没有提供context，返回基础火力
@@ -54,12 +76,16 @@ export function calculateAllFirePowers(cards, context = null) {
       basePowers.groundPower += value;
       basePowers.seaPower += value;
       basePowers.airPower += value;
+      basePowers.airDefense += value;
+      basePowers.airSuperiority += value;
     } else if (powerType === 'groundPower' || powerType === 'ground') {
       basePowers.groundPower += value;
     } else if (powerType === 'seaPower' || powerType === 'sea') {
       basePowers.seaPower += value;
     } else if (powerType === 'airPower' || powerType === 'air') {
       basePowers.airPower += value;
+      basePowers.airDefense += value;
+      basePowers.airSuperiority += value;
     }
   });
 
@@ -80,13 +106,23 @@ export function isVictorious(attackPowers, mission) {
 }
 
 /**
- * 检查对空火力是否满足（用于判断损失是否加倍）
+ * 检查防空火力是否满足（用于判断损失是否加倍）
  * @param {Object} attackPowers - 己方火力
  * @param {Object} mission - 任务对象
- * @returns {boolean} 对空火力是否满足
+ * @returns {boolean} 防空火力是否满足
  */
 export function isAirDefenseSufficient(attackPowers, mission) {
-  return attackPowers.airPower >= (mission.requiredAirPower || 0);
+  return attackPowers.airDefense >= (mission.requiredAirDefense || mission.requiredAirPower || 0);
+}
+
+/**
+ * 检查制空火力是否满足（用于判断返航能力是否触发）
+ * @param {Object} attackPowers - 己方火力
+ * @param {Object} mission - 任务对象
+ * @returns {boolean} 制空火力是否满足
+ */
+export function isAirSuperiorityAchieved(attackPowers, mission) {
+  return attackPowers.airSuperiority >= (mission.requiredAirSuperiority || mission.requiredAirPower || 0);
 }
 
 /**
@@ -179,7 +215,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
  * @param {Array} selectedCards - 选中参战的卡牌
  * @param {Object} mission - 当前任务
  * @param {Object} gameState - 当前游戏状态
- * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, airDefenseSufficient }
+ * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, airDefenseSufficient, airSuperiorityAchieved }
  */
 export function resolveCombat(selectedCards, mission, gameState) {
   // 计算己方火力（包括combat_boost能力）
@@ -187,19 +223,23 @@ export function resolveCombat(selectedCards, mission, gameState) {
   const requiredPowers = {
     groundPower: mission.requiredGroundPower || 0,
     seaPower: mission.requiredSeaPower || 0,
-    airPower: mission.requiredAirPower || 0
+    airDefense: mission.requiredAirDefense || mission.requiredAirPower || 0,
+    airSuperiority: mission.requiredAirSuperiority || mission.requiredAirPower || 0
   };
 
   // 判断胜负
   const victory = isVictorious(attackPowers, mission);
 
-  // 检查对空火力是否满足
+  // 检查防空火力是否满足（影响损失加倍）
   const airDefenseSufficient = isAirDefenseSufficient(attackPowers, mission);
+
+  // 检查制空火力是否满足（影响返航能力）
+  const airSuperiorityAchieved = isAirSuperiorityAchieved(attackPowers, mission);
 
   // 应用奖励（仅在胜利时）
   const rewards = victory ? applyReward(mission.reward, gameState) : { supply: 0, maxSupply: 0, victory: false };
 
-  // 计算损失（无论胜负都会有损失，对空不足时加倍）
+  // 计算损失（无论胜负都会有损失，防空不足时加倍）
   const lostCardIds = calculateLosses(selectedCards, mission.loss, airDefenseSufficient);
 
   // 获取损失的卡牌对象（用于显示具体卡牌名称）
@@ -212,7 +252,8 @@ export function resolveCombat(selectedCards, mission, gameState) {
     rewards,
     lostCardIds,
     lostCards,
-    airDefenseSufficient
+    airDefenseSufficient,
+    airSuperiorityAchieved
   };
 }
 

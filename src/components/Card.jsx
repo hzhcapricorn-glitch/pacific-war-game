@@ -66,6 +66,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         names.push('退役');
       } else if (ability.type === 'protect') {
         names.push('幸运');
+      } else if (ability.type === 'return_to_base') {
+        names.push('返航');
       }
     });
 
@@ -98,6 +100,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         descriptions.push(`退役：从弃牌堆移除一张卡牌🗑️`);
       } else if (ability.type === 'protect') {
         descriptions.push(`幸运：战斗损失时优先损失其他卡牌🍀`);
+      } else if (ability.type === 'return_to_base') {
+        descriptions.push(`返航：对空充足时损失后进入弃牌堆`);
       } else if (ability.type !== 'goes_to_discard' && ability.type !== 'cannot_participate_in_combat') {
         descriptions.push(ability.type);
       }
@@ -119,6 +123,12 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {/* 横置卡牌重置提示 */}
+      {isTapped && !isMission && card.redeployCost > 0 && (
+        <div className="card-redeploy-overlay">
+          🛠️{card.redeployCost}
+        </div>
+      )}
       {showDetailed ? (
         // 详细视图（显示区）- 新布局
         <div className="card-detailed-new">
@@ -152,7 +162,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
             {isMission ? (
               <>
                 <div className="detail-combat-line">
-                  💣{card.requiredGroundPower || 0}     🌊{card.requiredSeaPower || 0}     ✈️{card.requiredAirPower || 0}
+                  💣{card.requiredGroundPower || 0}     🌊{card.requiredSeaPower || 0}     🎯{card.requiredAirDefense || 0}     ✈️{card.requiredAirSuperiority || 0}
                 </div>
                 {card.reward && <div className="detail-mission-reward">✓ {card.reward.description}</div>}
                 {card.loss && <div className="detail-mission-loss">✗ {card.loss.description}</div>}
@@ -191,7 +201,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
               <>
                 {card.requiredGroundPower > 0 && <span className="combat-requirement">💣{card.requiredGroundPower}</span>}
                 {card.requiredSeaPower > 0 && <span className="combat-requirement">🌊{card.requiredSeaPower}</span>}
-                {card.requiredAirPower > 0 && <span className="combat-requirement">✈️{card.requiredAirPower}</span>}
+                {card.requiredAirDefense > 0 && <span className="combat-requirement">🎯{card.requiredAirDefense}</span>}
+                {card.requiredAirSuperiority > 0 && <span className="combat-requirement">✈️{card.requiredAirSuperiority}</span>}
               </>
             ) : (
               <>
