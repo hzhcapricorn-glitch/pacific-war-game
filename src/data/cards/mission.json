@@ -19,7 +19,8 @@
       "description": "随机损失1张参战卡牌"
     },
     "description": "首次航母对决，需要对海火力6、防空火力3、制空火力3",
-    "flavor": "1942年5月，历史上第一次航母对航母的海战"
+    "flavor": "1942年5月，历史上第一次航母对航母的海战",
+    "image": "/pacific-war-game/img/Mission_easy.jpeg"
   },
   {
     "id": "mission_midway",
@@ -41,7 +42,8 @@
       "description": "随机损失1张参战卡牌"
     },
     "description": "太平洋战争的转折点，需要对海火力10、防空火力8、制空火力8",
-    "flavor": "1942年6月，击沉四艘日本航母，扭转战局"
+    "flavor": "1942年6月，击沉四艘日本航母，扭转战局",
+    "image": "/pacific-war-game/img/Mission_normal.jpeg"
   },
   {
     "id": "mission_guadalcanal",
@@ -63,7 +65,8 @@
       "description": "随机损失2张参战卡牌"
     },
     "description": "海陆空联合作战，需要对地火力8、对海火力12、防空火力10、制空火力10",
-    "flavor": "1942-1943年，血战半年夺取所罗门群岛"
+    "flavor": "1942-1943年，血战半年夺取所罗门群岛",
+    "image": "/pacific-war-game/img/Mission_normal.jpeg"
   },
   {
     "id": "mission_philippine_sea",
@@ -85,7 +88,8 @@
       "description": "随机损失2张参战卡牌"
     },
     "description": "马里亚纳猎火鸡大赛，需要对地火力5、对海火力18、防空火力15、制空火力15",
-    "flavor": "1944年6月，摧毁日本海军航空兵主力"
+    "flavor": "1944年6月，摧毁日本海军航空兵主力",
+    "image": "/pacific-war-game/img/Mission_hard.jpg"
   },
   {
     "id": "mission_okinawa",
@@ -106,6 +110,7 @@
       "description": "随机损失3张参战卡牌"
     },
     "description": "最后的堡垒，需要对地火力15、对海火力25、防空火力20、制空火力20",
-    "flavor": "1945年4月，通向日本本土的最后一战"
+    "flavor": "1945年4月，通向日本本土的最后一战",
+    "image": "/pacific-war-game/img/Mission_hell.jpg"
   }
 ]

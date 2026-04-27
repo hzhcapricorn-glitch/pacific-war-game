@@ -94,6 +94,7 @@ export function createCard(cardData, instanceId) {
     description: cardData.description || '',
     flavor: cardData.flavor || '',
     image: cardData.image || null,
+    backgroundImage: cardData.backgroundImage || null,
     // 稀有度和商店配置
     rarity: cardData.rarity || CardRarity.N,
     shopType: cardData.shopType,

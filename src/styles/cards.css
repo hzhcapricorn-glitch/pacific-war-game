@@ -292,6 +292,18 @@
   object-position: top center;
 }
 
+/* 背景图（空军卡牌） */
+.detail-image-placeholder .card-background-image {
+  z-index: 1;
+  object-fit: cover;
+}
+
+/* 前景图（透明PNG，叠加在背景上） */
+.detail-image-placeholder .card-foreground-image {
+  z-index: 2;
+  object-fit: contain;
+}
+
 .detail-type-badge {
   position: absolute;
   bottom: 0;

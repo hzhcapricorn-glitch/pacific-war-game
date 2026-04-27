@@ -157,15 +157,24 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
           {/* 区域2: 图片区 */}
           <div className="detail-image-container">
             <div className="detail-image-placeholder">
+              {card.backgroundImage && (
+                <img
+                  src={card.backgroundImage}
+                  alt={`${card.name} 背景`}
+                  className="card-background-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              )}
               {card.image && (
                 <img
                   src={card.image}
                   alt={card.name}
+                  className={card.backgroundImage ? 'card-foreground-image' : ''}
                   onError={(e) => {
-                    console.error('图片加载失败:', card.image);
                     e.target.style.display = 'none';
                   }}
-                  onLoad={() => console.log('图片加载成功:', card.image)}
                 />
               )}
             </div>
