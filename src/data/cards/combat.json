@@ -330,7 +330,9 @@
     "seaPower": 2,
     "airPower": 0,
     "abilities": [],
-    "flavor": "二战美军最成功的驱逐舰，太平洋劳模"
+    "flavor": "二战美军最成功的驱逐舰，太平洋劳模",
+    "image": "/pacific-war-game/img/advanced_destroyer.jpeg",
+    "backgroundImage": "/pacific-war-game/img/Background_sea.jpeg"
   },
   {
     "id": "gato_submarine",
