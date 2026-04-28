@@ -22,28 +22,14 @@
 
 ### 空军单位
 
-- [ ] `basic_navy_airforce` - TBD鱼雷机"破坏者"
-- [ ] `f4f_wildcat` - F4F野猫战斗机
-- [ ] `f6f_hellcat` - F6F地狱猫战斗机
-- [ ] `sbd_dauntless` - SBD无畏式俯冲轰炸机
-- [ ] `tbm_avenger` - TBM复仇者鱼雷机
-- [ ] `b25_mitchell` - B-25轰炸机
 
 ### 海军单位
 
-- [ ] `basic_destroyer` - 法拉格特级驱逐舰
-- [ ] `gato_submarine` - 猫鲨级潜艇
-- [ ] `basic_cruiser` - 亚特兰大级巡洋舰
-- [ ] `cruiser` - 巴尔的摩级巡洋舰
-- [ ] `basic_battleship` - 北卡罗来纳级战列舰
-- [ ] `advanced_battleship` - 衣阿华级战列舰
-- [ ] `basic_carrier` - 独立级轻型航母
-- [ ] `advanced_carrier` - 埃塞克斯级航空母舰
-- [x] `carrier_enterprise` - 企业号航空母舰 ✅
+- [ ] `basic_cruiser` - 亚特兰大级巡洋舰:更新图片
+
 
 ### 陆军单位
 
-- [ ] `marines` - 海军陆战队
 
 ---
 
