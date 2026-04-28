@@ -579,6 +579,45 @@
 /* Specific Zone Styles */
 .hand-zone {
   min-height: 150px;
+  background-color: rgba(255, 255, 255, 0.12); /* 浅色背景 */
+  position: relative;
+}
+
+/* 手牌区背景 */
+.hand-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/pacific-war-game/img/Background_hand.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* 半透明白色覆盖层 */
+.hand-zone::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* 确保内容在背景之上 */
+.hand-zone > * {
+  position: relative;
+  z-index: 2;
 }
 
 .hand-zone .zone-content {
@@ -587,8 +626,46 @@
 
 .deployed-zone {
   min-height: 200px;
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(147, 197, 253, 0.15); /* 更亮的浅蓝色 */
   border: 2px dashed #3b82f6;
+  position: relative;
+}
+
+/* 部署区背景 */
+.deployed-zone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/pacific-war-game/img/Background_deploy.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* 半透明白色覆盖层 */
+.deployed-zone::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* 确保内容在背景之上 */
+.deployed-zone > * {
+  position: relative;
+  z-index: 2;
 }
 
 .deck-zone,
@@ -826,8 +903,83 @@
 .shop-section-right {
   margin-bottom: 0;
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.08); /* 浅色背景替代暗色 */
   border-radius: 6px;
+  position: relative;
+}
+
+/* 必要卡牌区背景 */
+.shop-section-left::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/pacific-war-game/img/Background_shop1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15; /* 降低背景图透明度，让它不突出 */
+  border-radius: 6px;
+  z-index: 0;
+}
+
+/* 半透明白色覆盖层，进一步柔化背景 */
+.shop-section-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.12); /* 淡白色覆盖 */
+  backdrop-filter: blur(2px); /* 轻微模糊 */
+  border-radius: 6px;
+  z-index: 1;
+}
+
+/* 确保卡牌内容在背景之上 */
+.shop-section-left > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* 随机卡牌区背景 */
+.shop-section-right::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/pacific-war-game/img/Background_shop2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  border-radius: 6px;
+  z-index: 0;
+}
+
+/* 半透明白色覆盖层 */
+.shop-section-right::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+  border-radius: 6px;
+  z-index: 1;
+}
+
+/* 确保卡牌内容在背景之上 */
+.shop-section-right > * {
+  position: relative;
+  z-index: 2;
 }
 
 .shop-section-title {
