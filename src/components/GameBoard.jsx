@@ -7,6 +7,7 @@ import MissionDisplay from './MissionDisplay';
 import Shop from './Shop';
 import CardListModal from './CardListModal';
 import BattleLog from './BattleLog';
+import CombatReportModal from './CombatReportModal';
 
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
@@ -18,6 +19,24 @@ import { resolveCombat, getCombatSummary, calculateCombatPower, calculateAllFire
 import { canParticipateInCombat } from '../core/AbilitySystem';
 
 /**
+ * 根据卡牌类型排序（后勤-海军-空军-陆军）
+ */
+function sortDeployedCards(cards) {
+  const typeOrder = {
+    '后勤': 0,
+    '海军': 1,
+    '空军': 2,
+    '陆军': 3
+  };
+
+  return [...cards].sort((a, b) => {
+    const orderA = typeOrder[a.type] ?? 4;
+    const orderB = typeOrder[b.type] ?? 4;
+    return orderA - orderB;
+  });
+}
+
+/**
  * GameBoard Component - 主游戏面板
  */
 function GameBoard() {
@@ -27,6 +46,8 @@ function GameBoard() {
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   const [showRetireModal, setShowRetireModal] = useState(false);
   const [showQuickResponseModal, setShowQuickResponseModal] = useState(false);
+  const [showCombatReportModal, setShowCombatReportModal] = useState(false);
+  const [currentReport, setCurrentReport] = useState(null);
   const [activeAbilityCardId, setActiveAbilityCardId] = useState(null); // 记录正在使用能力的卡牌ID（用于排除自身）
   const [supplyChanged, setSupplyChanged] = useState(false);
   const [prevSupply, setPrevSupply] = useState(0);
@@ -346,8 +367,8 @@ function GameBoard() {
       }
     }
 
-    // 应用战斗结算
-    actions.resolveCombat(combatResult.victory, combatResult.lostCardIds);
+    // 应用战斗结算（传递完整战斗结果）
+    actions.resolveCombat(combatResult.victory, combatResult.lostCardIds, combatResult);
 
     // 自动进入下一阶段
     actions.nextPhase();
@@ -361,6 +382,19 @@ function GameBoard() {
   const handleStartNewGame = () => {
     setGameInitialized(false);
     actions.resetGame();
+  };
+
+  const handleReportClick = (reportId) => {
+    const report = state.combatReports.find(r => r.id === reportId);
+    if (report) {
+      setCurrentReport(report);
+      setShowCombatReportModal(true);
+    }
+  };
+
+  const handleCloseCombatReport = () => {
+    setShowCombatReportModal(false);
+    setCurrentReport(null);
   };
 
   // 计算当前选中卡牌的火力
@@ -531,7 +565,7 @@ function GameBoard() {
           }`}>
             <CardZone
               title="部署区"
-              cards={state.zones.deployed}
+              cards={state.phase === GamePhase.PREPARE ? sortDeployedCards(state.zones.deployed) : state.zones.deployed}
               onCardClick={handleCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
@@ -583,7 +617,7 @@ function GameBoard() {
               </div>
             )}
           </div>
-          <BattleLog logs={state.battleLog} />
+          <BattleLog logs={state.battleLog} onReportClick={handleReportClick} />
         </div>
       </div>
 
@@ -630,6 +664,14 @@ function GameBoard() {
         onCardHoverEnd={() => setHoveredCard(null)}
         onCardSelect={handleQuickResponseSelect}
       />
+
+      {/* 战斗简报弹窗 */}
+      {showCombatReportModal && (
+        <CombatReportModal
+          report={currentReport}
+          onClose={handleCloseCombatReport}
+        />
+      )}
     </div>
   );
 }

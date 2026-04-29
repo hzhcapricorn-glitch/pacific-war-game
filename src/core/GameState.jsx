@@ -34,6 +34,7 @@ const initialState = {
   },
   selectedForCombat: [], // 选中参与战斗的卡牌ID
   battleLog: [], // 战场简讯日志（最多20条）
+  combatReports: [], // 战斗简报历史（完整战斗结果）
   retireUsedThisTurn: false, // 退役能力本回合是否已使用
   usedAbilitiesThisTurn: {} // 追踪本回合已使用的能力（用于once_per_turn约束）
 };
@@ -80,13 +81,24 @@ const ActionTypes = {
  */
 function addLogEntry(state, message, type = 'info') {
   const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const newLog = [...state.battleLog, {
+
+  // 支持对象类型的message（用于可点击日志）
+  let logEntry = {
     id: Date.now(),
     timestamp,
-    message,
     type,
     turn: state.turn
-  }];
+  };
+
+  if (typeof message === 'object') {
+    // message是对象，包含reportId等额外信息
+    logEntry = { ...logEntry, ...message };
+  } else {
+    // message是字符串
+    logEntry.message = message;
+  }
+
+  const newLog = [...state.battleLog, logEntry];
 
   // 保持最多 MAX_LOG_ENTRIES 条
   if (newLog.length > MAX_LOG_ENTRIES) {
@@ -228,10 +240,15 @@ function gameStateReducer(state, action) {
         const result = moveCard(cardId, state.zones.hand, state.zones.deployed);
         if (!result) return state;
 
-        // 所有单位卡和后勤卡部署时默认为整备中状态
+        // 检查卡牌是否拥有扩容(expand_shop)或储备(max_supply)能力
+        const hasExpandOrReserve = card.abilities?.some(ability =>
+          ability.type === 'expand_shop' || ability.type === 'max_supply'
+        );
+
+        // 拥有扩容或储备能力的卡牌部署时为已就绪状态，其他卡牌为整备中状态
         const deployedCard = {
           ...result.movedCard,
-          status: 'tapped'
+          status: hasExpandOrReserve ? 'ready' : 'tapped'
         };
         const newDeployedZone = [...result.newToZone.slice(0, -1), deployedCard];
 
@@ -275,7 +292,7 @@ function gameStateReducer(state, action) {
         delete newState.abilityLogs;
       }
 
-      // 处理待执行的actions（如draw cards）
+      // 处理待执行的actions（如draw cards, scout）
       if (newState.pendingActions && newState.pendingActions.length > 0) {
         newState.pendingActions.forEach(({ action: actionType, payload }) => {
           if (actionType === 'DRAW_CARDS') {
@@ -286,6 +303,18 @@ function gameStateReducer(state, action) {
               hand: [...newState.zones.hand, ...drawResult.drawnCards],
               discard: drawResult.newDiscard
             };
+          } else if (actionType === 'SCOUT_AND_TAP') {
+            // 处理侦查能力：抽牌然后整备
+            const drawResult = drawCards(newState.zones.deck, newState.zones.discard, payload.count);
+            newState.zones = {
+              ...newState.zones,
+              deck: drawResult.newDeck,
+              hand: [...newState.zones.hand, ...drawResult.drawnCards],
+              discard: drawResult.newDiscard,
+              // 将刚部署的卡牌保持整备中状态（已经是tapped了）
+              deployed: newState.zones.deployed
+            };
+            // 侦查日志已在能力系统中生成
           }
         });
         // 清除已执行的actions
@@ -400,7 +429,7 @@ function gameStateReducer(state, action) {
     }
 
     case ActionTypes.RESOLVE_COMBAT: {
-      const { victory, cardsLost } = action.payload;
+      const { victory, cardsLost, combatResult } = action.payload;
       let newMissions = [...state.missions];
       let newCurrentMission = state.currentMission;
       let newStats = { ...state.stats };
@@ -477,10 +506,37 @@ function gameStateReducer(state, action) {
 
       newState.battleLog = addLogEntry(newState, combatLog, 'combat');
 
-      // 添加损失日志
-      if (cardsLost.length > 0) {
-        const lossLog = `💔 战斗损失 ${cardsLost.length} 张卡牌，已返回商店`;
-        newState.battleLog = addLogEntry(newState, lossLog, 'loss');
+      // 保存完整战斗简报
+      if (combatResult) {
+        const reportId = `combat_${newState.turn}_${Date.now()}`;
+        const combatReport = {
+          id: reportId,
+          turn: newState.turn,
+          timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          mission: state.currentMission,
+          participatingCards,
+          ...combatResult
+        };
+
+        // 保存战斗简报（最多保留最近20场战斗）
+        const newReports = [combatReport, ...state.combatReports].slice(0, 20);
+        newState.combatReports = newReports;
+
+        // 添加可点击的损失日志
+        if (cardsLost.length > 0) {
+          const lossLog = {
+            message: `💔 战斗结束`,
+            reportId, // 关联战斗简报ID
+            isClickable: true
+          };
+          newState.battleLog = addLogEntry(newState, lossLog, 'combat_report');
+        }
+      } else {
+        // 兼容旧代码：如果没有combatResult
+        if (cardsLost.length > 0) {
+          const lossLog = `💔 战斗损失 ${cardsLost.length} 张卡牌，已返回商店`;
+          newState.battleLog = addLogEntry(newState, lossLog, 'loss');
+        }
       }
 
       return newState;
@@ -707,10 +763,10 @@ export function GameStateProvider({ children }) {
       dispatch({ type: ActionTypes.DESELECT_FOR_COMBAT, payload: { cardId } });
     }, []),
 
-    resolveCombat: useCallback((victory, cardsLost) => {
+    resolveCombat: useCallback((victory, cardsLost, combatResult = null) => {
       dispatch({
         type: ActionTypes.RESOLVE_COMBAT,
-        payload: { victory, cardsLost }
+        payload: { victory, cardsLost, combatResult }
       });
     }, []),
 
