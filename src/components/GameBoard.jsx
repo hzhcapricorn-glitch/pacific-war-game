@@ -561,7 +561,7 @@ function GameBoard() {
 
           <MissionDisplay
             currentMission={state.currentMission}
-            remainingMissions={state.missions.length}
+            remainingMissions={state.availableMissions ? state.availableMissions.length : state.missions.length}
             turnsRemaining={state.turnsRemaining}
             phaseData={state.phaseData}
             onMissionHover={setHoveredCard}
