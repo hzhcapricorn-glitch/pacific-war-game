@@ -156,6 +156,26 @@ function gameStateReducer(state, action) {
         usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn
       };
 
+      // 在进入准备阶段时对部署区卡牌排序（后勤-海军-空军-陆军）
+      if (nextPhase === GamePhase.PREPARE && state.zones.deployed.length > 0) {
+        const getCardOrder = (card) => {
+          if (card.cardCategory === 'logistics' || card.cardCategory === 'tactical') return 0;
+          if (card.unitType === 'navy') return 1;
+          if (card.unitType === 'air') return 2;
+          if (card.unitType === 'army') return 3;
+          return 4;
+        };
+
+        const sortedDeployed = [...state.zones.deployed].sort((a, b) => {
+          return getCardOrder(a) - getCardOrder(b);
+        });
+
+        newState.zones = {
+          ...newState.zones,
+          deployed: sortedDeployed
+        };
+      }
+
       // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
       if (isNewTurn && state.turn >= 1) {
         // 计算实际槽位数量：基础槽位 + 部署区中expand_shop能力的总和
@@ -292,7 +312,7 @@ function gameStateReducer(state, action) {
         delete newState.abilityLogs;
       }
 
-      // 处理待执行的actions（如draw cards, scout）
+      // 处理待执行的actions（如draw cards）
       if (newState.pendingActions && newState.pendingActions.length > 0) {
         newState.pendingActions.forEach(({ action: actionType, payload }) => {
           if (actionType === 'DRAW_CARDS') {
@@ -303,18 +323,6 @@ function gameStateReducer(state, action) {
               hand: [...newState.zones.hand, ...drawResult.drawnCards],
               discard: drawResult.newDiscard
             };
-          } else if (actionType === 'SCOUT_AND_TAP') {
-            // 处理侦查能力：抽牌然后整备
-            const drawResult = drawCards(newState.zones.deck, newState.zones.discard, payload.count);
-            newState.zones = {
-              ...newState.zones,
-              deck: drawResult.newDeck,
-              hand: [...newState.zones.hand, ...drawResult.drawnCards],
-              discard: drawResult.newDiscard,
-              // 将刚部署的卡牌保持整备中状态（已经是tapped了）
-              deployed: newState.zones.deployed
-            };
-            // 侦查日志已在能力系统中生成
           }
         });
         // 清除已执行的actions
@@ -694,7 +702,40 @@ function gameStateReducer(state, action) {
       });
 
       // 应用能力结果
-      const newState = applyAbilityResults(state, abilityResults, state.zones);
+      let newState = applyAbilityResults(state, abilityResults, state.zones);
+
+      // 处理能力日志
+      if (newState.abilityLogs && newState.abilityLogs.length > 0) {
+        newState.abilityLogs.forEach(log => {
+          newState.battleLog = addLogEntry(newState, log, 'action');
+        });
+        delete newState.abilityLogs;
+      }
+
+      // 处理待执行的actions（如侦查抽卡）
+      if (newState.pendingActions && newState.pendingActions.length > 0) {
+        newState.pendingActions.forEach(({ action: actionType, payload }) => {
+          if (actionType === 'DRAW_CARDS') {
+            const drawResult = drawCards(newState.zones.deck, newState.zones.discard, payload.count);
+            newState.zones = {
+              ...newState.zones,
+              deck: drawResult.newDeck,
+              hand: [...newState.zones.hand, ...drawResult.drawnCards],
+              discard: drawResult.newDiscard
+            };
+          } else if (actionType === 'SCOUT_AND_TAP') {
+            // 处理侦查能力：抽牌
+            const drawResult = drawCards(newState.zones.deck, newState.zones.discard, payload.count);
+            newState.zones = {
+              ...newState.zones,
+              deck: drawResult.newDeck,
+              hand: [...newState.zones.hand, ...drawResult.drawnCards],
+              discard: drawResult.newDiscard
+            };
+          }
+        });
+        delete newState.pendingActions;
+      }
 
       return newState;
     }

@@ -19,24 +19,6 @@ import { resolveCombat, getCombatSummary, calculateCombatPower, calculateAllFire
 import { canParticipateInCombat } from '../core/AbilitySystem';
 
 /**
- * 根据卡牌类型排序（后勤-海军-空军-陆军）
- */
-function sortDeployedCards(cards) {
-  const typeOrder = {
-    '后勤': 0,
-    '海军': 1,
-    '空军': 2,
-    '陆军': 3
-  };
-
-  return [...cards].sort((a, b) => {
-    const orderA = typeOrder[a.type] ?? 4;
-    const orderB = typeOrder[b.type] ?? 4;
-    return orderA - orderB;
-  });
-}
-
-/**
  * GameBoard Component - 主游戏面板
  */
 function GameBoard() {
@@ -347,10 +329,6 @@ function GameBoard() {
     // 执行战斗
     const combatResult = resolveCombat(selectedCards, state.currentMission, state);
 
-    // 显示战斗结果
-    const summary = getCombatSummary(combatResult);
-    alert(summary);
-
     // 应用战斗奖励
     if (combatResult.victory) {
       if (combatResult.rewards.supply > 0) {
@@ -366,6 +344,19 @@ function GameBoard() {
         return;
       }
     }
+
+    // 构建战斗简报并显示
+    const reportId = `combat_${state.turn}_${Date.now()}`;
+    const combatReport = {
+      id: reportId,
+      turn: state.turn,
+      timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      mission: state.currentMission,
+      participatingCards: selectedCards,
+      ...combatResult
+    };
+    setCurrentReport(combatReport);
+    setShowCombatReportModal(true);
 
     // 应用战斗结算（传递完整战斗结果）
     actions.resolveCombat(combatResult.victory, combatResult.lostCardIds, combatResult);
@@ -565,7 +556,7 @@ function GameBoard() {
           }`}>
             <CardZone
               title="部署区"
-              cards={state.phase === GamePhase.PREPARE ? sortDeployedCards(state.zones.deployed) : state.zones.deployed}
+              cards={state.zones.deployed}
               onCardClick={handleCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}

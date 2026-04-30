@@ -46,7 +46,7 @@
         "trigger": "after_play"
       }
     ],
-    "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础",
+    "flavor": "分段建造的奇迹，大洋丑小鸭",
     "image": "/pacific-war-game/img/medium_supply.png"
   },
   {
@@ -72,7 +72,7 @@
         "trigger": "after_play"
       }
     ],
-    "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础",
+    "flavor": "服务中队——远洋的补给线",
     "image": "/pacific-war-game/img/large_supply.jpg"
   },
   {
@@ -112,7 +112,7 @@
   {
     "id": "quick_response",
     "type": "combat",
-    "name": "维修舰",
+    "name": "火神级\n维修舰",
     "cardCategory": "logistics",
     "rarity": "SR",
     "shopType": "random",
@@ -149,7 +149,7 @@
   {
     "id": "basic_navy_airforce",
     "type": "combat",
-    "name": "TBD鱼雷机“破坏者”",
+    "name": "TBD鱼雷机\n“破坏者”",
     "cardCategory": "combat",
     "rarity": "N",
     "shopType": "essential",
@@ -173,11 +173,11 @@
   {
     "id": "f4f_wildcat",
     "type": "combat",
-    "name": "F4F野猫战斗机",
+    "name": "F4F战斗机\n“野猫”",
     "cardCategory": "combat",
-    "rarity": "N",
+    "rarity": "R",
     "shopType": "random",
-    "shopCopies": 8,
+    "shopCopies": 6,
     "unitType": "air",
     "cost": 2,
     "redeployCost": 1,
@@ -197,7 +197,7 @@
   {
     "id": "f6f_hellcat",
     "type": "combat",
-    "name": "F6F地狱猫战斗机",
+    "name": "F6F战斗机\n”地狱猫“",
     "cardCategory": "combat",
     "rarity": "R",
     "shopType": "random",
@@ -205,9 +205,9 @@
     "unitType": "air",
     "cost": 3,
     "redeployCost": 1,
-    "groundPower": 0,
+    "groundPower": 1,
     "seaPower": 0,
-    "airPower": 4,
+    "airPower": 3,
     "abilities": [
       {
         "type": "return_to_base",
@@ -216,7 +216,7 @@
       {
         "type": "scout",
         "value": 1,
-        "trigger": "on_play"
+        "trigger": "on_tap"
       }
     ],
     "flavor": "猎火鸡啦，猎火鸡啦",
@@ -226,7 +226,7 @@
   {
     "id": "sbd_dauntless",
     "type": "combat",
-    "name": "SBD无畏式俯冲轰炸机",
+    "name": "SBD轰炸机\n”无畏式“",
     "cardCategory": "combat",
     "rarity": "R",
     "shopType": "random",
@@ -245,7 +245,7 @@
       {
         "type": "scout",
         "value": 1,
-        "trigger": "on_play"
+        "trigger": "on_tap"
       }
     ],
     "flavor": "日本航母的噩梦，六边形战士",
@@ -255,7 +255,7 @@
   {
     "id": "tbm_avenger",
     "type": "combat",
-    "name": "TBM复仇者鱼雷机",
+    "name": "TBM鱼雷机\n“复仇者”",
     "cardCategory": "combat",
     "rarity": "SR",
     "shopType": "random",
@@ -285,9 +285,9 @@
     "shopType": "random",
     "shopCopies": 3,
     "unitType": "air",
-    "cost": 5,
-    "redeployCost": 2,
-    "groundPower": 4,
+    "cost": 3,
+    "redeployCost": 1,
+    "groundPower": 5,
     "seaPower": 0,
     "airPower": 0,
     "abilities": [
@@ -303,7 +303,7 @@
   {
     "id": "basic_destroyer",
     "type": "combat",
-    "name": "法拉格特级驱逐舰",
+    "name": "法拉格特级\n驱逐舰",
     "cardCategory": "combat",
     "rarity": "N",
     "shopType": "essential",
@@ -321,7 +321,7 @@
   {
     "id": "advanced_destroyer",
     "type": "combat",
-    "name": "弗莱彻级驱逐舰",
+    "name": "弗莱彻级\n驱逐舰",
     "cardCategory": "combat",
     "rarity": "R",
     "shopType": "random",
@@ -340,7 +340,7 @@
   {
     "id": "gato_submarine",
     "type": "combat",
-    "name": "猫鲨级潜艇",
+    "name": "猫鲨级\n潜艇",
     "cardCategory": "combat",
     "rarity": "N",
     "shopType": "random",
@@ -355,7 +355,7 @@
       {
         "type": "scout",
         "value": 1,
-        "trigger": "on_play"
+        "trigger": "on_tap"
       }
     ],
     "flavor": "太平洋战场的静默猎手",
@@ -364,34 +364,34 @@
   {
     "id": "basic_cruiser",
     "type": "combat",
-    "name": "亚特兰大级巡洋舰",
+    "name": "亚特兰大级\n巡洋舰",
     "cardCategory": "combat",
     "rarity": "N",
-    "shopType": "essential",
+    "shopType": "random",
     "shopCopies": 10,
     "unitType": "navy",
     "cost": 3,
     "redeployCost": 1,
     "groundPower": 1,
-    "seaPower": 2,
+    "seaPower": 1,
     "airPower": 1,
     "abilities": [],
     "flavor": "装满127mm高平两用炮的“刺猬”",
-    "image": "/pacific-war-game/img/basic_cruiser.jpeg"
+    "image": "/pacific-war-game/img/basic_cruiser.jpg"
   },
   {
     "id": "cruiser",
     "type": "combat",
-    "name": "巴尔的摩级巡洋舰",
+    "name": "巴尔的摩级\n巡洋舰",
     "cardCategory": "combat",
     "rarity": "R",
     "shopType": "random",
     "shopCopies": 5,
     "unitType": "navy",
-    "cost": 5,
+    "cost": 4,
     "redeployCost": 2,
-    "groundPower": 2,
-    "seaPower": 4,
+    "groundPower": 3,
+    "seaPower": 3,
     "airPower": 2,
     "abilities": [],
     "flavor": "海上的钢铁巨兽",
@@ -400,43 +400,55 @@
   {
     "id": "basic_battleship",
     "type": "combat",
-    "name": "北卡罗来纳级战列舰",
+    "name": "北卡罗来纳级\n战列舰",
     "cardCategory": "combat",
     "rarity": "R",
     "shopType": "random",
     "shopCopies": 5,
     "unitType": "navy",
-    "cost": 7,
+    "cost": 5,
     "redeployCost": 2,
-    "groundPower": 5,
-    "seaPower": 5,
+    "groundPower": 4,
+    "seaPower": 4,
     "airPower": 3,
-    "abilities": [],
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 1,
+        "trigger": "during_combat_loss"
+      }
+    ],
     "flavor": "航母的最佳保镖",
     "image": "/pacific-war-game/img/basic_battleship.jpg"
   },
   {
     "id": "advanced_battleship",
     "type": "combat",
-    "name": "衣阿华级战列舰",
+    "name": "衣阿华级\n战列舰",
     "cardCategory": "combat",
     "rarity": "SR",
     "shopType": "random",
     "shopCopies": 2,
     "unitType": "navy",
-    "cost": 3,
-    "redeployCost": 3,
-    "groundPower": 7,
-    "seaPower": 7,
+    "cost": 6,
+    "redeployCost": 2,
+    "groundPower": 6,
+    "seaPower": 6,
     "airPower": 4,
-    "abilities": [],
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 1,
+        "trigger": "during_combat_loss"
+      }
+    ],
     "flavor": "16英寸主炮的咆哮震撼敌人心魄",
     "image": "/pacific-war-game/img/advanced_battleship.jpg"
   },
   {
     "id": "basic_carrier",
     "type": "combat",
-    "name": "独立级轻型航母",
+    "name": "独立级\n轻型航母",
     "cardCategory": "combat",
     "rarity": "N",
     "shopType": "essential",
@@ -455,13 +467,13 @@
   {
     "id": "advanced_carrier",
     "type": "combat",
-    "name": "埃塞克斯级航空母舰",
+    "name": "埃塞克斯级\n航空母舰",
     "cardCategory": "combat",
     "rarity": "SR",
     "shopType": "random",
     "shopCopies": 4,
     "unitType": "navy",
-    "cost": 6,
+    "cost": 4,
     "redeployCost": 2,
     "groundPower": 0,
     "seaPower": 0,
@@ -474,13 +486,13 @@
   {
     "id": "carrier_enterprise",
     "type": "combat",
-    "name": "企业号航空母舰",
+    "name": "企业号\n航空母舰",
     "cardCategory": "combat",
     "rarity": "UR",
     "shopType": "random",
     "shopCopies": 1,
     "unitType": "navy",
-    "cost": 6,
+    "cost": 4,
     "redeployCost": 2,
     "groundPower": 0,
     "seaPower": 0,
@@ -505,7 +517,7 @@
     "shopCopies": 6,
     "unitType": "army",
     "cost": 1,
-    "redeployCost": 0,
+    "redeployCost": 1,
     "groundPower": 2,
     "seaPower": 0,
     "airPower": 0,
@@ -516,7 +528,7 @@
   {
     "id": "amphibious_tank",
     "type": "combat",
-    "name": "两栖坦克",
+    "name": "海军陆战队\nLVT装甲车",
     "cardCategory": "combat",
     "rarity": "SR",
     "shopType": "random",
@@ -528,13 +540,13 @@
     "seaPower": 0,
     "airPower": 0,
     "abilities": [],
-    "flavor": "硫磺岛、瓜岛，他们战无不胜",
-    "image": "/pacific-war-game/img/marines.jpeg"
+    "flavor": "冲绳岛战役的传奇单位",
+    "image": "/pacific-war-game/img/tank.jpg"
   },
   {
     "id": "forward_base",
     "type": "combat",
-    "name": "前进基地",
+    "name": "前进基地\n”幼狮“",
     "cardCategory": "logistics",
     "rarity": "R",
     "shopType": "random",

@@ -45,11 +45,34 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
     return `${ground}       ${sea}       ${air}`;
   };
 
+  // 获取任务卡需求战斗力显示（动态调整空格）
+  const getMissionRequirementLine = () => {
+    const ground = card.requiredGroundPower || 0;
+    const sea = card.requiredSeaPower || 0;
+    const airDef = card.requiredAirDefense || 0;
+    const airSup = card.requiredAirSuperiority || 0;
+
+    // 计算每个数字的位数
+    const groundLen = String(ground).length;
+    const seaLen = String(sea).length;
+    const airDefLen = String(airDef).length;
+
+    // 基础空格数（1位数时用4个空格）
+    const baseSpaces = 4;
+
+    // 根据数字位数减少空格（每多1位减1个空格）
+    const spaces1 = ' '.repeat(Math.max(1, baseSpaces - groundLen + 1));
+    const spaces2 = ' '.repeat(Math.max(1, baseSpaces - seaLen + 1));
+    const spaces3 = ' '.repeat(Math.max(1, baseSpaces - airDefLen + 1));
+
+    return `💣${ground}${spaces1}🌊${sea}${spaces2}🎯${airDef}${spaces3}✈️${airSup}`;
+  };
+
   // 获取能力名称（用于简略视图）
   const getAbilityNames = () => {
     if (!card.abilities || card.abilities.length === 0) {
       if (card.airSlots > 0) {
-        return ['航空'];
+        return [`航空${card.airSlots}`];
       }
       return [];
     }
@@ -57,11 +80,11 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
     const names = [];
     card.abilities.forEach(ability => {
       if (ability.type === 'supply') {
-        names.push('补给');
+        names.push(`补给+${ability.value || 1}`);
       } else if (ability.type === 'draw') {
         names.push('抽卡');
       } else if (ability.type === 'max_supply') {
-        names.push('储备');
+        names.push(`储备+${ability.value || 1}`);
       } else if (ability.type === 'retire') {
         names.push('退役');
       } else if (ability.type === 'protect') {
@@ -74,11 +97,13 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         names.push('扩容');
       } else if (ability.type === 'quick_response') {
         names.push('快整');
+      } else if (ability.type === 'heavy_armor') {
+        names.push(`重甲${ability.value || 1}`);
       }
     });
 
     if (card.airSlots > 0) {
-      names.push('航空');
+      names.push(`航空${card.airSlots}`);
     }
 
     return names;
@@ -114,6 +139,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         descriptions.push(`扩容：商店刷新时+${ability.value}张卡牌🏪`);
       } else if (ability.type === 'quick_response') {
         descriptions.push(`快速整备：激活一张整备中的卡牌⚡`);
+      } else if (ability.type === 'heavy_armor') {
+        descriptions.push(`重甲${ability.value}：战斗损失时需被选中${ability.value + 1}次才损失🛡️`);
       } else if (ability.type !== 'goes_to_discard' && ability.type !== 'cannot_participate_in_combat') {
         descriptions.push(ability.type);
       }
@@ -193,7 +220,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
             {isMission ? (
               <>
                 <div className="detail-combat-line">
-                  💣{card.requiredGroundPower || 0}     🌊{card.requiredSeaPower || 0}     🎯{card.requiredAirDefense || 0}     ✈️{card.requiredAirSuperiority || 0}
+                  {getMissionRequirementLine()}
                 </div>
                 {card.reward && <div className="detail-mission-reward">✓ {card.reward.description}</div>}
                 {card.loss && <div className="detail-mission-loss">✗ {card.loss.description}</div>}
@@ -240,7 +267,6 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
                 {card.groundPower > 0 && <span className="combat">💣{card.groundPower}</span>}
                 {card.seaPower > 0 && <span className="combat">🌊{card.seaPower}</span>}
                 {card.airPower > 0 && <span className="combat">✈️{card.airPower}</span>}
-                {card.airSlots > 0 && <span style={{color: '#60a5fa'}}>🛫{card.airSlots}</span>}
               </>
             )}
           </div>
