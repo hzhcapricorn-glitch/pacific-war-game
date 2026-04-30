@@ -1089,3 +1089,31 @@ button:disabled {
   border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
 }
+
+/* ==========================================
+   Mission Display Updates
+   ========================================== */
+.btn-change-mission {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: rgba(66, 153, 225, 0.2);
+  border: 1px solid rgba(66, 153, 225, 0.4);
+  color: #63b3ed;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-change-mission:hover {
+  background: rgba(66, 153, 225, 0.3);
+  border-color: rgba(66, 153, 225, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+}
+
+.btn-change-mission:active {
+  transform: translateY(0);
+}

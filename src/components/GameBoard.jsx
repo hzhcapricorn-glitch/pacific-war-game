@@ -8,6 +8,9 @@ import Shop from './Shop';
 import CardListModal from './CardListModal';
 import BattleLog from './BattleLog';
 import CombatReportModal from './CombatReportModal';
+import PhaseTransitionModal from './PhaseTransitionModal';
+import MissionSelectionModal from './MissionSelectionModal';
+import BattlefieldConditions from './BattlefieldConditions';
 
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
@@ -33,6 +36,9 @@ function GameBoard() {
   const [activeAbilityCardId, setActiveAbilityCardId] = useState(null); // 记录正在使用能力的卡牌ID（用于排除自身）
   const [supplyChanged, setSupplyChanged] = useState(false);
   const [prevSupply, setPrevSupply] = useState(0);
+  // Strategic Phase System modals
+  const [showPhaseTransitionModal, setShowPhaseTransitionModal] = useState(false);
+  const [showMissionSelectionModal, setShowMissionSelectionModal] = useState(false);
 
   // 初始化游戏
   useEffect(() => {
@@ -434,6 +440,18 @@ function GameBoard() {
     );
   }
 
+  // Strategic Phase System handlers
+  const handleChangeMission = () => {
+    // Only allow changing mission during action phase
+    if (state.phase === GamePhase.ACTION) {
+      setShowMissionSelectionModal(true);
+    }
+  };
+
+  const handleSelectMission = (missionId) => {
+    actions.selectMission(missionId);
+  };
+
   return (
     <div className="game-board">
 
@@ -512,9 +530,18 @@ function GameBoard() {
           <MissionDisplay
             currentMission={state.currentMission}
             remainingMissions={state.missions.length}
+            turnsRemaining={state.turnsRemaining}
+            phaseData={state.phaseData}
             onMissionHover={setHoveredCard}
             onMissionHoverEnd={() => setHoveredCard(null)}
+            onChangeMission={handleChangeMission}
+            canChangeMission={state.phase === GamePhase.ACTION && state.availableMissions && state.availableMissions.length > 1}
           />
+
+          {/* 战场局势 */}
+          {state.phaseData && state.battlefieldConditions && state.battlefieldConditions.length > 0 && (
+            <BattlefieldConditions conditions={state.battlefieldConditions} />
+          )}
         </div>
 
         {/* 中央：游戏区域 */}
@@ -649,6 +676,30 @@ function GameBoard() {
         <CombatReportModal
           report={currentReport}
           onClose={handleCloseCombatReport}
+        />
+      )}
+
+      {/* 战略阶段过渡弹窗 */}
+      {showPhaseTransitionModal && state.phaseData && state.availableMissions && (
+        <PhaseTransitionModal
+          phaseData={state.phaseData}
+          missions={state.availableMissions}
+          onClose={() => setShowPhaseTransitionModal(false)}
+          onCardHover={setHoveredCard}
+          onCardHoverEnd={() => setHoveredCard(null)}
+        />
+      )}
+
+      {/* 任务选择弹窗 */}
+      {showMissionSelectionModal && state.phaseData && state.availableMissions && (
+        <MissionSelectionModal
+          phaseData={state.phaseData}
+          missions={state.availableMissions}
+          currentMissionId={state.currentMission?.id}
+          onSelectMission={handleSelectMission}
+          onClose={() => setShowMissionSelectionModal(false)}
+          onCardHover={setHoveredCard}
+          onCardHoverEnd={() => setHoveredCard(null)}
         />
       )}
     </div>
