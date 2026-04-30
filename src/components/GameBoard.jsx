@@ -44,11 +44,11 @@ function GameBoard() {
 
   // 初始化游戏
   useEffect(() => {
-    if (!gameInitialized && state.turn === 0) {
+    if (!gameInitialized && state.zones.discard.length === 0) {
       initializeGame();
       setGameInitialized(true);
     }
-  }, [gameInitialized, state.turn]);
+  }, [gameInitialized, state.zones.discard.length]);
 
   // 自动执行不需要用户输入的阶段
   useEffect(() => {
