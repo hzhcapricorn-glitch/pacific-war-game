@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from 'react';
 /**
  * BattleLog Component - 战场简讯日志
  */
-function BattleLog({ logs }) {
+function BattleLog({ logs, onReportClick }) {
   const logEndRef = useRef(null);
 
   // 自动滚动到最新日志
@@ -18,6 +18,7 @@ function BattleLog({ logs }) {
       case 'system': return '🎮';
       case 'action': return '🃏';
       case 'combat': return '⚔️';
+      case 'combat_report': return '📋';
       case 'loss': return '💔';
       case 'reward': return '🎁';
       default: return '📌';
@@ -29,6 +30,7 @@ function BattleLog({ logs }) {
       case 'system': return 'log-system';
       case 'action': return 'log-action';
       case 'combat': return 'log-combat';
+      case 'combat_report': return 'log-combat-report';
       case 'loss': return 'log-loss';
       case 'reward': return 'log-reward';
       default: return 'log-info';
@@ -50,7 +52,16 @@ function BattleLog({ logs }) {
               <div key={log.id} className={`log-entry ${getLogClass(log.type)}`}>
                 <span className="log-time">[{log.timestamp}]</span>
                 <span className="log-turn">回合{log.turn}</span>
-                <span className="log-message">{log.message}</span>
+                {log.isClickable && log.reportId ? (
+                  <span
+                    className="log-message log-clickable"
+                    onClick={() => onReportClick && onReportClick(log.reportId)}
+                  >
+                    {log.message} <span className="log-link">→ 查看战斗简报</span>
+                  </span>
+                ) : (
+                  <span className="log-message">{log.message}</span>
+                )}
               </div>
             ))}
             <div ref={logEndRef} />

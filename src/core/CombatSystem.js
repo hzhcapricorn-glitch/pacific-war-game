@@ -1,5 +1,5 @@
 import { getCardFirePower } from '../models/Card';
-import { processAbilities, hasProtectAbility } from './AbilitySystem';
+import { processAbilities, hasProtectAbility, getHeavyArmorValue, hasReturnToBaseAbility } from './AbilitySystem';
 
 /**
  * CombatSystem - 处理战斗相关的逻辑（太平洋战争版本）
@@ -158,15 +158,15 @@ export function applyReward(reward, gameState) {
 }
 
 /**
- * 计算战斗损失 - 随机选择需要损失的卡牌
+ * 计算战斗损失 - 随机选择需要损失的卡牌，支持重甲和幸运能力
  * @param {Array} participatingCards - 参战卡牌数组
  * @param {Object} loss - 损失对象 { type, count, description }
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
- * @returns {Array} 被损失的卡牌ID数组
+ * @returns {Object} { lostCardIds: Array, damageDetails: Array }
  */
 export function calculateLosses(participatingCards, loss, airDefenseSufficient) {
   if (!loss || loss.count === 0 || participatingCards.length === 0) {
-    return [];
+    return { lostCardIds: [], damageDetails: [] };
   }
 
   // 对空火力不足时损失加倍
@@ -175,39 +175,99 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
     lossCount *= 2;
   }
 
-  lossCount = Math.min(lossCount, participatingCards.length);
-
-  // 将卡牌分为两组：有幸运能力的和没有的
-  const vulnerableCards = []; // 没有幸运能力的卡牌（优先损失）
-  const luckyCards = [];      // 有幸运能力的卡牌（最后损失）
-
+  // 构建卡牌池：重甲X的卡牌算作X+1个单位
+  const cardPool = [];
   participatingCards.forEach(card => {
-    if (hasProtectAbility(card)) {
-      luckyCards.push(card);
-    } else {
-      vulnerableCards.push(card);
+    const armorValue = getHeavyArmorValue(card);
+    const copies = armorValue + 1; // 重甲X需要被选中X+1次
+    for (let i = 0; i < copies; i++) {
+      cardPool.push({
+        card,
+        isLucky: hasProtectAbility(card),
+        hitCount: 0 // 记录该卡已被选中的次数
+      });
     }
   });
 
+  // 将卡牌池分为两组：有幸运能力的和没有的
+  const vulnerablePool = cardPool.filter(entry => !entry.isLucky);
+  const luckyPool = cardPool.filter(entry => entry.isLucky);
+
+  // 跟踪每张卡牌被选中的次数
+  const hitTracker = new Map(); // instanceId -> 被选中次数
+  participatingCards.forEach(card => {
+    hitTracker.set(card.instanceId, 0);
+  });
+
   const lostCards = [];
+  let remainingLoss = lossCount;
 
-  // 第一阶段：优先从普通卡牌中随机选择
-  const availableVulnerable = [...vulnerableCards];
-  while (lostCards.length < lossCount && availableVulnerable.length > 0) {
+  // 第一阶段：优先从普通卡牌池中随机选择
+  const availableVulnerable = [...vulnerablePool];
+  while (remainingLoss > 0 && availableVulnerable.length > 0) {
     const randomIndex = Math.floor(Math.random() * availableVulnerable.length);
-    const lostCard = availableVulnerable.splice(randomIndex, 1)[0];
-    lostCards.push(lostCard.instanceId);
+    const selected = availableVulnerable.splice(randomIndex, 1)[0];
+
+    const cardId = selected.card.instanceId;
+    const currentHits = hitTracker.get(cardId) + 1;
+    hitTracker.set(cardId, currentHits);
+
+    const armorValue = getHeavyArmorValue(selected.card);
+    const requiredHits = armorValue + 1;
+
+    // 检查是否达到损失条件
+    if (currentHits >= requiredHits) {
+      // 卡牌真正损失（返回商店）
+      if (!lostCards.includes(cardId)) {
+        lostCards.push(cardId);
+      }
+    }
+
+    remainingLoss--;
   }
 
-  // 第二阶段：如果还需要更多损失，从幸运卡牌中选择
-  const availableLucky = [...luckyCards];
-  while (lostCards.length < lossCount && availableLucky.length > 0) {
+  // 第二阶段：如果还需要更多损失，从幸运卡牌池中选择
+  const availableLucky = [...luckyPool];
+  while (remainingLoss > 0 && availableLucky.length > 0) {
     const randomIndex = Math.floor(Math.random() * availableLucky.length);
-    const lostCard = availableLucky.splice(randomIndex, 1)[0];
-    lostCards.push(lostCard.instanceId);
+    const selected = availableLucky.splice(randomIndex, 1)[0];
+
+    const cardId = selected.card.instanceId;
+    const currentHits = hitTracker.get(cardId) + 1;
+    hitTracker.set(cardId, currentHits);
+
+    const armorValue = getHeavyArmorValue(selected.card);
+    const requiredHits = armorValue + 1;
+
+    if (currentHits >= requiredHits) {
+      if (!lostCards.includes(cardId)) {
+        lostCards.push(cardId);
+      }
+    }
+
+    remainingLoss--;
   }
 
-  return lostCards;
+  // 生成损伤详情
+  const damageDetails = [];
+  participatingCards.forEach(card => {
+    const hits = hitTracker.get(card.instanceId);
+    if (hits > 0) {
+      const armorValue = getHeavyArmorValue(card);
+      const requiredHits = armorValue + 1;
+      const isDestroyed = hits >= requiredHits;
+
+      damageDetails.push({
+        card,
+        hits,
+        armorValue,
+        requiredHits,
+        isDestroyed
+      });
+    }
+  });
+
+  return { lostCardIds: lostCards, damageDetails };
 }
 
 /**
@@ -215,7 +275,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
  * @param {Array} selectedCards - 选中参战的卡牌
  * @param {Object} mission - 当前任务
  * @param {Object} gameState - 当前游戏状态
- * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, airDefenseSufficient, airSuperiorityAchieved }
+ * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, damageDetails, airDefenseSufficient, airSuperiorityAchieved }
  */
 export function resolveCombat(selectedCards, mission, gameState) {
   // 计算己方火力（包括combat_boost能力）
@@ -240,18 +300,19 @@ export function resolveCombat(selectedCards, mission, gameState) {
   const rewards = victory ? applyReward(mission.reward, gameState) : { supply: 0, maxSupply: 0, victory: false };
 
   // 计算损失（无论胜负都会有损失，防空不足时加倍）
-  const lostCardIds = calculateLosses(selectedCards, mission.loss, airDefenseSufficient);
+  const lossResult = calculateLosses(selectedCards, mission.loss, airDefenseSufficient);
 
   // 获取损失的卡牌对象（用于显示具体卡牌名称）
-  const lostCards = selectedCards.filter(card => lostCardIds.includes(card.instanceId));
+  const lostCards = selectedCards.filter(card => lossResult.lostCardIds.includes(card.instanceId));
 
   return {
     victory,
     attackPowers,
     requiredPowers,
     rewards,
-    lostCardIds,
+    lostCardIds: lossResult.lostCardIds,
     lostCards,
+    damageDetails: lossResult.damageDetails,
     airDefenseSufficient,
     airSuperiorityAchieved
   };
@@ -263,29 +324,74 @@ export function resolveCombat(selectedCards, mission, gameState) {
  * @returns {string} 摘要文本
  */
 export function getCombatSummary(combatResult) {
-  const { victory, attackPowers, requiredPowers, rewards, lostCards, airDefenseSufficient } = combatResult;
+  const {
+    victory,
+    attackPowers,
+    requiredPowers,
+    rewards,
+    lostCards,
+    damageDetails,
+    airDefenseSufficient,
+    airSuperiorityAchieved
+  } = combatResult;
 
   let summary = victory ? '🎉 战斗胜利！\n\n' : '❌ 战斗失败...\n\n';
 
   summary += '己方火力:\n';
   summary += `  对地: ${attackPowers.groundPower} / ${requiredPowers.groundPower}\n`;
   summary += `  对海: ${attackPowers.seaPower} / ${requiredPowers.seaPower}\n`;
-  summary += `  对空: ${attackPowers.airPower} / ${requiredPowers.airPower}`;
+  summary += `  防空: ${attackPowers.airDefense} / ${requiredPowers.airDefense}`;
 
-  if (!airDefenseSufficient && requiredPowers.airPower > 0) {
+  if (!airDefenseSufficient && requiredPowers.airDefense > 0) {
     summary += ' ⚠️ 不足！损失加倍\n';
+  } else {
+    summary += '\n';
+  }
+
+  summary += `  制空: ${attackPowers.airSuperiority} / ${requiredPowers.airSuperiority}`;
+  if (airSuperiorityAchieved) {
+    summary += ' ✓ 空军可返航\n';
   } else {
     summary += '\n';
   }
 
   if (victory) {
     summary += '\n获得奖励:\n';
-    if (rewards.supply > 0) summary += `- 补给 +${rewards.supply}\n`;
-    if (rewards.maxSupply > 0) summary += `- 最大补给保留 +${rewards.maxSupply}\n`;
-    if (rewards.victory) summary += '- 完成最终任务！\n';
+    if (rewards.supply > 0) summary += `  - 补给 +${rewards.supply}\n`;
+    if (rewards.maxSupply > 0) summary += `  - 最大补给保留 +${rewards.maxSupply}\n`;
+    if (rewards.victory) summary += '  - 完成最终任务！\n';
   }
 
-  if (lostCards && lostCards.length > 0) {
+  // 显示损伤详情
+  if (damageDetails && damageDetails.length > 0) {
+    summary += '\n战损情况:\n';
+    damageDetails.forEach(detail => {
+      const { card, hits, armorValue, isDestroyed } = detail;
+
+      // 检查是否有返航能力
+      const hasReturnAbility = hasReturnToBaseAbility(card);
+
+      if (armorValue > 0) {
+        // 有重甲的单位
+        if (isDestroyed) {
+          summary += `  - ${card.name} 被重创${hits}次并击沉 🛡️💥\n`;
+        } else {
+          summary += `  - ${card.name} 被重创${hits}次但未被击沉 🛡️\n`;
+        }
+      } else if (hasReturnAbility) {
+        // 有返航能力的空军
+        if (airSuperiorityAchieved) {
+          summary += `  - ${card.name} 被击中但成功返航 ✈️\n`;
+        } else {
+          summary += `  - ${card.name} 被击中并坠毁 ✈️💥\n`;
+        }
+      } else {
+        // 普通单位
+        summary += `  - ${card.name} 损失\n`;
+      }
+    });
+  } else if (lostCards && lostCards.length > 0) {
+    // 兼容旧版：如果没有damageDetails但有lostCards
     summary += `\n损失卡牌 (${lostCards.length}张):\n`;
     lostCards.forEach(card => {
       summary += `  - ${card.name}\n`;

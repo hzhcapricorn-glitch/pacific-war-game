@@ -128,7 +128,8 @@ function handleCannotParticipateInCombatAbility(ability, card, context) {
 }
 
 /**
- * 侦查能力 - 抽取X张卡牌后整备
+ * 侦查能力 - 点击部署区已就绪卡牌时抽取X张卡牌
+ * 触发时机：on_tap（部署后点击已就绪单位）
  */
 function handleScoutAbility(ability, card, context) {
   return {
@@ -426,6 +427,26 @@ export function hasAbility(card, abilityType) {
  */
 export function hasProtectAbility(card) {
   return hasAbility(card, 'protect');
+}
+
+/**
+ * 获取卡牌的重甲值（战斗损失时需被选中X+1次才损失）
+ * @param {Object} card - 卡牌对象
+ * @returns {number} 重甲值，0表示无重甲
+ */
+export function getHeavyArmorValue(card) {
+  if (!card.abilities) return 0;
+  const armorAbility = card.abilities.find(ability => ability.type === 'heavy_armor');
+  return armorAbility ? (armorAbility.value || 0) : 0;
+}
+
+/**
+ * 检查卡牌是否有返航能力（制空充足时损失后进入弃牌堆）
+ * @param {Object} card - 卡牌对象
+ * @returns {boolean}
+ */
+export function hasReturnToBaseAbility(card) {
+  return hasAbility(card, 'return_to_base');
 }
 
 /**

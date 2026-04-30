@@ -17,6 +17,7 @@ ABILITY_VALUES = {
     'scout': lambda v: v * 2.5,  # 侦查值 * 2.5
     'expand_shop': lambda v: v * 4,  # 商店扩容 * 4
     'quick_response': lambda v: v * 5,  # 快速整备 * 5
+    'heavy_armor': lambda v: v * 3,  # 重甲值 * 3
     'goes_to_discard': lambda v: 0,  # 忽略
     'cannot_participate_in_combat': lambda v: 0,  # 忽略（后勤卡标记）
 }
@@ -44,6 +45,8 @@ def get_ability_description(ability):
         return f"扩容+{value}"
     elif ability_type == 'quick_response':
         return f"快整{value}"
+    elif ability_type == 'heavy_armor':
+        return f"重甲{value}"
     elif ability_type == 'goes_to_discard':
         return "战术卡"
     elif ability_type == 'cannot_participate_in_combat':
@@ -91,8 +94,12 @@ for card in cards:
 
     total_value = total_power + ability_value
 
-    # 计算有效成本 e_cost = (cost + rd_cost*2)^2
-    effect_cost = (cost + redeploy_cost * 2) ** 2
+    # 计算有效成本 e_cost = cost^1.4 + rd_cost × cost^0.6 × 1.5
+    # 超线性增长模型：捕捉购买难度的非线性特性和整备成本的复合影响
+    if cost > 0:
+        effect_cost = cost ** 1.4 + redeploy_cost * (cost ** 0.6) * 1.5
+    else:
+        effect_cost = 0
 
     # 计算性价比（避免除以0）
     power_per_cost = round(total_power / cost, 2) if cost > 0 else 0
@@ -112,20 +119,19 @@ for card in cards:
     csv_data.append({
         'id': card_id,
         'name': name,
-        'rarity': rarity,
-        'category': card_category,
+        'RR': rarity,
         'unit_type': unit_type,
-        'copies': shop_copies,
-        'cost': cost,
-        'rd_cost': redeploy_cost,
-        'e_cost': effect_cost,
+        'CP': shop_copies,
+        'CST': cost,
+        'RDC': redeploy_cost,
+        'e_cost': round(effect_cost, 2),
         'GP': ground_power,
         'SP': sea_power,
         'AP': air_power,
-        'slots': air_slots,
-        'ability1': ability1,
-        'ability2': ability2,
-        'ability3': ability3,
+        'SLT': air_slots,
+        'AB1': ability1,
+        'AB2': ability2,
+        'AB3': ability3,
         'TP': total_power,
         'AV': round(ability_value, 1),
         'TV': round(total_value, 1),
@@ -133,15 +139,15 @@ for card in cards:
         'value_efficiency': value_efficiency
     })
 
-# 按照 copies 从高到低排序
-csv_data.sort(key=lambda x: x['copies'], reverse=True)
+# 按照 CP 从高到低排序
+csv_data.sort(key=lambda x: x['CP'], reverse=True)
 
 # 写入CSV
 csv_file = 'card_stats.csv'
 fieldnames = [
-    'id', 'name', 'rarity', 'category', 'unit_type', 'copies',
-    'cost', 'rd_cost', 'e_cost', 'GP', 'SP', 'AP', 'slots',
-    'ability1', 'ability2', 'ability3',
+    'id', 'name', 'RR', 'unit_type', 'CP',
+    'CST', 'RDC', 'e_cost', 'GP', 'SP', 'AP', 'SLT',
+    'AB1', 'AB2', 'AB3',
     'TP', 'AV', 'TV', 'power_efficiency', 'value_efficiency'
 ]
 
@@ -155,14 +161,14 @@ print(f"✓ 共统计 {len(csv_data)} 张卡牌")
 print("\n性价比最高的5张卡牌（按总价值效率）：")
 print("  格式: 卡牌名 - [价值/cost | 价值/e_cost]")
 # 按 value/cost 排序
-sorted_by_value = sorted([c for c in csv_data if c['cost'] > 0],
+sorted_by_value = sorted([c for c in csv_data if c['CST'] > 0],
                          key=lambda x: float(x['value_efficiency'].split('|')[0]), reverse=True)[:5]
 for i, card in enumerate(sorted_by_value, 1):
     print(f"  {i}. {card['name']} - [{card['value_efficiency']}]")
 
 print("\n纯火力性价比最高的5张卡牌（按火力效率）：")
 print("  格式: 卡牌名 - [火力/cost | 火力/e_cost]")
-sorted_by_power = sorted([c for c in csv_data if c['cost'] > 0],
+sorted_by_power = sorted([c for c in csv_data if c['CST'] > 0],
                          key=lambda x: float(x['power_efficiency'].split('|')[0]), reverse=True)[:5]
 for i, card in enumerate(sorted_by_power, 1):
     print(f"  {i}. {card['name']} - [{card['power_efficiency']}]")
