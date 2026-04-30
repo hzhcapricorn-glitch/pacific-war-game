@@ -170,15 +170,27 @@ export function applyBattlefieldCondition(state, condition) {
 export function getEffectiveDrawCount(state) {
   let baseDrawCount = 5; // Default draw count
 
-  if (!state.battlefieldConditions) {
-    return baseDrawCount;
+  // Check battlefield conditions
+  if (state.battlefieldConditions) {
+    state.battlefieldConditions.forEach(condition => {
+      if (condition.effect.type === 'modify_draw_count') {
+        baseDrawCount += condition.effect.value;
+      }
+    });
   }
 
-  state.battlefieldConditions.forEach(condition => {
-    if (condition.effect.type === 'modify_draw_count') {
-      baseDrawCount += condition.effect.value;
-    }
-  });
+  // Check leader abilities in deployed zone
+  if (state.zones && state.zones.deployed) {
+    state.zones.deployed.forEach(card => {
+      if (card.type === 'leader' && card.abilities) {
+        card.abilities.forEach(ability => {
+          if (ability.type === 'modify_draw_count') {
+            baseDrawCount += ability.effect?.value || 0;
+          }
+        });
+      }
+    });
+  }
 
   return Math.max(1, baseDrawCount); // Minimum 1 card
 }
