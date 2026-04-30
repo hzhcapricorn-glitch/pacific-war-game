@@ -52,21 +52,17 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
           </div>
         </div>
 
-        {/* 任务选择和详情区域 */}
+        {/* 任务和战场局势区域 */}
         <div className="phase-transition-content">
-          {/* 左侧：任务列表和战场局势 */}
           <div className="phase-mission-section">
             <h3>阶段任务</h3>
 
-            {/* 主线任务 */}
-            <div className="mission-row">
-              <div className="mission-row-label">主线</div>
-              <div className="mission-cards-horizontal">
-                <div
-                  className="mission-card-compact"
-                  onMouseEnter={() => setHoveredMissionId(mainMission.id)}
-                  onMouseLeave={() => setHoveredMissionId(null)}
-                >
+            {/* 所有任务（主线+支线在同一行） */}
+            <div className="all-missions-row">
+              {/* 主线任务 */}
+              <div className="mission-with-label">
+                <div className="mission-inline-label">主线</div>
+                <div className="mission-card-compact">
                   <Card
                     card={mainMission}
                     onHover={onCardHover}
@@ -74,30 +70,21 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
                   />
                 </div>
               </div>
-            </div>
 
-            {/* 支线任务 */}
-            {sideMissions.length > 0 && (
-              <div className="mission-row">
-                <div className="mission-row-label">支线</div>
-                <div className="mission-cards-horizontal">
-                  {sideMissions.map(mission => (
-                    <div
-                      key={mission.id}
-                      className="mission-card-compact"
-                      onMouseEnter={() => setHoveredMissionId(mission.id)}
-                      onMouseLeave={() => setHoveredMissionId(null)}
-                    >
-                      <Card
-                        card={mission}
-                        onHover={onCardHover}
-                        onHoverEnd={onCardHoverEnd}
-                      />
-                    </div>
-                  ))}
+              {/* 支线任务 */}
+              {sideMissions.length > 0 && sideMissions.map(mission => (
+                <div key={mission.id} className="mission-with-label">
+                  <div className="mission-inline-label">支线</div>
+                  <div className="mission-card-compact">
+                    <Card
+                      card={mission}
+                      onHover={onCardHover}
+                      onHoverEnd={onCardHoverEnd}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
 
             {/* 战场局势 */}
             <BattlefieldConditions conditions={phaseData.battlefieldConditions} />
@@ -107,16 +94,6 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
               <h4>卡牌变更</h4>
               <p>{getAffectedCardsText()}</p>
             </div>
-          </div>
-
-          {/* 右侧：详细信息面板 */}
-          <div className="phase-detail-panel">
-            {hoveredMission && (
-              <Card
-                card={hoveredMission}
-                showDetailed={true}
-              />
-            )}
           </div>
         </div>
       </div>
