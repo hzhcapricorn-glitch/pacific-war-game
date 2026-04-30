@@ -96,6 +96,11 @@ const ActionTypes = {
 };
 
 /**
+ * Counter for generating unique log IDs
+ */
+let logIdCounter = 0;
+
+/**
  * 添加日志条目的辅助函数
  */
 function addLogEntry(state, message, type = 'info') {
@@ -103,7 +108,7 @@ function addLogEntry(state, message, type = 'info') {
 
   // 支持对象类型的message（用于可点击日志）
   let logEntry = {
-    id: Date.now(),
+    id: `${Date.now()}_${logIdCounter++}`,
     timestamp,
     type,
     turn: state.turn

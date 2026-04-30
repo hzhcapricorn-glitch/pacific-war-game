@@ -44,44 +44,58 @@ export function loadPhaseMissions(phaseNumber) {
 export function applyPhaseTransition(state, newPhase) {
   const newState = { ...state };
 
+  // Ensure zones exist
+  if (!newState.zones) {
+    newState.zones = {
+      deck: [],
+      hand: [],
+      deployed: [],
+      discard: [],
+      essentialShop: [],
+      randomShop: [],
+      randomShopDeck: [],
+      removed: []
+    };
+  }
+
   // Remove cards that retire this phase
   if (newPhase.cardsToRetire && newPhase.cardsToRetire.length > 0) {
     // Remove from essential shop
-    newState.essentialShop = newState.essentialShop.filter(
+    newState.zones.essentialShop = (newState.zones.essentialShop || []).filter(
       card => !newPhase.cardsToRetire.includes(card.id)
     );
 
     // Remove from random shop
-    newState.randomShop = newState.randomShop.filter(
+    newState.zones.randomShop = (newState.zones.randomShop || []).filter(
       card => !newPhase.cardsToRetire.includes(card.id)
     );
 
     // Remove from random shop deck
-    newState.randomShopDeck = newState.randomShopDeck.filter(
+    newState.zones.randomShopDeck = (newState.zones.randomShopDeck || []).filter(
       card => !newPhase.cardsToRetire.includes(card.id)
     );
   }
 
   // Return deployed logistics cards to shop (as per requirements)
-  const logisticsCards = newState.deployed.filter(
+  const logisticsCards = (newState.zones.deployed || []).filter(
     card => card.cardCategory === 'logistics'
   );
 
   logisticsCards.forEach(card => {
     if (card.shopType === 'essential') {
       // Return to essential shop
-      const existingInShop = newState.essentialShop.find(c => c.id === card.id);
+      const existingInShop = (newState.zones.essentialShop || []).find(c => c.id === card.id);
       if (!existingInShop) {
-        newState.essentialShop.push({ ...card, status: 'ready' });
+        newState.zones.essentialShop = [...(newState.zones.essentialShop || []), { ...card, status: 'ready' }];
       }
     } else if (card.shopType === 'random') {
       // Return to random shop deck
-      newState.randomShopDeck.push({ ...card, status: 'ready' });
+      newState.zones.randomShopDeck = [...(newState.zones.randomShopDeck || []), { ...card, status: 'ready' }];
     }
   });
 
   // Remove logistics cards from deployed zone
-  newState.deployed = newState.deployed.filter(
+  newState.zones.deployed = (newState.zones.deployed || []).filter(
     card => card.cardCategory !== 'logistics'
   );
 
