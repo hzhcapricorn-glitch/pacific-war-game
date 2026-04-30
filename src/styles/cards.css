@@ -556,6 +556,23 @@
   font-size: 14px;
 }
 
+.btn-sort-zone {
+  padding: 4px 12px;
+  font-size: 12px;
+  background-color: #4a5568;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.btn-sort-zone:hover {
+  background-color: #5a6678;
+  transform: translateY(-1px);
+}
+
 .zone-content {
   display: flex;
   flex-wrap: wrap;
@@ -751,11 +768,24 @@
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 2px solid #3b82f6;
+  gap: 15px;
 }
 
 .shop-header h3 {
   color: #60a5fa;
   font-size: 18px;
+}
+
+.debug-controls-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-debug-inline {
+  padding: 6px 12px;
+  font-size: 12px;
+  background-color: #6b7280;
+  opacity: 0.8;
 }
 
 .supply-display {
@@ -768,6 +798,44 @@
   font-weight: bold;
   font-size: 20px;
   margin-left: 5px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.supply-value.supply-increasing {
+  animation: supplyPulse 0.8s ease;
+  color: #10b981;
+}
+
+@keyframes supplyPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+    color: #6ee7b7;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.supply-arrow {
+  color: #10b981;
+  font-size: 18px;
+  margin-left: 4px;
+  animation: supplyArrowFloat 0.8s ease-out;
+}
+
+@keyframes supplyArrowFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
 }
 
 .shop-content {

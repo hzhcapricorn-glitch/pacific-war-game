@@ -64,6 +64,23 @@ button:disabled {
   gap: 10px;
 }
 
+/* 左侧回合阶段信息框 */
+.game-info-box {
+  background-color: rgba(45, 55, 72, 0.7);
+  padding: 12px 15px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.game-info-box .btn-next-phase {
+  margin-left: auto;
+}
+
 .game-header {
   display: flex;
   justify-content: space-between;

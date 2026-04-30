@@ -17,7 +17,8 @@ function CardZone({
   selectedCards = [],
   showLastOnly = false,
   onZoneClick = null,
-  showCountOnly = false
+  showCountOnly = false,
+  onSortClick = null
 }) {
   let displayedCards;
   let hiddenCount = 0;
@@ -47,7 +48,20 @@ function CardZone({
       onClick={onZoneClick ? handleZoneClick : undefined}
     >
       <div className="zone-header">
-        <h3 className="zone-title">{title}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h3 className="zone-title">{title}</h3>
+          {onSortClick && (
+            <button
+              className="btn-sort-zone"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSortClick();
+              }}
+            >
+              排序
+            </button>
+          )}
+        </div>
         {showCount && <span className="zone-count">({cards.length})</span>}
       </div>
       <div className="zone-content">

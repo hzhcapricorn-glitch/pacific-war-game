@@ -14,10 +14,15 @@ function Shop({
   maxSupplyRetention,
   allEssentialCardTypes,
   currentPhase,
-  isShopPhase
+  isShopPhase,
+  onDebugAddSupply,
+  onDebugRefreshShop
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
+  // 补给变化动画状态
+  const [supplyIncreasing, setSupplyIncreasing] = useState(false);
+  const [prevSupply, setPrevSupply] = useState(currentSupply);
 
   // 初始化时从所有卡牌中提取必要卡牌种类
   useEffect(() => {
@@ -31,6 +36,18 @@ function Shop({
       setKnownEssentialTypes(types);
     }
   }, [allEssentialCardTypes]);
+
+  // 监听补给变化，触发动画
+  useEffect(() => {
+    if (currentSupply > prevSupply) {
+      setSupplyIncreasing(true);
+      const timer = setTimeout(() => {
+        setSupplyIncreasing(false);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+    setPrevSupply(currentSupply);
+  }, [currentSupply, prevSupply]);
 
   // 按卡牌种类分组必要卡牌
   const groupedEssentialCards = {};
@@ -58,8 +75,21 @@ function Shop({
     <div className={`shop ${!isShopPhase ? 'shop-disabled' : ''}`}>
       <div className="shop-header">
         <h3>商店</h3>
+        {onDebugAddSupply && onDebugRefreshShop && (
+          <div className="debug-controls-inline">
+            <button onClick={onDebugAddSupply} className="btn-debug-inline">
+              补给+10
+            </button>
+            <button onClick={onDebugRefreshShop} className="btn-debug-inline">
+              刷新商店
+            </button>
+          </div>
+        )}
         <div className="supply-display">
-          补给: <span className="supply-value">{currentSupply} / {maxSupplyRetention}</span>
+          补给: <span className={`supply-value ${supplyIncreasing ? 'supply-increasing' : ''}`}>
+            {currentSupply}
+            {supplyIncreasing && <span className="supply-arrow">↑</span>}
+          </span> / {maxSupplyRetention}
         </div>
       </div>
       <div className="shop-content-horizontal">

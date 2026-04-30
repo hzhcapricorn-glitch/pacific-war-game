@@ -436,39 +436,6 @@ function GameBoard() {
 
   return (
     <div className="game-board">
-      {/* 顶部信息栏 */}
-      <div className="game-header">
-        <div className="game-info">
-          <div className="info-item">
-            <span className="label">回合:</span>
-            <span className="value">{state.turn}</span>
-          </div>
-          <div className="info-item">
-            <span className="label">阶段:</span>
-            <span className="value phase">{PhaseDisplayName[state.phase]}</span>
-          </div>
-        </div>
-        <div className="header-controls">
-          {/* Debug控制 */}
-          <div className="debug-controls">
-            <button onClick={() => actions.addSupply(10)} className="btn-debug">
-              补给+10
-            </button>
-            <button onClick={() => actions.refreshRandomShop()} className="btn-debug">
-              刷新商店
-            </button>
-            <button onClick={handleStartNewGame} className="btn-debug">
-              重新开始
-            </button>
-          </div>
-          {/* 只在需要用户操作的阶段显示"下一阶段"按钮 */}
-          {(state.phase === GamePhase.ACTION || state.phase === GamePhase.SHOP) && (
-            <button onClick={handleNextPhase} className="btn-next-phase">
-              下一阶段
-            </button>
-          )}
-        </div>
-      </div>
 
       {/* 战斗控制面板 */}
       {state.phase === GamePhase.COMBAT && state.currentMission && (
@@ -524,6 +491,24 @@ function GameBoard() {
       <div className="game-main">
         {/* 左侧：任务区 */}
         <div className="game-left">
+          {/* 回合阶段信息 */}
+          <div className="game-info-box">
+            <div className="info-item">
+              <span className="label">回合:</span>
+              <span className="value">{state.turn}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">阶段:</span>
+              <span className="value phase">{PhaseDisplayName[state.phase]}</span>
+            </div>
+            {/* 只在需要用户操作的阶段显示"下一阶段"按钮 */}
+            {(state.phase === GamePhase.ACTION || state.phase === GamePhase.SHOP) && (
+              <button onClick={handleNextPhase} className="btn-next-phase">
+                下一阶段
+              </button>
+            )}
+          </div>
+
           <MissionDisplay
             currentMission={state.currentMission}
             remainingMissions={state.missions.length}
@@ -547,6 +532,8 @@ function GameBoard() {
               maxSupplyRetention={state.maxSupplyRetention}
               currentPhase={state.phase}
               isShopPhase={state.phase === GamePhase.SHOP}
+              onDebugAddSupply={() => actions.addSupply(10)}
+              onDebugRefreshShop={() => actions.refreshRandomShop()}
             />
           </div>
 
@@ -563,6 +550,7 @@ function GameBoard() {
               className="deployed-zone"
               emptyMessage="未部署任何卡牌"
               selectedCards={state.selectedForCombat}
+              onSortClick={() => actions.sortDeployed()}
             />
           </div>
 

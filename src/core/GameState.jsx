@@ -67,6 +67,7 @@ const ActionTypes = {
   UPDATE_MISSIONS: 'UPDATE_MISSIONS',
   SET_SHOP: 'SET_SHOP',
   REFRESH_RANDOM_SHOP: 'REFRESH_RANDOM_SHOP',
+  SORT_DEPLOYED: 'SORT_DEPLOYED',
   GAME_OVER: 'GAME_OVER',
   RESET_GAME: 'RESET_GAME',
   ADD_LOG: 'ADD_LOG',
@@ -155,26 +156,6 @@ function gameStateReducer(state, action) {
         retireUsedThisTurn: isNewTurn ? false : state.retireUsedThisTurn,
         usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn
       };
-
-      // 在进入准备阶段时对部署区卡牌排序（后勤-海军-空军-陆军）
-      if (nextPhase === GamePhase.PREPARE && state.zones.deployed.length > 0) {
-        const getCardOrder = (card) => {
-          if (card.cardCategory === 'logistics' || card.cardCategory === 'tactical') return 0;
-          if (card.unitType === 'navy') return 1;
-          if (card.unitType === 'air') return 2;
-          if (card.unitType === 'army') return 3;
-          return 4;
-        };
-
-        const sortedDeployed = [...state.zones.deployed].sort((a, b) => {
-          return getCardOrder(a) - getCardOrder(b);
-        });
-
-        newState.zones = {
-          ...newState.zones,
-          deployed: sortedDeployed
-        };
-      }
 
       // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
       if (isNewTurn && state.turn >= 1) {
@@ -299,14 +280,20 @@ function gameStateReducer(state, action) {
         }
       };
 
-      // 添加主日志
-      let logMessage = `🃏 使用了「${card.name}」`;
-      newState.battleLog = addLogEntry(newState, logMessage, 'action');
+      // 添加主日志（跳过补给类卡牌的日志）
+      const hasSupplyAbility = card.abilities?.some(ability => ability.type === 'supply');
+      if (!hasSupplyAbility) {
+        let logMessage = `🃏 使用了「${card.name}」`;
+        newState.battleLog = addLogEntry(newState, logMessage, 'action');
+      }
 
-      // 添加能力日志
+      // 添加能力日志（跳过补给能力的日志）
       if (newState.abilityLogs && newState.abilityLogs.length > 0) {
         newState.abilityLogs.forEach(log => {
-          newState.battleLog = addLogEntry(newState, `  ↳ ${log}`, 'ability');
+          // 跳过补给日志
+          if (!log.includes('补给') || !hasSupplyAbility) {
+            newState.battleLog = addLogEntry(newState, `  ↳ ${log}`, 'ability');
+          }
         });
         // 清除临时日志
         delete newState.abilityLogs;
@@ -740,6 +727,30 @@ function gameStateReducer(state, action) {
       return newState;
     }
 
+    case ActionTypes.SORT_DEPLOYED: {
+      if (state.zones.deployed.length === 0) return state;
+
+      const getCardOrder = (card) => {
+        if (card.cardCategory === 'logistics' || card.cardCategory === 'tactical') return 0;
+        if (card.unitType === 'navy') return 1;
+        if (card.unitType === 'air') return 2;
+        if (card.unitType === 'army') return 3;
+        return 4;
+      };
+
+      const sortedDeployed = [...state.zones.deployed].sort((a, b) => {
+        return getCardOrder(a) - getCardOrder(b);
+      });
+
+      return {
+        ...state,
+        zones: {
+          ...state.zones,
+          deployed: sortedDeployed
+        }
+      };
+    }
+
     default:
       return state;
   }
@@ -852,6 +863,10 @@ export function GameStateProvider({ children }) {
         type: ActionTypes.SCOUT_AND_TAP,
         payload: { count, cardInstanceId }
       });
+    }, []),
+
+    sortDeployed: useCallback(() => {
+      dispatch({ type: ActionTypes.SORT_DEPLOYED });
     }, [])
   };
 
