@@ -99,27 +99,29 @@ function Shop({
             {essentialStacks.length === 0 ? (
               <div className="shop-empty">暂无必要卡牌</div>
             ) : (
-              essentialStacks.map((stack) => {
-                const canAfford = stack.card.cost <= currentSupply;
-                const isAvailable = stack.count > 0 && isShopPhase && canAfford;
-                return (
-                  <div
-                    key={stack.card.id}
-                    className={`shop-card-stack ${stack.count === 0 ? 'empty' : ''} ${!canAfford && stack.count > 0 && isShopPhase ? 'unaffordable' : ''}`}
-                  >
-                    <Card
-                      card={stack.card}
-                      onClick={isAvailable ? () => onCardClick(stack.actualCards[0], 'essential') : undefined}
-                      onHover={onCardHover}
-                      onHoverEnd={onCardHoverEnd}
-                      className={`shop-card ${stack.count === 0 ? 'sold-out' : ''} ${!canAfford && stack.count > 0 && isShopPhase ? 'unaffordable' : ''}`}
-                    />
-                    <div className={`card-stack-count ${stack.count === 0 ? 'empty' : ''}`}>
-                      {stack.count}
+              essentialStacks
+                .filter(stack => stack.count > 0) // 只显示有库存的卡牌
+                .map((stack) => {
+                  const canAfford = stack.card.cost <= currentSupply;
+                  const isAvailable = isShopPhase && canAfford;
+                  return (
+                    <div
+                      key={stack.card.id}
+                      className={`shop-card-stack ${!canAfford && isShopPhase ? 'unaffordable' : ''}`}
+                    >
+                      <Card
+                        card={stack.card}
+                        onClick={isAvailable ? () => onCardClick(stack.actualCards[0], 'essential') : undefined}
+                        onHover={onCardHover}
+                        onHoverEnd={onCardHoverEnd}
+                        className={`shop-card ${!canAfford && isShopPhase ? 'unaffordable' : ''}`}
+                      />
+                      <div className="card-stack-count">
+                        {stack.count}
+                      </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })
             )}
           </div>
         </div>

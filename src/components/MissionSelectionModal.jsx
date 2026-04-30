@@ -38,46 +38,50 @@ function MissionSelectionModal({
   return (
     <div className="modal-overlay">
       <div className="mission-selection-modal">
-        {/* 标题区域 */}
-        <div className="modal-header">
-          <h2>选择任务</h2>
-          <div className="phase-info-compact">
-            {phaseData.name} - 剩余{phaseData.turnLimit}回合
+        {/* 阶段信息区域 */}
+        <div className="phase-info-header">
+          <div className="phase-info-top">
+            <h2>{phaseData.name}</h2>
+            <span className="phase-turns">剩余 {phaseData.turnLimit} 回合</span>
+          </div>
+          <div className="phase-context-text">
+            {phaseData.historicalContext}
           </div>
         </div>
 
-        {/* 主要内容区域 */}
-        <div className="modal-content-wrapper">
+        {/* 任务选择和详情区域 */}
+        <div className="mission-selection-content">
           {/* 左侧：任务列表 */}
-          <div className="modal-left-section">
+          <div className="mission-list-section">
+            <h3>选择任务</h3>
+
             {/* 主线任务 */}
-            <div className="mission-section">
-              <h3>主线任务</h3>
-              <div
-                className={`mission-card-item ${currentMissionId === mainMission.id ? 'current' : ''}`}
-                onMouseEnter={() => setHoveredMissionId(mainMission.id)}
-                onClick={() => handleMissionClick(mainMission.id)}
-              >
-                <Card
-                  card={mainMission}
-                  onHover={onCardHover}
-                  onHoverEnd={onCardHoverEnd}
-                />
-                {currentMissionId === mainMission.id && (
-                  <div className="mission-current-badge">当前任务</div>
-                )}
+            <div className="mission-row">
+              <div className="mission-row-label">主线</div>
+              <div className="mission-cards-horizontal">
+                <div
+                  className={`mission-card-compact ${currentMissionId === mainMission.id ? 'current-selected' : ''}`}
+                  onMouseEnter={() => setHoveredMissionId(mainMission.id)}
+                  onClick={() => handleMissionClick(mainMission.id)}
+                >
+                  <Card
+                    card={mainMission}
+                    onHover={onCardHover}
+                    onHoverEnd={onCardHoverEnd}
+                  />
+                </div>
               </div>
             </div>
 
             {/* 支线任务 */}
             {sideMissions.length > 0 && (
-              <div className="mission-section">
-                <h3>支线任务</h3>
-                <div className="mission-grid">
+              <div className="mission-row">
+                <div className="mission-row-label">支线</div>
+                <div className="mission-cards-horizontal">
                   {sideMissions.map(mission => (
                     <div
                       key={mission.id}
-                      className={`mission-card-item ${currentMissionId === mission.id ? 'current' : ''}`}
+                      className={`mission-card-compact ${currentMissionId === mission.id ? 'current-selected' : ''}`}
                       onMouseEnter={() => setHoveredMissionId(mission.id)}
                       onClick={() => handleMissionClick(mission.id)}
                     >
@@ -86,9 +90,6 @@ function MissionSelectionModal({
                         onHover={onCardHover}
                         onHoverEnd={onCardHoverEnd}
                       />
-                      {currentMissionId === mission.id && (
-                        <div className="mission-current-badge">当前任务</div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -99,16 +100,21 @@ function MissionSelectionModal({
             <BattlefieldConditions conditions={phaseData.battlefieldConditions} />
           </div>
 
-          {/* 右侧：预留给详细信息面板使用 */}
-          <div className="modal-right-spacer">
-            {/* 空白区域，确保不遮挡右侧详细信息面板 */}
+          {/* 右侧：详细信息面板（在模态窗口内） */}
+          <div className="mission-detail-panel">
+            {hoveredMission && (
+              <Card
+                card={hoveredMission}
+                showDetailed={true}
+              />
+            )}
           </div>
         </div>
 
         {/* 按钮区域 */}
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>
-            取消
+            关闭
           </button>
         </div>
       </div>

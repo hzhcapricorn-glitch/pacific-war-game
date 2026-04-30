@@ -16,36 +16,45 @@ function MissionDisplay({
 }) {
   return (
     <div className="mission-display">
-      <div className="mission-header">
-        <h3>当前任务</h3>
-        {phaseData ? (
-          <span className="missions-remaining">
-            {phaseData.name} - 剩余: {turnsRemaining}回合
-          </span>
-        ) : (
-          <span className="missions-remaining">
-            剩余任务: {remainingMissions}
-          </span>
+      {/* 战略阶段名称 */}
+      {phaseData && (
+        <div className="phase-name-large">
+          {phaseData.name}
+        </div>
+      )}
+
+      {/* 剩余回合 */}
+      {phaseData && (
+        <div className="turns-remaining">
+          剩余 {turnsRemaining} 回合
+        </div>
+      )}
+
+      {/* 当前任务标题和按钮 */}
+      <div className="mission-title-row">
+        <span className="mission-label">当前任务</span>
+        {canChangeMission && (
+          <button
+            className="btn-change-mission-inline"
+            onClick={onChangeMission}
+          >
+            更改任务
+          </button>
         )}
       </div>
+
+      {/* 分割线 */}
+      <div className="mission-divider"></div>
+
+      {/* 任务卡牌 */}
       <div className="mission-content">
         {currentMission ? (
-          <>
-            <Card
-              card={currentMission}
-              onHover={onMissionHover}
-              onHoverEnd={onMissionHoverEnd}
-              className="current-mission"
-            />
-            {canChangeMission && (
-              <button
-                className="btn-change-mission"
-                onClick={onChangeMission}
-              >
-                更改任务
-              </button>
-            )}
-          </>
+          <Card
+            card={currentMission}
+            onHover={onMissionHover}
+            onHoverEnd={onMissionHoverEnd}
+            className="current-mission"
+          />
         ) : (
           <div className="no-mission">所有任务已完成！</div>
         )}

@@ -21,7 +21,7 @@ function BattlefieldConditions({ conditions = [] }) {
         <h4>战场局势</h4>
       </div>
 
-      {/* 详细描述区域（悬停时显示） */}
+      {/* 详细描述区域（悬停时显示，固定高度：1行标题+2行描述） */}
       <div className="condition-detail-area">
         {hoveredCondition ? (
           <div className="condition-detail">
