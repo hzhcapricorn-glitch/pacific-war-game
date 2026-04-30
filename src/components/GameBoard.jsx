@@ -129,19 +129,20 @@ function GameBoard() {
   }, [state.pendingInteraction]);
 
   const initializeGame = () => {
-    // 创建初始牌组（5张初级补给卡）
-    const starterCard = combatCardsData.find(c => c.id === gameConfig.game.starterCardId);
-    const starterDeck = [];
-    for (let i = 0; i < gameConfig.game.starterDeckSize; i++) {
-      starterDeck.push(createCard(starterCard, `${starterCard.id}_starter_${i}`));
-    }
+    try {
+      // 创建初始牌组（5张初级补给卡）
+      const starterCard = combatCardsData.find(c => c.id === gameConfig.game.starterCardId);
+      const starterDeck = [];
+      for (let i = 0; i < gameConfig.game.starterDeckSize; i++) {
+        starterDeck.push(createCard(starterCard, `${starterCard.id}_starter_${i}`));
+      }
 
-    // Load phase 1 data
-    const phase1Data = loadPhaseData(1);
-    const initialPhase = 1;
+      // Load phase 1 data
+      const phase1Data = loadPhaseData(1);
+      const initialPhase = 1;
 
-    // Use phase 1 missions instead of old missions
-    const missions = missionPhase1Data.map((m, idx) => createCard(m, `${m.id}_${idx}`));
+      // Use phase 1 missions instead of old missions
+      const missions = missionPhase1Data.map((m, idx) => createCard(m, `${m.id}_${idx}`));
 
     // Filter shop cards by appearPhase (only cards that appear in phase 1)
     const shopCardDefinitions = combatCardsData.filter(c =>
@@ -181,10 +182,14 @@ function GameBoard() {
       gameConfig.game.randomShopSlots || 6
     );
 
-    // Start phase 1 immediately after init
-    setTimeout(() => {
-      actions.startPhase(initialPhase);
-    }, 100);
+      // Start phase 1 immediately after init
+      setTimeout(() => {
+        actions.startPhase(initialPhase);
+      }, 100);
+    } catch (error) {
+      console.error('Game initialization error:', error);
+      alert('游戏初始化失败: ' + error.message);
+    }
   };
 
   const handleNextPhase = () => {
@@ -197,7 +202,7 @@ function GameBoard() {
       const affordableCards = allShopCards.filter(card => card.cost <= state.supply);
 
       // 检查是否还有可以整备的卡牌
-      const tappedCards = state.zones.deployed.filter(card => card.status === 'tapped');
+      const tappedCards = (state.zones.deployed || []).filter(card => card.status === 'tapped');
       const affordableRedeployCards = tappedCards.filter(card => card.redeployCost <= state.supply);
 
       const hasAffordableShopCards = state.supply > 0 && affordableCards.length > 0;
@@ -237,8 +242,8 @@ function GameBoard() {
 
     if (currentPhase === GamePhase.ACTION) {
       // 检查卡牌是否在手牌中（通过 instanceId 比较）
-      const isInHand = state.zones.hand.some(c => c.instanceId === card.instanceId);
-      const isInDeployed = state.zones.deployed.some(c => c.instanceId === card.instanceId);
+      const isInHand = (state.zones.hand || []).some(c => c.instanceId === card.instanceId);
+      const isInDeployed = (state.zones.deployed || []).some(c => c.instanceId === card.instanceId);
 
       if (isInHand) {
         // 行动阶段：打出手牌
@@ -264,7 +269,7 @@ function GameBoard() {
             actions.tapCard(card.instanceId);
           } else if (activeAbility.type === 'quick_response') {
             // 使用快速整备能力
-            const tappedCards = state.zones.deployed.filter(c => c.status === 'tapped' && c.instanceId !== card.instanceId);
+            const tappedCards = (state.zones.deployed || []).filter(c => c.status === 'tapped' && c.instanceId !== card.instanceId);
             if (tappedCards.length === 0) {
               alert('没有可以激活的整备中卡牌');
             } else {
@@ -280,7 +285,7 @@ function GameBoard() {
       // 行动阶段不允许整备卡牌
     } else if (currentPhase === GamePhase.COMBAT) {
       // 检查卡牌是否在部署区
-      const isInDeployed = state.zones.deployed.some(c => c.instanceId === card.instanceId);
+      const isInDeployed = (state.zones.deployed || []).some(c => c.instanceId === card.instanceId);
 
       if (isInDeployed && card.status === 'ready') {
         // 检查卡牌是否可以参加战斗（后勤卡不能参加战斗）
@@ -299,7 +304,7 @@ function GameBoard() {
       }
     } else if (currentPhase === GamePhase.SHOP) {
       // 购买阶段：整备部署区的整备中卡牌
-      const isInDeployed = state.zones.deployed.some(c => c.instanceId === card.instanceId);
+      const isInDeployed = (state.zones.deployed || []).some(c => c.instanceId === card.instanceId);
 
       if (isInDeployed && card.status === 'tapped') {
         if (state.supply >= card.redeployCost) {
@@ -360,7 +365,7 @@ function GameBoard() {
     }
 
     // 获取选中的卡牌对象
-    const selectedCards = state.zones.deployed.filter(card =>
+    const selectedCards = (state.zones.deployed || []).filter(card =>
       state.selectedForCombat.includes(card.instanceId)
     );
 
@@ -428,7 +433,7 @@ function GameBoard() {
 
   // 计算当前选中卡牌的火力
   const selectedFirePowers = () => {
-    const selectedCards = state.zones.deployed.filter(card =>
+    const selectedCards = (state.zones.deployed || []).filter(card =>
       state.selectedForCombat.includes(card.instanceId)
     );
     return calculateAllFirePowers(selectedCards, { state });
@@ -436,7 +441,7 @@ function GameBoard() {
 
   // 计算航空槽位相关信息
   const getAirSlotInfo = () => {
-    const selectedCards = state.zones.deployed.filter(card =>
+    const selectedCards = (state.zones.deployed || []).filter(card =>
       state.selectedForCombat.includes(card.instanceId)
     );
 
@@ -483,6 +488,23 @@ function GameBoard() {
   const handleSelectMission = (missionId) => {
     actions.selectMission(missionId);
   };
+
+  // Safety check - ensure state is initialized
+  if (!state || !state.zones) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        color: '#fff',
+        fontSize: '18px'
+      }}>
+        游戏加载中...
+      </div>
+    );
+  }
 
   return (
     <div className="game-board">
@@ -608,7 +630,7 @@ function GameBoard() {
           }`}>
             <CardZone
               title="部署区"
-              cards={state.zones.deployed}
+              cards={state.zones?.deployed || []}
               onCardClick={handleCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
@@ -623,7 +645,7 @@ function GameBoard() {
           <div className="bottom-zone">
             <CardZone
               title="手牌"
-              cards={state.zones.hand}
+              cards={state.zones?.hand || []}
               onCardClick={handleCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
@@ -633,14 +655,14 @@ function GameBoard() {
             <div className="deck-zones">
               <CardZone
                 title="抽牌堆"
-                cards={state.zones.deck}
+                cards={state.zones?.deck || []}
                 className="deck-zone"
                 emptyMessage="无"
                 showCountOnly={true}
               />
               <CardZone
                 title="弃牌堆"
-                cards={state.zones.discard}
+                cards={state.zones?.discard || []}
                 className="discard-zone"
                 emptyMessage="无"
                 showCountOnly={true}
@@ -700,7 +722,7 @@ function GameBoard() {
           actions.clearPendingInteraction();
           setActiveAbilityCardId(null);
         }}
-        cards={state.zones.deployed.filter(card =>
+        cards={(state.zones.deployed || []).filter(card =>
           card.status === 'tapped' && card.instanceId !== activeAbilityCardId
         )}
         title="选择要激活的卡牌"
