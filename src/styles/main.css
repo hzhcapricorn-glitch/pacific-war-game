@@ -814,6 +814,26 @@ button:disabled {
   transform: translateX(2px);
 }
 
+.condition-item.condition-buff {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.condition-item.condition-buff:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.condition-item.condition-debuff {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.condition-item.condition-debuff:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
 /* ==========================================
    Modal Components (Shared Styles)
    ========================================== */
@@ -1303,10 +1323,7 @@ button:disabled {
 .mission-detail-panel {
   width: 350px;
   flex-shrink: 0;
-  background: rgba(26, 32, 44, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 16px;
-  max-height: 500px;
-  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

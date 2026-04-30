@@ -95,9 +95,6 @@ function MissionSelectionModal({
                 </div>
               </div>
             )}
-
-            {/* 战场局势 */}
-            <BattlefieldConditions conditions={phaseData.battlefieldConditions} />
           </div>
 
           {/* 右侧：详细信息面板（在模态窗口内） */}

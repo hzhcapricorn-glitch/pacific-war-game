@@ -10,6 +10,7 @@
       "id": "pearl_harbor_debuff",
       "name": "珍珠港偷袭",
       "description": "战列舰暂时无法在商店获得",
+      "isBuff": false,
       "effect": {
         "type": "block_shop_card",
         "cardIds": ["basic_battleship", "advanced_battleship"]

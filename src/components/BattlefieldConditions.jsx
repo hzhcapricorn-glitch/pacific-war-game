@@ -40,7 +40,7 @@ function BattlefieldConditions({ conditions = [] }) {
         {conditions.map((condition, index) => (
           <div
             key={condition.id || index}
-            className="condition-item"
+            className={`condition-item ${condition.isBuff ? 'condition-buff' : 'condition-debuff'}`}
             onMouseEnter={() => setHoveredCondition(condition)}
             onMouseLeave={() => setHoveredCondition(null)}
           >
