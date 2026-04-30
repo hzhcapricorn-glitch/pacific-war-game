@@ -122,6 +122,14 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
     const descriptions = [];
 
     card.abilities.forEach(ability => {
+      // 优先使用能力的 description 字段（领袖卡等特殊卡牌）
+      if (ability.description) {
+        const prefix = ability.name ? `${ability.name}：` : '';
+        descriptions.push(`${prefix}${ability.description}`);
+        return;
+      }
+
+      // 标准能力类型
       if (ability.type === 'supply') {
         descriptions.push(`补给：提供${ability.value}点补给💰`);
       } else if (ability.type === 'draw') {
@@ -142,9 +150,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         descriptions.push(`快速整备：激活一张整备中的卡牌⚡`);
       } else if (ability.type === 'heavy_armor') {
         descriptions.push(`重甲${ability.value}：战斗损失时需被选中${ability.value + 1}次才损失🛡️`);
-      } else if (ability.type !== 'goes_to_discard' && ability.type !== 'cannot_participate_in_combat') {
-        descriptions.push(ability.type);
       }
+      // 移除 else 分支，不再显示未知的 ability.type
     });
 
     if (card.airSlots > 0) {
