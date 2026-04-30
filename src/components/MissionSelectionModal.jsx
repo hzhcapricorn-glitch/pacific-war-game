@@ -43,6 +43,7 @@ function MissionSelectionModal({
           <div className="phase-info-top">
             <h2>{phaseData.name}</h2>
             <span className="phase-turns">剩余 {phaseData.turnLimit} 回合</span>
+            <button className="modal-close-inline" onClick={onClose}>×</button>
           </div>
           <div className="phase-context-text">
             {phaseData.historicalContext}
@@ -108,12 +109,6 @@ function MissionSelectionModal({
           </div>
         </div>
 
-        {/* 按钮区域 */}
-        <div className="modal-footer">
-          <button className="btn-secondary" onClick={onClose}>
-            关闭
-          </button>
-        </div>
       </div>
     </div>
   );

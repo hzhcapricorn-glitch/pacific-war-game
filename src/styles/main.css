@@ -1242,12 +1242,14 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  gap: 15px;
 }
 
 .phase-info-top h2 {
   font-size: 24px;
   color: #63b3ed;
   margin: 0;
+  flex: 1;
 }
 
 .phase-turns {
@@ -1256,6 +1258,31 @@ button:disabled {
   background: rgba(45, 55, 72, 0.6);
   padding: 6px 12px;
   border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.modal-close-inline {
+  background: transparent;
+  border: none;
+  color: #cbd5e0;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.modal-close-inline:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  transform: none;
 }
 
 .phase-context-text {
