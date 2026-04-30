@@ -1349,14 +1349,18 @@ button:disabled {
 
 .mission-detail-panel {
   width: 350px;
+  height: 500px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .mission-detail-panel .card {
-  max-height: 520px;
+  width: 100%;
+  height: 100%;
+  min-height: unset;
 }
 
 /* ==========================================
@@ -1438,7 +1442,7 @@ button:disabled {
 
 .leader-detail-panel {
   width: 350px;
-  height: 100%;
+  height: 500px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1447,7 +1451,9 @@ button:disabled {
 }
 
 .leader-detail-panel .card {
-  max-height: 520px;
+  width: 100%;
+  height: 100%;
+  min-height: unset;
 }
 
 .leader-selection-footer {
