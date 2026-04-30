@@ -484,12 +484,12 @@ function gameStateReducer(state, action) {
           const phaseKey = `phase_${state.currentPhase}`;
           const phaseCompletion = newCompletedMissions[phaseKey] || { main: false, side: [] };
 
-          if (state.currentMission.type === 'main') {
+          if (state.currentMission.missionType === 'main') {
             newCompletedMissions[phaseKey] = {
               ...phaseCompletion,
               main: true
             };
-          } else if (state.currentMission.type === 'side') {
+          } else if (state.currentMission.missionType === 'side') {
             newCompletedMissions[phaseKey] = {
               ...phaseCompletion,
               side: [...phaseCompletion.side, state.currentMission.id]

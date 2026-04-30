@@ -2,7 +2,8 @@
   {
     "id": "mission_midway",
     "name": "中途岛海战",
-    "type": "main",
+    "type": "mission",
+    "missionType": "main",
     "phase": 1,
     "difficulty": "hard",
     "image": "/pacific-war-game/img/Mission_hard.jpg",
@@ -25,7 +26,8 @@
   {
     "id": "mission_coral_sea",
     "name": "珊瑚海海战",
-    "type": "side",
+    "type": "mission",
+    "missionType": "side",
     "phase": 1,
     "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_normal.jpeg",
@@ -48,7 +50,8 @@
   {
     "id": "mission_darwin",
     "name": "达尔文港防御",
-    "type": "side",
+    "type": "mission",
+    "missionType": "side",
     "phase": 1,
     "difficulty": "easy",
     "image": "/pacific-war-game/img/Mission_easy.jpeg",
@@ -70,7 +73,8 @@
   {
     "id": "mission_aleutian",
     "name": "阿留申群岛拦截",
-    "type": "side",
+    "type": "mission",
+    "missionType": "side",
     "phase": 1,
     "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_normal.jpeg",

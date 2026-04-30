@@ -27,8 +27,8 @@ function MissionSelectionModal({
   }
 
   const hoveredMission = missions.find(m => m.id === hoveredMissionId);
-  const mainMission = missions.find(m => m.type === 'main');
-  const sideMissions = missions.filter(m => m.type === 'side');
+  const mainMission = missions.find(m => m.missionType === 'main');
+  const sideMissions = missions.filter(m => m.missionType === 'side');
 
   const handleMissionClick = (missionId) => {
     onSelectMission(missionId);

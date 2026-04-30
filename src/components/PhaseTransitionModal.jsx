@@ -20,7 +20,7 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
 
   const currentMission = missions.find(m => m.id === selectedMissionId);
   const mainMission = missions.find(m => m.id === phaseData.mainMission);
-  const sideMissions = missions.filter(m => m.type === 'side');
+  const sideMissions = missions.filter(m => m.missionType === 'side');
 
   // 获取受影响的卡牌信息
   const getAffectedCardsText = () => {
