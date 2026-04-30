@@ -20,7 +20,6 @@ function MissionDisplay({ currentMission, remainingMissions, onMissionHover, onM
             onHover={onMissionHover}
             onHoverEnd={onMissionHoverEnd}
             className="current-mission"
-            showDetailed={true}
           />
         ) : (
           <div className="no-mission">所有任务已完成！</div>

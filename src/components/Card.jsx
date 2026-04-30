@@ -254,6 +254,17 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
               {card.redeployCost > 0 && <span className="redeploy-cost">🛠️{card.redeployCost}</span>}
             </div>
           )}
+          {isMission && card.image && (
+            <div className="card-compact-image">
+              <img
+                src={card.image}
+                alt={card.name}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
           <div className="card-stats-compact">
             {isMission ? (
               <>
