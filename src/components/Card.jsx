@@ -176,7 +176,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
             <div className="detail-rarity">{isMission ? getDifficultyText() : (card.rarity || 'N')}</div>
             <div className="detail-name">{card.name}</div>
             <div className="detail-cost">
-              {card.cost > 0 && `💰${card.cost}`}
+              {isMission && card.loss && `💥${card.loss.randomLoss || 0}`}
+              {!isMission && card.cost > 0 && `💰${card.cost}`}
               {!isMission && card.redeployCost > 0 && (card.cost > 0 ? `  🛠️${card.redeployCost}` : `🛠️${card.redeployCost}`)}
             </div>
           </div>
@@ -223,7 +224,6 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
                   {getMissionRequirementLine()}
                 </div>
                 {card.reward && <div className="detail-mission-reward">✓ {card.reward.description}</div>}
-                {card.loss && <div className="detail-mission-loss">✗ {card.loss.description}</div>}
               </>
             ) : (
               <>
