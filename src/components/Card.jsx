@@ -268,10 +268,10 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
           <div className="card-stats-compact">
             {isMission ? (
               <>
-                {card.requiredGroundPower > 0 && <span className="combat-requirement">💣{card.requiredGroundPower}</span>}
-                {card.requiredSeaPower > 0 && <span className="combat-requirement">🌊{card.requiredSeaPower}</span>}
-                {card.requiredAirDefense > 0 && <span className="combat-requirement">🎯{card.requiredAirDefense}</span>}
-                {card.requiredAirSuperiority > 0 && <span className="combat-requirement">✈️{card.requiredAirSuperiority}</span>}
+                <span className="combat-requirement">💣{card.requiredGroundPower || 0}</span>
+                <span className="combat-requirement">🌊{card.requiredSeaPower || 0}</span>
+                <span className="combat-requirement">🎯{card.requiredAirDefense || 0}</span>
+                <span className="combat-requirement">✈️{card.requiredAirSuperiority || 0}</span>
               </>
             ) : (
               <>
