@@ -48,6 +48,7 @@ const initialState = {
   currentPhase: 1, // Current strategic phase number
   phaseData: null, // Current phase definition
   availableMissions: [], // All missions for current phase
+  leader: null, // Selected leader card
   turnsRemaining: 15, // Countdown timer
   battlefieldConditions: [], // Active buffs/debuffs
   completedMissions: {} // Track completed missions by phase
@@ -138,12 +139,15 @@ function addLogEntry(state, message, type = 'info') {
 function gameStateReducer(state, action) {
   switch (action.type) {
     case ActionTypes.INIT_GAME: {
-      const { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots } = action.payload;
+      const { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader } = action.payload;
 
       // 从随机商店堆中抽取初始卡牌
       const shuffledRandomDeck = shuffleDeck([...randomShopDeck]);
       const initialRandomShop = shuffledRandomDeck.slice(0, randomShopSlots);
       const remainingRandomDeck = shuffledRandomDeck.slice(randomShopSlots);
+
+      // Leader card is deployed immediately and already ready (not tapped)
+      const initialDeployed = leader ? [{ ...leader, status: 'ready' }] : [];
 
       const newState = {
         ...initialState,
@@ -151,6 +155,7 @@ function gameStateReducer(state, action) {
         zones: {
           ...initialState.zones,
           discard: starterCards,
+          deployed: initialDeployed, // Leader starts deployed
           essentialShop: essentialShopCards,
           randomShop: initialRandomShop,
           randomShopDeck: remainingRandomDeck,
@@ -159,8 +164,13 @@ function gameStateReducer(state, action) {
         missions: missions,
         currentMission: missions[0] || null,
         retireUsedThisTurn: false,
-        usedAbilitiesThisTurn: {}
+        usedAbilitiesThisTurn: {},
+        leader: leader || null // Store leader reference
       };
+
+      if (leader) {
+        newState.battleLog = addLogEntry(newState, `👑 ${leader.name}加入指挥！`, 'system');
+      }
       newState.battleLog = addLogEntry(newState, '🎮 游戏开始！准备迎接挑战...', 'system');
       return newState;
     }

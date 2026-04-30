@@ -1,0 +1,59 @@
+[
+  {
+    "id": "leader_halsey",
+    "type": "leader",
+    "name": "哈尔西",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_1.jpeg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "combat_boost",
+        "trigger": "combat",
+        "name": "蛮牛",
+        "description": "战斗阶段，如果空军单位对海战斗力不为0，则其对海战斗力额外+1",
+        "effect": {
+          "target": "air_units_with_sea_power",
+          "stat": "seaPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "威廉·哈尔西，美国海军五星上将，以激进的战术风格著称"
+  },
+  {
+    "id": "leader_ozawa",
+    "type": "leader",
+    "name": "小泽治三郎",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_6.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "modify_draw_count",
+        "trigger": "phase_start",
+        "name": "战术家",
+        "description": "每回合准备阶段多摸一张手牌",
+        "effect": {
+          "phase": "draw",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "小泽治三郎，日本海军中将，航空战术专家"
+  }
+]

@@ -10,12 +10,14 @@ import BattleLog from './BattleLog';
 import CombatReportModal from './CombatReportModal';
 import PhaseTransitionModal from './PhaseTransitionModal';
 import MissionSelectionModal from './MissionSelectionModal';
+import LeaderSelectionModal from './LeaderSelectionModal';
 import BattlefieldConditions from './BattlefieldConditions';
 
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
 import missionCardsData from '../data/cards/mission.json';
 import missionPhase1Data from '../data/cards/mission_phase1.json';
+import leaderCardsData from '../data/cards/leader.json';
 import gameConfig from '../data/config.json';
 import { createCard } from '../models/Card';
 import { shuffleDeck } from '../core/CardEngine';
@@ -41,11 +43,18 @@ function GameBoard() {
   // Strategic Phase System modals
   const [showPhaseTransitionModal, setShowPhaseTransitionModal] = useState(false);
   const [showMissionSelectionModal, setShowMissionSelectionModal] = useState(false);
+  // Leader selection
+  const [showLeaderSelectionModal, setShowLeaderSelectionModal] = useState(false);
+  const [selectedLeader, setSelectedLeader] = useState(null);
+  const [availableLeaders, setAvailableLeaders] = useState([]);
 
-  // 初始化游戏
+  // 初始化游戏 - 显示领袖选择
   useEffect(() => {
     if (!gameInitialized && state.zones.discard.length === 0) {
-      initializeGame();
+      // Load available leaders
+      const leaders = leaderCardsData.map((l, idx) => createCard(l, `${l.id}_${idx}`));
+      setAvailableLeaders(leaders);
+      setShowLeaderSelectionModal(true);
       setGameInitialized(true);
     }
   }, [gameInitialized, state.zones.discard.length]);
@@ -128,7 +137,14 @@ function GameBoard() {
     }
   }, [state.pendingInteraction]);
 
-  const initializeGame = () => {
+  const handleLeaderSelected = (leader) => {
+    setSelectedLeader(leader);
+    setShowLeaderSelectionModal(false);
+    // Initialize game with selected leader
+    initializeGame(leader);
+  };
+
+  const initializeGame = (leader) => {
     try {
       // 创建初始牌组（5张初级补给卡）
       const starterCard = combatCardsData.find(c => c.id === gameConfig.game.starterCardId);
@@ -173,18 +189,20 @@ function GameBoard() {
       }
     });
 
-    // Initialize game with filtered cards
+    // Initialize game with filtered cards and leader
     actions.initGame(
       starterDeck,
       missions,
       essentialShopCards,
       randomShopDeck,
-      gameConfig.game.randomShopSlots || 6
+      gameConfig.game.randomShopSlots || 6,
+      leader  // Pass leader card
     );
 
-      // Start phase 1 immediately after init
+      // Start phase 1 and show phase transition modal
       setTimeout(() => {
         actions.startPhase(initialPhase);
+        setShowPhaseTransitionModal(true);
       }, 100);
     } catch (error) {
       console.error('Game initialization error:', error);
@@ -736,6 +754,16 @@ function GameBoard() {
         <CombatReportModal
           report={currentReport}
           onClose={handleCloseCombatReport}
+        />
+      )}
+
+      {/* 领袖选择弹窗 */}
+      {showLeaderSelectionModal && availableLeaders.length > 0 && (
+        <LeaderSelectionModal
+          leaders={availableLeaders}
+          onSelectLeader={handleLeaderSelected}
+          onCardHover={setHoveredCard}
+          onCardHoverEnd={() => setHoveredCard(null)}
         />
       )}
 

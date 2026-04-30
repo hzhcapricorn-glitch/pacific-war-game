@@ -24,6 +24,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
 
   const isTapped = card.status === 'tapped';
   const isMission = card.type === 'mission';
+  const isLeader = card.type === 'leader';
 
   // 获取难度显示文本
   const getDifficultyText = () => {
@@ -208,6 +209,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
             </div>
             <div className="detail-type-badge">
               {isMission ? '任务卡' :
+               isLeader ? '领袖' :
                card.cardCategory === 'tactical' ? '战术卡' :
                card.cardCategory === 'logistics' ? '后勤卡' :
                card.unitType === 'air' ? '单位：空军' :
@@ -224,6 +226,13 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
                   {getMissionRequirementLine()}
                 </div>
                 {card.reward && <div className="detail-mission-reward">✓ {card.reward.description}</div>}
+              </>
+            ) : isLeader ? (
+              <>
+                {/* 领袖卡：只显示能力，不显示战斗力 */}
+                {getAbilityDescriptions().map((desc, idx) => (
+                  <div key={idx} className="detail-ability-text leader-ability">{desc}</div>
+                ))}
               </>
             ) : (
               <>
@@ -248,13 +257,13 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         // 简略视图
         <div className="card-compact">
           <div className="card-name">{card.name}</div>
-          {!isMission && (
+          {!isMission && !isLeader && (
             <div className="card-price-line">
               {card.cost > 0 && <span className="cost">💰{card.cost}</span>}
               {card.redeployCost > 0 && <span className="redeploy-cost">🛠️{card.redeployCost}</span>}
             </div>
           )}
-          {isMission && card.image && (
+          {(isMission || isLeader) && card.image && (
             <div className="card-compact-image">
               <img
                 src={card.image}
@@ -265,35 +274,37 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
               />
             </div>
           )}
-          <div className="card-stats-compact">
-            {isMission ? (
-              <>
-                <span className="combat-requirement">
-                  <div className="requirement-icon">💣</div>
-                  <div className="requirement-value">{card.requiredGroundPower || 0}</div>
-                </span>
-                <span className="combat-requirement">
-                  <div className="requirement-icon">🌊</div>
-                  <div className="requirement-value">{card.requiredSeaPower || 0}</div>
-                </span>
-                <span className="combat-requirement">
-                  <div className="requirement-icon">🎯</div>
-                  <div className="requirement-value">{card.requiredAirDefense || 0}</div>
-                </span>
-                <span className="combat-requirement">
-                  <div className="requirement-icon">✈️</div>
-                  <div className="requirement-value">{card.requiredAirSuperiority || 0}</div>
-                </span>
-              </>
-            ) : (
-              <>
-                {card.groundPower > 0 && <span className="combat">💣{card.groundPower}</span>}
-                {card.seaPower > 0 && <span className="combat">🌊{card.seaPower}</span>}
-                {card.airPower > 0 && <span className="combat">✈️{card.airPower}</span>}
-              </>
-            )}
-          </div>
-          {!isMission && getAbilityNames().length > 0 && (
+          {!isLeader && (
+            <div className="card-stats-compact">
+              {isMission ? (
+                <>
+                  <span className="combat-requirement">
+                    <div className="requirement-icon">💣</div>
+                    <div className="requirement-value">{card.requiredGroundPower || 0}</div>
+                  </span>
+                  <span className="combat-requirement">
+                    <div className="requirement-icon">🌊</div>
+                    <div className="requirement-value">{card.requiredSeaPower || 0}</div>
+                  </span>
+                  <span className="combat-requirement">
+                    <div className="requirement-icon">🎯</div>
+                    <div className="requirement-value">{card.requiredAirDefense || 0}</div>
+                  </span>
+                  <span className="combat-requirement">
+                    <div className="requirement-icon">✈️</div>
+                    <div className="requirement-value">{card.requiredAirSuperiority || 0}</div>
+                  </span>
+                </>
+              ) : (
+                <>
+                  {card.groundPower > 0 && <span className="combat">💣{card.groundPower}</span>}
+                  {card.seaPower > 0 && <span className="combat">🌊{card.seaPower}</span>}
+                  {card.airPower > 0 && <span className="combat">✈️{card.airPower}</span>}
+                </>
+              )}
+            </div>
+          )}
+          {!isMission && !isLeader && getAbilityNames().length > 0 && (
             <div className="card-abilities-compact">
               {getAbilityNames().map((name, idx) => (
                 <span key={idx} className="ability-name">{name}</span>
