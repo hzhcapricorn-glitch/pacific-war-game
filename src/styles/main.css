@@ -992,6 +992,21 @@ button:disabled {
   transform: translateY(-1px);
 }
 
+.phase-info-row {
+  display: flex;
+  gap: 20px;
+}
+
+.phase-info-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.phase-info-right {
+  flex: 1;
+  min-width: 0;
+}
+
 .mission-tabs {
   margin-bottom: 20px;
 }

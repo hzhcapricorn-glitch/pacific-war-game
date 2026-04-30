@@ -86,13 +86,20 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
               ))}
             </div>
 
-            {/* 战场局势 */}
-            <BattlefieldConditions conditions={phaseData.battlefieldConditions} />
+            {/* 战场局势和卡牌变更 */}
+            <div className="phase-info-row">
+              {/* 战场局势 */}
+              <div className="phase-info-left">
+                <BattlefieldConditions conditions={phaseData.battlefieldConditions} />
+              </div>
 
-            {/* 受影响的卡牌 */}
-            <div className="affected-cards-info">
-              <h4>卡牌变更</h4>
-              <p>{getAffectedCardsText()}</p>
+              {/* 受影响的卡牌 */}
+              <div className="phase-info-right">
+                <div className="affected-cards-info">
+                  <h4>卡牌变更</h4>
+                  <p>{getAffectedCardsText()}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
