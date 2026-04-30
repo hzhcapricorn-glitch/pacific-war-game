@@ -3,6 +3,12 @@ import { GamePhase, getNextPhase } from '../models/GamePhase';
 import { drawCards, moveCard, setCardStatus, shuffleDeck, createDeck } from './CardEngine';
 import { getCardAbilityEffects, isSupplyCard } from '../models/Card';
 import { processAbilities, getCardDestination, applyAbilityResults } from './AbilitySystem';
+import {
+  loadPhaseData,
+  loadPhaseMissions,
+  applyPhaseTransition,
+  checkPhaseComplete
+} from './PhaseSystem';
 
 /**
  * 初始游戏状态
@@ -36,7 +42,15 @@ const initialState = {
   battleLog: [], // 战场简讯日志（最多20条）
   combatReports: [], // 战斗简报历史（完整战斗结果）
   retireUsedThisTurn: false, // 退役能力本回合是否已使用
-  usedAbilitiesThisTurn: {} // 追踪本回合已使用的能力（用于once_per_turn约束）
+  usedAbilitiesThisTurn: {}, // 追踪本回合已使用的能力（用于once_per_turn约束）
+
+  // Strategic Phase System
+  currentPhase: 1, // Current strategic phase number
+  phaseData: null, // Current phase definition
+  availableMissions: [], // All missions for current phase
+  turnsRemaining: 15, // Countdown timer
+  battlefieldConditions: [], // Active buffs/debuffs
+  completedMissions: {} // Track completed missions by phase
 };
 
 const MAX_LOG_ENTRIES = 20;
@@ -74,7 +88,11 @@ const ActionTypes = {
   RETIRE_CARD: 'RETIRE_CARD',
   CLEAR_PENDING_INTERACTION: 'CLEAR_PENDING_INTERACTION',
   SCOUT_AND_TAP: 'SCOUT_AND_TAP',
-  TRIGGER_DEPLOYED_ABILITY: 'TRIGGER_DEPLOYED_ABILITY'
+  TRIGGER_DEPLOYED_ABILITY: 'TRIGGER_DEPLOYED_ABILITY',
+  // Strategic Phase System
+  START_PHASE: 'START_PHASE',
+  SELECT_MISSION: 'SELECT_MISSION',
+  COMPLETE_MISSION: 'COMPLETE_MISSION'
 };
 
 /**
@@ -153,9 +171,33 @@ function gameStateReducer(state, action) {
         ...state,
         phase: nextPhase,
         turn: isNewTurn ? state.turn + 1 : state.turn,
+        turnsRemaining: isNewTurn && state.turnsRemaining > 0 ? state.turnsRemaining - 1 : state.turnsRemaining,
         retireUsedThisTurn: isNewTurn ? false : state.retireUsedThisTurn,
         usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn
       };
+
+      // Check for phase completion at start of new turn
+      if (isNewTurn && state.phaseData) {
+        const phaseComplete = checkPhaseComplete(newState);
+        if (phaseComplete) {
+          // Main mission complete - ready for next phase
+          // Note: Actual phase transition will be triggered by user interaction
+          newState.battleLog = addLogEntry(
+            newState,
+            `✅ 阶段「${state.phaseData.name}」主线任务完成！`,
+            'system'
+          );
+        } else if (newState.turnsRemaining === 0) {
+          // Out of time - game over
+          newState.battleLog = addLogEntry(
+            newState,
+            `⏰ 时间耗尽！未能完成主线任务「${state.currentMission?.name}」`,
+            'system'
+          );
+          // Trigger game over
+          newState.phase = GamePhase.GAME_OVER;
+        }
+      }
 
       // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
       if (isNewTurn && state.turn >= 1) {
@@ -428,11 +470,35 @@ function gameStateReducer(state, action) {
       let newMissions = [...state.missions];
       let newCurrentMission = state.currentMission;
       let newStats = { ...state.stats };
+      let newCompletedMissions = { ...state.completedMissions };
 
       if (victory) {
-        // 移除完成的任务
-        newMissions = newMissions.slice(1);
-        newCurrentMission = newMissions[0] || null;
+        // Check if this is a phase mission
+        if (state.currentMission && state.currentMission.phase) {
+          // Mark mission as complete
+          const phaseKey = `phase_${state.currentPhase}`;
+          const phaseCompletion = newCompletedMissions[phaseKey] || { main: false, side: [] };
+
+          if (state.currentMission.type === 'main') {
+            newCompletedMissions[phaseKey] = {
+              ...phaseCompletion,
+              main: true
+            };
+          } else if (state.currentMission.type === 'side') {
+            newCompletedMissions[phaseKey] = {
+              ...phaseCompletion,
+              side: [...phaseCompletion.side, state.currentMission.id]
+            };
+          }
+
+          // Remove completed mission from available missions
+          // (Current mission will remain displayed until user advances phase)
+        } else {
+          // Old mission system: remove from mission list
+          newMissions = newMissions.slice(1);
+          newCurrentMission = newMissions[0] || null;
+        }
+
         newStats.battlesWon++;
       }
 
@@ -475,7 +541,8 @@ function gameStateReducer(state, action) {
         missions: newMissions,
         currentMission: newCurrentMission,
         selectedForCombat: [],
-        stats: newStats
+        stats: newStats,
+        completedMissions: newCompletedMissions
       };
 
       // 添加战斗日志
@@ -751,6 +818,92 @@ function gameStateReducer(state, action) {
       };
     }
 
+    case ActionTypes.START_PHASE: {
+      const { phaseNumber } = action.payload;
+
+      // Load phase data
+      const phaseData = loadPhaseData(phaseNumber);
+      const phaseMissions = loadPhaseMissions(phaseNumber);
+
+      // Apply phase transition (handle card lifecycle)
+      let newState = applyPhaseTransition(state, phaseData);
+
+      // Set up new phase
+      newState = {
+        ...newState,
+        currentPhase: phaseNumber,
+        phaseData: phaseData,
+        availableMissions: phaseMissions,
+        currentMission: phaseMissions.find(m => m.id === phaseData.mainMission) || phaseMissions[0],
+        turnsRemaining: phaseData.turnLimit,
+        battlefieldConditions: phaseData.battlefieldConditions || [],
+        completedMissions: {
+          ...state.completedMissions,
+          [`phase_${phaseNumber}`]: { main: false, side: [] }
+        }
+      };
+
+      // Add log
+      newState.battleLog = addLogEntry(
+        newState,
+        `🎯 进入新阶段：${phaseData.name}（剩余${phaseData.turnLimit}回合）`,
+        'system'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.SELECT_MISSION: {
+      const { missionId } = action.payload;
+      const mission = state.availableMissions.find(m => m.id === missionId);
+
+      if (!mission) return state;
+
+      const newState = {
+        ...state,
+        currentMission: mission
+      };
+
+      newState.battleLog = addLogEntry(
+        newState,
+        `📋 切换任务：${mission.name}`,
+        'system'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.COMPLETE_MISSION: {
+      const { missionId, missionType } = action.payload;
+
+      const phaseKey = `phase_${state.currentPhase}`;
+      const phaseCompletion = state.completedMissions[phaseKey] || { main: false, side: [] };
+
+      let newCompletedMissions;
+      if (missionType === 'main') {
+        newCompletedMissions = {
+          ...state.completedMissions,
+          [phaseKey]: {
+            ...phaseCompletion,
+            main: true
+          }
+        };
+      } else {
+        newCompletedMissions = {
+          ...state.completedMissions,
+          [phaseKey]: {
+            ...phaseCompletion,
+            side: [...phaseCompletion.side, missionId]
+          }
+        };
+      }
+
+      return {
+        ...state,
+        completedMissions: newCompletedMissions
+      };
+    }
+
     default:
       return state;
   }
@@ -867,6 +1020,19 @@ export function GameStateProvider({ children }) {
 
     sortDeployed: useCallback(() => {
       dispatch({ type: ActionTypes.SORT_DEPLOYED });
+    }, []),
+
+    // Strategic Phase System Actions
+    startPhase: useCallback((phaseNumber) => {
+      dispatch({ type: ActionTypes.START_PHASE, payload: { phaseNumber } });
+    }, []),
+
+    selectMission: useCallback((missionId) => {
+      dispatch({ type: ActionTypes.SELECT_MISSION, payload: { missionId } });
+    }, []),
+
+    completeMission: useCallback((missionId, missionType) => {
+      dispatch({ type: ActionTypes.COMPLETE_MISSION, payload: { missionId, missionType } });
     }, [])
   };
 

@@ -1,0 +1,21 @@
+{
+  "id": "phase_1_defensive",
+  "name": "防御性反击",
+  "historicalContext": "1942年，珍珠港事件后，美国太平洋舰队损失惨重。日军占据太平洋战场主动权，美军需要在防御中寻找反击机会。中途岛海战将是扭转战局的关键一战，同时需要在其他战线牵制日军兵力，为决战争取时间。",
+  "turnLimit": 15,
+  "mainMission": "mission_midway",
+  "sideMissions": ["mission_coral_sea", "mission_darwin", "mission_aleutian"],
+  "battlefieldConditions": [
+    {
+      "id": "pearl_harbor_debuff",
+      "name": "珍珠港偷袭",
+      "description": "战列舰暂时无法在商店获得",
+      "effect": {
+        "type": "block_shop_card",
+        "cardIds": ["basic_battleship", "advanced_battleship"]
+      }
+    }
+  ],
+  "cardsToRetire": [],
+  "cardsToAdd": []
+}
