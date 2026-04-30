@@ -491,8 +491,8 @@ function gameStateReducer(state, action) {
             };
           }
 
-          // Remove completed mission from available missions
-          // (Current mission will remain displayed until user advances phase)
+          // Process mission rewards (will be applied in newState below)
+          // Note: Actual reward application happens after creating newState
         } else {
           // Old mission system: remove from mission list
           newMissions = newMissions.slice(1);
@@ -598,6 +598,45 @@ function gameStateReducer(state, action) {
         if (cardsLost.length > 0) {
           const lossLog = `💔 战斗损失 ${cardsLost.length} 张卡牌，已返回商店`;
           newState.battleLog = addLogEntry(newState, lossLog, 'loss');
+        }
+      }
+
+      // Apply mission rewards if victory
+      if (victory && state.currentMission && state.currentMission.reward) {
+        const reward = state.currentMission.reward;
+
+        // Extra turns reward
+        if (reward.extraTurns) {
+          newState.turnsRemaining += reward.extraTurns;
+          newState.battleLog = addLogEntry(
+            newState,
+            `⏰ 任务奖励：增加${reward.extraTurns}回合`,
+            'reward'
+          );
+        }
+
+        // Card reward (create new card instance)
+        if (reward.card) {
+          // Note: Card creation would require importing card data
+          // For now, log it - implementation can be added later
+          newState.battleLog = addLogEntry(
+            newState,
+            `🎁 任务奖励：获得卡牌「${reward.card}」`,
+            'reward'
+          );
+        }
+
+        // Battlefield buff reward
+        if (reward.battlefieldBuff) {
+          newState.battlefieldConditions = [
+            ...newState.battlefieldConditions,
+            reward.battlefieldBuff
+          ];
+          newState.battleLog = addLogEntry(
+            newState,
+            `⚡ 任务奖励：获得战场增益「${reward.battlefieldBuff.name}」`,
+            'reward'
+          );
         }
       }
 

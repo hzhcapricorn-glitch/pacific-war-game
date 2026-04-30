@@ -15,11 +15,13 @@ import BattlefieldConditions from './BattlefieldConditions';
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
 import missionCardsData from '../data/cards/mission.json';
+import missionPhase1Data from '../data/cards/mission_phase1.json';
 import gameConfig from '../data/config.json';
 import { createCard } from '../models/Card';
 import { shuffleDeck } from '../core/CardEngine';
 import { resolveCombat, getCombatSummary, calculateCombatPower, calculateAllFirePowers } from '../core/CombatSystem';
 import { canParticipateInCombat } from '../core/AbilitySystem';
+import { loadPhaseData, isCardBlockedByConditions, getEffectiveDrawCount } from '../core/PhaseSystem';
 
 /**
  * GameBoard Component - 主游戏面板
@@ -61,10 +63,11 @@ function GameBoard() {
           actions.nextPhase();
         }, 500); // 延迟500ms让玩家看到阶段变化
       }
-      // 抽卡阶段：自动抽卡
+      // 抽卡阶段：自动抽卡（考虑战场局势的影响）
       else if (currentPhase === GamePhase.DRAW) {
         setTimeout(() => {
-          actions.drawCards(gameConfig.phases.drawCount);
+          const drawCount = getEffectiveDrawCount(state);
+          actions.drawCards(drawCount);
           actions.nextPhase();
         }, 500);
       }
@@ -95,6 +98,21 @@ function GameBoard() {
     }
   }, [state.supply]);
 
+  // Monitor for phase completion and show transition modal
+  useEffect(() => {
+    if (!gameInitialized || !state.phaseData) return;
+
+    // Check if main mission is complete
+    const phaseKey = `phase_${state.currentPhase}`;
+    const phaseCompletion = state.completedMissions[phaseKey];
+
+    if (phaseCompletion && phaseCompletion.main && state.turnsRemaining > 0) {
+      // Main mission complete - could trigger next phase
+      // For phase 1, this is the end of the game for now
+      console.log('Phase complete! Main mission accomplished.');
+    }
+  }, [state.completedMissions, state.phase, gameInitialized, state.phaseData]);
+
   // 监听pending interaction（如retire能力、快速响应能力）
   useEffect(() => {
     if (state.pendingInteraction) {
@@ -118,11 +136,19 @@ function GameBoard() {
       starterDeck.push(createCard(starterCard, `${starterCard.id}_starter_${i}`));
     }
 
-    // 创建任务卡牌
-    const missions = missionCardsData.map((m, idx) => createCard(m, `${m.id}_${idx}`));
+    // Load phase 1 data
+    const phase1Data = loadPhaseData(1);
+    const initialPhase = 1;
 
-    // 创建商店卡牌（排除初级补给卡）
-    const shopCardDefinitions = combatCardsData.filter(c => c.id !== gameConfig.game.starterCardId);
+    // Use phase 1 missions instead of old missions
+    const missions = missionPhase1Data.map((m, idx) => createCard(m, `${m.id}_${idx}`));
+
+    // Filter shop cards by appearPhase (only cards that appear in phase 1)
+    const shopCardDefinitions = combatCardsData.filter(c =>
+      c.id !== gameConfig.game.starterCardId && // Exclude starter card
+      c.appearPhase <= initialPhase && // Card appears at or before this phase
+      (c.retirePhase === null || c.retirePhase > initialPhase) // Card hasn't retired yet
+    );
 
     // 分离必要卡牌和随机卡牌
     const essentialCardDefs = shopCardDefinitions.filter(c => c.shopType === 'essential');
@@ -146,6 +172,7 @@ function GameBoard() {
       }
     });
 
+    // Initialize game with filtered cards
     actions.initGame(
       starterDeck,
       missions,
@@ -153,6 +180,11 @@ function GameBoard() {
       randomShopDeck,
       gameConfig.game.randomShopSlots || 6
     );
+
+    // Start phase 1 immediately after init
+    setTimeout(() => {
+      actions.startPhase(initialPhase);
+    }, 100);
   };
 
   const handleNextPhase = () => {
@@ -549,9 +581,15 @@ function GameBoard() {
           {/* 商店区 */}
           <div className="top-zone">
             <Shop
-              essentialShopCards={state.zones.essentialShop || []}
-              randomShopCards={state.zones.randomShop || []}
-              allEssentialCardTypes={combatCardsData.filter(c => c.shopType === 'essential')}
+              essentialShopCards={(state.zones.essentialShop || []).filter(
+                card => !isCardBlockedByConditions(card, state)
+              )}
+              randomShopCards={(state.zones.randomShop || []).filter(
+                card => !isCardBlockedByConditions(card, state)
+              )}
+              allEssentialCardTypes={combatCardsData.filter(c =>
+                c.shopType === 'essential' && !isCardBlockedByConditions(c, state)
+              )}
               onCardClick={handleShopCardClick}
               onCardHover={setHoveredCard}
               onCardHoverEnd={() => setHoveredCard(null)}
