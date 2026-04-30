@@ -12,13 +12,13 @@ import BattlefieldConditions from './BattlefieldConditions';
  * - 受影响的卡牌（新增/退役）
  */
 function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCardHoverEnd }) {
-  const [selectedMissionId, setSelectedMissionId] = useState(phaseData.mainMission);
+  const [hoveredMissionId, setHoveredMissionId] = useState(phaseData.mainMission);
 
   if (!phaseData || !missions) {
     return null;
   }
 
-  const currentMission = missions.find(m => m.id === selectedMissionId);
+  const hoveredMission = missions.find(m => m.id === hoveredMissionId);
   const mainMission = missions.find(m => m.id === phaseData.mainMission);
   const sideMissions = missions.filter(m => m.missionType === 'side');
 
@@ -40,54 +40,64 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
   return (
     <div className="modal-overlay">
       <div className="phase-transition-modal">
-        {/* 标题区域 */}
-        <div className="modal-header">
-          <h2>{phaseData.name}</h2>
-          <div className="phase-turn-limit">
-            剩余回合：{phaseData.turnLimit}
+        {/* 阶段信息区域 */}
+        <div className="phase-info-header">
+          <div className="phase-info-top">
+            <h2>{phaseData.name}</h2>
+            <span className="phase-turns">剩余 {phaseData.turnLimit} 回合</span>
+            <button className="modal-close-inline" onClick={onClose}>开始行动</button>
+          </div>
+          <div className="phase-context-text">
+            {phaseData.historicalContext}
           </div>
         </div>
 
-        {/* 历史背景 */}
-        <div className="phase-context">
-          <p>{phaseData.historicalContext}</p>
-        </div>
+        {/* 任务选择和详情区域 */}
+        <div className="phase-transition-content">
+          {/* 左侧：任务列表和战场局势 */}
+          <div className="phase-mission-section">
+            <h3>阶段任务</h3>
 
-        {/* 主要内容区域 */}
-        <div className="modal-content-wrapper">
-          {/* 左侧：任务选择和战场局势 */}
-          <div className="modal-left-section">
-            {/* 任务标签页 */}
-            <div className="mission-tabs">
-              <div className="mission-tabs-header">
-                <button
-                  className={`mission-tab ${selectedMissionId === mainMission.id ? 'active' : ''}`}
-                  onClick={() => setSelectedMissionId(mainMission.id)}
+            {/* 主线任务 */}
+            <div className="mission-row">
+              <div className="mission-row-label">主线</div>
+              <div className="mission-cards-horizontal">
+                <div
+                  className="mission-card-compact"
+                  onMouseEnter={() => setHoveredMissionId(mainMission.id)}
+                  onMouseLeave={() => setHoveredMissionId(null)}
                 >
-                  主线：{mainMission.name}
-                </button>
-                {sideMissions.map(mission => (
-                  <button
-                    key={mission.id}
-                    className={`mission-tab ${selectedMissionId === mission.id ? 'active' : ''}`}
-                    onClick={() => setSelectedMissionId(mission.id)}
-                  >
-                    支线：{mission.name}
-                  </button>
-                ))}
-              </div>
-
-              {/* 当前选中任务卡牌 */}
-              {currentMission && (
-                <div className="mission-card-display">
                   <Card
-                    card={currentMission}
+                    card={mainMission}
                     onHover={onCardHover}
                     onHoverEnd={onCardHoverEnd}
                   />
                 </div>
-              )}
+              </div>
             </div>
+
+            {/* 支线任务 */}
+            {sideMissions.length > 0 && (
+              <div className="mission-row">
+                <div className="mission-row-label">支线</div>
+                <div className="mission-cards-horizontal">
+                  {sideMissions.map(mission => (
+                    <div
+                      key={mission.id}
+                      className="mission-card-compact"
+                      onMouseEnter={() => setHoveredMissionId(mission.id)}
+                      onMouseLeave={() => setHoveredMissionId(null)}
+                    >
+                      <Card
+                        card={mission}
+                        onHover={onCardHover}
+                        onHoverEnd={onCardHoverEnd}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 战场局势 */}
             <BattlefieldConditions conditions={phaseData.battlefieldConditions} />
@@ -99,17 +109,15 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
             </div>
           </div>
 
-          {/* 右侧：预留给详细信息面板使用 */}
-          <div className="modal-right-spacer">
-            {/* 空白区域，确保不遮挡右侧详细信息面板 */}
+          {/* 右侧：详细信息面板 */}
+          <div className="phase-detail-panel">
+            {hoveredMission && (
+              <Card
+                card={hoveredMission}
+                showDetailed={true}
+              />
+            )}
           </div>
-        </div>
-
-        {/* 按钮区域 */}
-        <div className="modal-footer">
-          <button className="btn-primary" onClick={onClose}>
-            开始行动
-          </button>
         </div>
       </div>
     </div>
