@@ -738,3 +738,354 @@ button:disabled {
 .log-link:hover {
   color: #c084fc;
 }
+
+/* ==========================================
+   Battlefield Conditions Component
+   ========================================== */
+.battlefield-conditions {
+  background: rgba(26, 32, 44, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.conditions-header h4 {
+  font-size: 14px;
+  color: #a0aec0;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.condition-detail-area {
+  background: rgba(45, 55, 72, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 8px;
+  min-height: 60px;
+  margin-bottom: 8px;
+}
+
+.condition-detail-placeholder {
+  color: #718096;
+  font-size: 12px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.condition-detail {
+  animation: fadeIn 0.2s ease-in;
+}
+
+.condition-detail-name {
+  font-weight: 600;
+  color: #edf2f7;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.condition-detail-description {
+  font-size: 12px;
+  color: #cbd5e0;
+  line-height: 1.4;
+}
+
+.conditions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.condition-item {
+  background: rgba(45, 55, 72, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.condition-item:hover {
+  background: rgba(66, 153, 225, 0.2);
+  border-color: rgba(66, 153, 225, 0.4);
+  transform: translateX(2px);
+}
+
+/* ==========================================
+   Modal Components (Shared Styles)
+   ========================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.phase-transition-modal,
+.mission-selection-modal {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border: 2px solid rgba(66, 153, 225, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease-out;
+}
+
+.modal-header {
+  background: rgba(26, 32, 44, 0.8);
+  border-bottom: 2px solid rgba(66, 153, 225, 0.3);
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  color: #63b3ed;
+  margin: 0;
+}
+
+.phase-turn-limit,
+.phase-info-compact {
+  font-size: 14px;
+  color: #a0aec0;
+  background: rgba(45, 55, 72, 0.6);
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.phase-context {
+  background: rgba(45, 55, 72, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+}
+
+.phase-context p {
+  font-size: 14px;
+  color: #cbd5e0;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.modal-content-wrapper {
+  display: flex;
+  padding: 20px 24px;
+  gap: 20px;
+}
+
+.modal-left-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-right-spacer {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.modal-footer {
+  background: rgba(26, 32, 44, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ==========================================
+   Phase Transition Modal Specific
+   ========================================== */
+.mission-tabs {
+  margin-bottom: 20px;
+}
+
+.mission-tabs-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.mission-tab {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  background: rgba(45, 55, 72, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #a0aec0;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.mission-tab:hover {
+  background: rgba(66, 153, 225, 0.2);
+  border-color: rgba(66, 153, 225, 0.4);
+  color: #63b3ed;
+}
+
+.mission-tab.active {
+  background: rgba(66, 153, 225, 0.3);
+  border-color: rgba(66, 153, 225, 0.6);
+  color: #63b3ed;
+  font-weight: 600;
+}
+
+.mission-card-display {
+  background: rgba(45, 55, 72, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.affected-cards-info {
+  margin-top: 16px;
+  background: rgba(26, 32, 44, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.affected-cards-info h4 {
+  font-size: 14px;
+  color: #a0aec0;
+  margin-bottom: 8px;
+}
+
+.affected-cards-info p {
+  font-size: 13px;
+  color: #cbd5e0;
+  margin: 0;
+}
+
+/* ==========================================
+   Mission Selection Modal Specific
+   ========================================== */
+.mission-section {
+  margin-bottom: 20px;
+}
+
+.mission-section h3 {
+  font-size: 16px;
+  color: #63b3ed;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(66, 153, 225, 0.3);
+}
+
+.mission-card-item {
+  position: relative;
+  background: rgba(45, 55, 72, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mission-card-item:hover {
+  background: rgba(66, 153, 225, 0.15);
+  border-color: rgba(66, 153, 225, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+}
+
+.mission-card-item.current {
+  border-color: rgba(72, 187, 120, 0.6);
+  background: rgba(72, 187, 120, 0.1);
+}
+
+.mission-current-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #48bb78;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* ==========================================
+   Animations
+   ========================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================
+   Button Variants
+   ========================================== */
+.btn-primary {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(66, 153, 225, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(74, 85, 104, 0.8);
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(74, 85, 104, 1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
