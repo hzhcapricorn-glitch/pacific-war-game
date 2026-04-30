@@ -852,6 +852,7 @@ function gameStateReducer(state, action) {
       if (state.zones.deployed.length === 0) return state;
 
       const getCardOrder = (card) => {
+        if (card.type === 'leader') return -1; // Leader always first
         if (card.cardCategory === 'logistics' || card.cardCategory === 'tactical') return 0;
         if (card.unitType === 'navy') return 1;
         if (card.unitType === 'air') return 2;
@@ -971,10 +972,10 @@ export function GameStateProvider({ children }) {
 
   // Actions
   const actions = {
-    initGame: useCallback((starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots) => {
+    initGame: useCallback((starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader) => {
       dispatch({
         type: ActionTypes.INIT_GAME,
-        payload: { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots }
+        payload: { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader }
       });
     }, []),
 
