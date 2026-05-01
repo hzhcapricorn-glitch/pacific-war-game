@@ -4,7 +4,7 @@
 
 /**
  * Battlefield condition effect types
- * @typedef {'block_shop_card' | 'modify_draw_count' | 'modify_max_supply' | 'add_combat_power' | 'modify_air_slots' | 'modify_shop_refresh_count'} ConditionEffectType
+ * @typedef {'block_shop_card' | 'modify_draw_count' | 'modify_max_supply' | 'add_combat_power' | 'modify_air_slots' | 'modify_shop_refresh_count' | 'reduce_mission_requirement' | 'increase_mission_requirement' | 'reduce_random_loss' | 'increase_random_loss'} ConditionEffectType
  */
 
 /**
@@ -14,6 +14,7 @@
  * @property {number} [value] - Numeric value for the effect
  * @property {string[]} [cardIds] - Card IDs affected by the effect
  * @property {string} [powerType] - Type of power affected (ground/sea/air)
+ * @property {string} [stat] - Stat to modify (groundPower/seaPower/airDefense/airSuperiority)
  */
 
 /**
@@ -22,7 +23,8 @@
  * @property {string} id - Unique condition ID
  * @property {string} name - Display name
  * @property {string} description - Full description
- * @property {ConditionEffect} effect - Game effect of this condition
+ * @property {boolean} [isBuff] - True if buff, false if debuff
+ * @property {ConditionEffect|ConditionEffect[]} effect - Single effect or array of effects
  */
 
 /**

@@ -1,5 +1,6 @@
 import { getCardFirePower } from '../models/Card';
 import { processAbilities, hasProtectAbility, getHeavyArmorValue, hasReturnToBaseAbility } from './AbilitySystem';
+import { applyBuffsToMissionRequirements, applyBuffsToLossCount } from './BuffSystem';
 
 /**
  * CombatSystem - 处理战斗相关的逻辑（太平洋战争版本）
@@ -225,13 +226,16 @@ export function applyReward(reward, gameState) {
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
  * @returns {Object} { lostCardIds: Array, damageDetails: Array }
  */
-export function calculateLosses(participatingCards, loss, airDefenseSufficient) {
+export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = []) {
   if (!loss || !loss.randomLoss || loss.randomLoss === 0 || participatingCards.length === 0) {
     return { lostCardIds: [], damageDetails: [] };
   }
 
+  // 应用战场buff修改损失数量
+  let baseLoss = applyBuffsToLossCount(loss.randomLoss, battlefieldConditions);
+
   // 对空火力不足时损失加倍
-  let lossCount = loss.randomLoss;
+  let lossCount = baseLoss;
   if (!airDefenseSufficient) {
     lossCount *= 2;
   }
@@ -341,12 +345,12 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
 export function resolveCombat(selectedCards, mission, gameState) {
   // 计算己方火力（包括combat_boost能力和任务约束）
   const attackPowers = calculateAllFirePowers(selectedCards, { state: gameState, mission });
-  const requiredPowers = {
-    groundPower: mission.requiredGroundPower || 0,
-    seaPower: mission.requiredSeaPower || 0,
-    airDefense: mission.requiredAirDefense || mission.requiredAirPower || 0,
-    airSuperiority: mission.requiredAirSuperiority || mission.requiredAirPower || 0
-  };
+
+  // 应用战场buff修改任务需求
+  const requiredPowers = applyBuffsToMissionRequirements(
+    mission,
+    gameState.battlefieldConditions || []
+  );
 
   // 判断胜负
   const victory = isVictorious(attackPowers, mission);
@@ -361,7 +365,12 @@ export function resolveCombat(selectedCards, mission, gameState) {
   const rewards = victory ? applyReward(mission.reward, gameState) : { supply: 0, maxSupply: 0, victory: false };
 
   // 计算损失（无论胜负都会有损失，防空不足时加倍）
-  const lossResult = calculateLosses(selectedCards, mission.loss, airDefenseSufficient);
+  const lossResult = calculateLosses(
+    selectedCards,
+    mission.loss,
+    airDefenseSufficient,
+    gameState.battlefieldConditions || []
+  );
 
   // 获取损失的卡牌对象（用于显示具体卡牌名称）
   const lostCards = selectedCards.filter(card => lossResult.lostCardIds.includes(card.instanceId));

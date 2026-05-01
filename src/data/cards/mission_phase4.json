@@ -93,8 +93,18 @@
     "requiredAirDefense": 8,
     "requiredAirSuperiority": 15,
     "reward": {
-      "description": "大规模战略轰炸摧毁日本工业，获得1张B-29超级空中堡垒",
-      "card": "b29_superfortress"
+      "description": "大规模战略轰炸摧毁日本工业，获得战场优势：东京大火",
+      "battlefieldBuff": {
+        "id": "fighter_escort",
+        "name": "东京大火",
+        "description": "空军对地火力+2，空军防空火力+3",
+        "isBuff": true,
+        "effect": {
+          "type": "add_combat_power",
+          "powerType": "air",
+          "value": 3
+        }
+      }
     },
     "loss": {
       "description": "随机损失2张参战卡牌",
@@ -103,11 +113,20 @@
     "missionConstraints": [
       {
         "type": "restrict_unit_type",
-        "unitTypes": ["army", "navy"],
+        "unitTypes": ["army"],
         "shortName": "战略轰炸",
         "name": "战略轰炸任务",
-        "message": "战略轰炸任务，只允许空军参战",
-        "description": "这是纯空军战略轰炸任务，陆军和海军无法参与"
+        "message": "战略轰炸任务，陆军无法参战",
+        "description": "这是纯空军战略轰炸任务，陆军无法参与"
+      },
+      {
+        "type": "modify_unit_power",
+        "unitTypes": ["navy"],
+        "powerType": "ground",
+        "multiplier": 0,
+        "shortName": "海军对地=0",
+        "name": "海军对地火力归零",
+        "description": "这是纯空军战略轰炸任务，海军舰炮无法参与战斗"
       }
     ],
     "flavor": "一夜之间，东京化为火海"

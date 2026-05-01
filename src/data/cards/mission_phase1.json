@@ -36,9 +36,29 @@
     "requiredAirDefense": 6,
     "requiredAirSuperiority": 5,
     "reward": {
-      "description": "胜利后获得2点补给和2点额外回合",
-      "supply": 2,
-      "extraTurns": 2
+      "description": "胜利后获得战场优势：双鹤折翼",
+      "battlefieldBuff": {
+        "id": "damaged_carriers",
+        "name": "双鹤折翼",
+        "description": "日军两艘航母受损退出战场，本阶段所有任务：防空需求-2，制空需求-2，战斗损失-1",
+        "isBuff": true,
+        "effect": [
+          {
+            "type": "reduce_mission_requirement",
+            "stat": "airDefense",
+            "value": 2
+          },
+          {
+            "type": "reduce_mission_requirement",
+            "stat": "airSuperiority",
+            "value": 2
+          },
+          {
+            "type": "reduce_random_loss",
+            "value": 1
+          }
+        ]
+      }
     },
     "loss": {
       "description": "随机损失1张参战卡牌",
