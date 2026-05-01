@@ -16,7 +16,9 @@ function Shop({
   currentPhase,
   isShopPhase,
   onDebugAddSupply,
-  onDebugRefreshShop
+  onDebugRefreshShop,
+  onDebugDrawCard,
+  onDebugUntapAll
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
@@ -75,14 +77,28 @@ function Shop({
     <div className={`shop ${!isShopPhase ? 'shop-disabled' : ''}`}>
       <div className="shop-header">
         <h3>商店</h3>
-        {onDebugAddSupply && onDebugRefreshShop && (
+        {(onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll) && (
           <div className="debug-controls-inline">
-            <button onClick={onDebugAddSupply} className="btn-debug-inline">
-              补给+10
-            </button>
-            <button onClick={onDebugRefreshShop} className="btn-debug-inline">
-              刷新商店
-            </button>
+            {onDebugAddSupply && (
+              <button onClick={onDebugAddSupply} className="btn-debug-inline">
+                补给+10
+              </button>
+            )}
+            {onDebugRefreshShop && (
+              <button onClick={onDebugRefreshShop} className="btn-debug-inline">
+                刷新商店
+              </button>
+            )}
+            {onDebugDrawCard && (
+              <button onClick={onDebugDrawCard} className="btn-debug-inline">
+                抽一张卡
+              </button>
+            )}
+            {onDebugUntapAll && (
+              <button onClick={onDebugUntapAll} className="btn-debug-inline">
+                整备所有
+              </button>
+            )}
           </div>
         )}
         <div className="supply-display">

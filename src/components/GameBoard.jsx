@@ -640,6 +640,15 @@ function GameBoard() {
               isShopPhase={state.phase === GamePhase.SHOP}
               onDebugAddSupply={() => actions.addSupply(10)}
               onDebugRefreshShop={() => actions.refreshRandomShop()}
+              onDebugDrawCard={() => actions.drawCards(1)}
+              onDebugUntapAll={() => {
+                // 整备所有部署区的整备中卡牌
+                (state.zones.deployed || []).forEach(card => {
+                  if (card.status === 'tapped') {
+                    actions.untapCard(card.instanceId);
+                  }
+                });
+              }}
             />
           </div>
 
