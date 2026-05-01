@@ -5,11 +5,12 @@ import React, { useRef, useEffect } from 'react';
  */
 function BattleLog({ logs, onReportClick }) {
   const logEndRef = useRef(null);
+  const logContentRef = useRef(null);
 
-  // 自动滚动到最新日志
+  // 自动滚动到最新日志（只在日志容器内滚动）
   useEffect(() => {
-    if (logEndRef.current) {
-      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (logContentRef.current) {
+      logContentRef.current.scrollTop = logContentRef.current.scrollHeight;
     }
   }, [logs]);
 
@@ -43,7 +44,7 @@ function BattleLog({ logs, onReportClick }) {
         <h3>战场简讯</h3>
         <span className="log-count">{logs.length} 条记录</span>
       </div>
-      <div className="log-content">
+      <div className="log-content" ref={logContentRef}>
         {logs.length === 0 ? (
           <div className="log-empty">等待战斗开始...</div>
         ) : (
