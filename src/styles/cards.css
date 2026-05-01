@@ -694,7 +694,7 @@
 }
 
 .deployed-zone {
-  min-height: 200px;
+  min-height: 280px;
   background-color: rgba(147, 197, 253, 0.15); /* 更亮的浅蓝色 */
   border: 2px dashed #3b82f6;
   position: relative;
@@ -1161,4 +1161,112 @@
 
 .zone-disabled .card {
   filter: grayscale(0.5);
+}
+
+/* ==================== Card Stack Styles ==================== */
+
+/* 堆叠容器 */
+.card-stack {
+  position: relative;
+  width: 120px;
+  flex-shrink: 0;
+  /* margin-bottom 由组件动态设置 */
+}
+
+/* X/Y 指示器 */
+.stack-indicator {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  z-index: 1000;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 全部就绪 - 绿色 */
+.stack-indicator.all-ready {
+  background: rgba(16, 185, 129, 0.95);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* 全部整备中 - 红色 */
+.stack-indicator.none-ready {
+  background: rgba(239, 68, 68, 0.95);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* 堆叠中的单个卡牌容器 */
+.card-stack-item {
+  position: absolute;
+  left: 0;
+  width: 120px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 第一张卡（最底部）完整显示，其他卡只显示下沿 */
+.card-stack-item:not(:last-child) .card {
+  clip-path: inset(calc(100% - 22px) 0 0 0);
+}
+
+/* Hover时展开完整卡牌（不移动位置，避免鼠标丢失目标） */
+.card-stack-item:hover {
+  z-index: 999 !important;
+}
+
+.card-stack-item:hover .card {
+  clip-path: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  transform: scale(1.02);
+}
+
+/* 选中卡牌完整显示（不移动，避免遮挡） */
+.card-stack-item:has(.card.selected) {
+  z-index: 500 !important;
+}
+
+.card-stack-item:has(.card.selected) .card {
+  clip-path: none;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+/* 堆叠中的选中卡牌：覆盖默认的上移效果 */
+.card-stack-item .card.selected {
+  transform: none !important;
+  border-color: #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+/* 整备动画 */
+@keyframes card-redeploy {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.card-stack-item.redeploying {
+  animation: card-redeploy 0.5s ease-in-out;
+}
+
+/* 部署区使用堆叠时的内容布局 */
+.zone-content-stacks {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 15px;
+  align-items: flex-start;
 }

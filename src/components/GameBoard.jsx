@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useGameState } from '../core/GameState.jsx';
 import { GamePhase, PhaseDisplayName } from '../models/GamePhase';
 import Card from './Card';
 import CardZone from './CardZone';
+import CardStack from './CardStack';
 import MissionDisplay from './MissionDisplay';
 import Shop from './Shop';
 import CardListModal from './CardListModal';
@@ -23,6 +24,7 @@ import { createCard } from '../models/Card';
 import { shuffleDeck } from '../core/CardEngine';
 import { resolveCombat, getCombatSummary, calculateCombatPower, calculateAllFirePowers } from '../core/CombatSystem';
 import { canParticipateInCombat } from '../core/AbilitySystem';
+import { getCardShopType, getCardShopCopies } from '../core/ShopSystem';
 import { loadPhaseData, isCardBlockedByConditions, getEffectiveDrawCount } from '../core/PhaseSystem';
 
 /**
@@ -107,8 +109,8 @@ function GameBoard() {
     }
   }, [state.supply]);
 
-  // Monitor for phase completion and show transition modal
-  useEffect(() => {
+  // Check for phase completion - will be called after combat report is closed
+  const checkForPhaseTransition = useCallback(() => {
     if (!gameInitialized || !state.phaseData) return;
 
     // Check if main mission is complete
@@ -123,22 +125,18 @@ function GameBoard() {
       const nextPhaseNumber = state.currentPhase + 1;
       try {
         // Try to load next phase data
-        const nextPhaseData = loadPhaseData(nextPhaseNumber);
+        loadPhaseData(nextPhaseNumber);
 
-        // If successful, show phase transition modal after a short delay
-        setTimeout(() => {
-          actions.startPhase(nextPhaseNumber);
-          setShowPhaseTransitionModal(true);
-        }, 1000);
+        // If successful, transition to next phase and show modal
+        actions.startPhase(nextPhaseNumber, combatCardsData);
+        setShowPhaseTransitionModal(true);
       } catch (error) {
         // No next phase - game complete!
         console.log('All phases complete! Game won!');
-        setTimeout(() => {
-          actions.gameOver();
-        }, 1000);
+        actions.gameOver();
       }
     }
-  }, [state.completedMissions, state.phase, gameInitialized, state.phaseData]);
+  }, [state.completedMissions, state.currentPhase, state.turnsRemaining, state.phaseData, gameInitialized, actions]);
 
   // 监听pending interaction（如retire能力、快速响应能力）
   useEffect(() => {
@@ -178,21 +176,20 @@ function GameBoard() {
       // Use phase 1 missions instead of old missions
       const missions = missionPhase1Data.map((m, idx) => createCard(m, `${m.id}_${idx}`));
 
-    // Filter shop cards by appearPhase (only cards that appear in phase 1)
-    const shopCardDefinitions = combatCardsData.filter(c =>
-      c.id !== gameConfig.game.starterCardId && // Exclude starter card
-      c.appearPhase <= initialPhase && // Card appears at or before this phase
-      (c.retirePhase === null || c.retirePhase > initialPhase) // Card hasn't retired yet
-    );
+    // Filter shop cards by phase availability
+    const shopCardDefinitions = combatCardsData.filter(c => {
+      return c.id !== gameConfig.game.starterCardId && // Exclude starter card
+        getCardShopType(c, initialPhase) !== null; // Card is available in this phase
+    });
 
     // 分离必要卡牌和随机卡牌
-    const essentialCardDefs = shopCardDefinitions.filter(c => c.shopType === 'essential');
-    const randomCardDefs = shopCardDefinitions.filter(c => c.shopType === 'random');
+    const essentialCardDefs = shopCardDefinitions.filter(c => getCardShopType(c, initialPhase) === 'essential');
+    const randomCardDefs = shopCardDefinitions.filter(c => getCardShopType(c, initialPhase) === 'random');
 
     // 创建必要商店卡牌
     const essentialShopCards = [];
     essentialCardDefs.forEach((cardDef, idx) => {
-      const copies = cardDef.shopCopies || gameConfig.game.essentialShopCopies || 10;
+      const copies = getCardShopCopies(cardDef, 'essential');
       for (let i = 0; i < copies; i++) {
         essentialShopCards.push(createCard(cardDef, `${cardDef.id}_essential_${idx}_${i}`));
       }
@@ -201,7 +198,7 @@ function GameBoard() {
     // 创建随机商店卡牌堆
     const randomShopDeck = [];
     randomCardDefs.forEach((cardDef, idx) => {
-      const copies = cardDef.shopCopies || gameConfig.game.randomShopCopies || 10;
+      const copies = getCardShopCopies(cardDef, 'random');
       for (let i = 0; i < copies; i++) {
         randomShopDeck.push(createCard(cardDef, `${cardDef.id}_random_${idx}_${i}`));
       }
@@ -219,7 +216,7 @@ function GameBoard() {
 
       // Start phase 1 and show phase transition modal
       setTimeout(() => {
-        actions.startPhase(initialPhase);
+        actions.startPhase(initialPhase, combatCardsData);
         setShowPhaseTransitionModal(true);
       }, 100);
     } catch (error) {
@@ -466,6 +463,9 @@ function GameBoard() {
   const handleCloseCombatReport = () => {
     setShowCombatReportModal(false);
     setCurrentReport(null);
+
+    // Check for phase transition after closing combat report
+    checkForPhaseTransition();
   };
 
   // 计算当前选中卡牌的火力
@@ -657,7 +657,7 @@ function GameBoard() {
                 card => !isCardBlockedByConditions(card, state)
               )}
               allEssentialCardTypes={combatCardsData.filter(c =>
-                c.shopType === 'essential' && !isCardBlockedByConditions(c, state)
+                getCardShopType(c, state.currentPhase || 1) === 'essential' && !isCardBlockedByConditions(c, state)
               )}
               onCardClick={handleShopCardClick}
               onCardHover={setHoveredCard}
@@ -684,17 +684,45 @@ function GameBoard() {
           <div className={`middle-zone ${
             [GamePhase.PREPARE, GamePhase.DRAW, GamePhase.DISCARD].includes(state.phase) ? 'zone-disabled' : ''
           }`}>
-            <CardZone
-              title="部署区"
-              cards={state.zones?.deployed || []}
-              onCardClick={handleCardClick}
-              onCardHover={setHoveredCard}
-              onCardHoverEnd={() => setHoveredCard(null)}
-              className="deployed-zone"
-              emptyMessage="未部署任何卡牌"
-              selectedCards={state.selectedForCombat}
-              onSortClick={() => actions.sortDeployed()}
-            />
+            <div className="card-zone deployed-zone">
+              <div className="zone-header">
+                <h3>部署区 ({state.zones?.deployed.length || 0})</h3>
+                <button
+                  className="zone-action-button"
+                  onClick={() => actions.sortDeployed()}
+                  disabled={!state.zones?.deployed.length}
+                >
+                  排序
+                </button>
+              </div>
+              <div className="zone-content zone-content-stacks">
+                {(!state.zones?.deployed || state.zones.deployed.length === 0) ? (
+                  <div className="empty-message">未部署任何卡牌</div>
+                ) : (
+                  // 按卡牌ID分组
+                  (() => {
+                    const groups = (state.zones.deployed || []).reduce((groups, card) => {
+                      if (!groups[card.id]) {
+                        groups[card.id] = [];
+                      }
+                      groups[card.id].push(card);
+                      return groups;
+                    }, {});
+                    return Object.values(groups);
+                  })().map(stack => (
+                    <CardStack
+                      key={`${stack[0].id}_${stack.map(c => c.instanceId).join('_')}`}
+                      cards={stack}
+                      phase={state.phase}
+                      onCardClick={handleCardClick}
+                      onCardHover={setHoveredCard}
+                      onCardHoverEnd={() => setHoveredCard(null)}
+                      selectedCards={state.selectedForCombat}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
           {/* 底部：手牌区 */}
@@ -810,6 +838,7 @@ function GameBoard() {
         <PhaseTransitionModal
           phaseData={state.phaseData}
           missions={state.availableMissions}
+          cardChanges={state.phaseCardChanges}
           onClose={() => setShowPhaseTransitionModal(false)}
           onCardHover={setHoveredCard}
           onCardHoverEnd={() => setHoveredCard(null)}

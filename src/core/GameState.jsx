@@ -45,7 +45,7 @@ const initialState = {
   usedAbilitiesThisTurn: {}, // 追踪本回合已使用的能力（用于once_per_turn约束）
 
   // Strategic Phase System
-  currentPhase: 1, // Current strategic phase number
+  currentPhase: undefined, // Current strategic phase number (set by START_PHASE)
   phaseData: null, // Current phase definition
   availableMissions: [], // All missions for current phase
   leader: null, // Selected leader card
@@ -911,14 +911,14 @@ function gameStateReducer(state, action) {
     }
 
     case ActionTypes.START_PHASE: {
-      const { phaseNumber } = action.payload;
+      const { phaseNumber, allCombatCards } = action.payload;
 
       // Load phase data
       const phaseData = loadPhaseData(phaseNumber);
       const phaseMissions = loadPhaseMissions(phaseNumber);
 
       // Apply phase transition (handle card lifecycle)
-      let newState = applyPhaseTransition(state, phaseData);
+      let newState = applyPhaseTransition(state, phaseData, phaseNumber, allCombatCards);
 
       // Set up new phase
       const initialMission = phaseMissions.find(m => m.id === phaseData.mainMission) || phaseMissions[0];
@@ -1122,8 +1122,8 @@ export function GameStateProvider({ children }) {
     }, []),
 
     // Strategic Phase System Actions
-    startPhase: useCallback((phaseNumber) => {
-      dispatch({ type: ActionTypes.START_PHASE, payload: { phaseNumber } });
+    startPhase: useCallback((phaseNumber, allCombatCards) => {
+      dispatch({ type: ActionTypes.START_PHASE, payload: { phaseNumber, allCombatCards } });
     }, []),
 
     selectMission: useCallback((missionId) => {

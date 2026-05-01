@@ -11,7 +11,7 @@ import BattlefieldConditions from './BattlefieldConditions';
  * - 战场局势
  * - 受影响的卡牌（新增/退役）
  */
-function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCardHoverEnd }) {
+function PhaseTransitionModal({ phaseData, missions, cardChanges, onClose, onCardHover, onCardHoverEnd }) {
   const [hoveredMissionId, setHoveredMissionId] = useState(phaseData.mainMission);
 
   if (!phaseData || !missions) {
@@ -24,17 +24,28 @@ function PhaseTransitionModal({ phaseData, missions, onClose, onCardHover, onCar
 
   // 获取受影响的卡牌信息
   const getAffectedCardsText = () => {
-    const retiredCount = phaseData.cardsToRetire?.length || 0;
-    const addedCount = phaseData.cardsToAdd?.length || 0;
+    const retiredCount = cardChanges?.retired?.length || 0;
+    const addedCount = cardChanges?.added?.length || 0;
+    const promotedCount = cardChanges?.promoted?.length || 0;
 
-    if (retiredCount === 0 && addedCount === 0) {
+    if (retiredCount === 0 && addedCount === 0 && promotedCount === 0) {
       return '商店卡牌无变化';
     }
 
     const parts = [];
-    if (retiredCount > 0) parts.push(`${retiredCount}种卡牌退役`);
-    if (addedCount > 0) parts.push(`${addedCount}种卡牌加入`);
-    return parts.join('，');
+    if (retiredCount > 0) {
+      const retiredNames = cardChanges.retired.map(c => c.name.replace(/\n/g, '')).join('、');
+      parts.push(`退役：${retiredNames}`);
+    }
+    if (addedCount > 0) {
+      const addedNames = cardChanges.added.map(c => c.name.replace(/\n/g, '')).join('、');
+      parts.push(`新增：${addedNames}`);
+    }
+    if (promotedCount > 0) {
+      const promotedNames = cardChanges.promoted.map(c => c.name.replace(/\n/g, '')).join('、');
+      parts.push(`量产：${promotedNames}`);
+    }
+    return parts.join('；');
   };
 
   return (

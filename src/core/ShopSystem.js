@@ -146,3 +146,89 @@ export function getShopStats(shopCards) {
     uniqueTypes
   };
 }
+
+/**
+ * Determine the shop type for a card in a given phase
+ * @param {Object} cardDef - Card definition
+ * @param {number} phaseNumber - Current phase number
+ * @returns {string|null} - 'essential', 'random', or null if not available
+ */
+export function getCardShopType(cardDef, phaseNumber) {
+  // Legacy support: if card has shopType field, use it
+  if (cardDef.shopType) {
+    const appearPhase = cardDef.appearPhase || cardDef.appearInRandomPhase || cardDef.appearInEssentialPhase || 1;
+    if (appearPhase > phaseNumber) {
+      return null;
+    }
+    if (cardDef.retirePhase && cardDef.retirePhase <= phaseNumber) {
+      return null;
+    }
+    return cardDef.shopType;
+  }
+
+  // New system: check appearInEssentialPhase first
+  if (cardDef.appearInEssentialPhase && cardDef.appearInEssentialPhase <= phaseNumber) {
+    // Check if retired
+    if (cardDef.retirePhase && cardDef.retirePhase <= phaseNumber) {
+      return null;
+    }
+    return 'essential';
+  }
+
+  // Then check appearInRandomPhase
+  if (cardDef.appearInRandomPhase && cardDef.appearInRandomPhase <= phaseNumber) {
+    // Check if retired
+    if (cardDef.retirePhase && cardDef.retirePhase <= phaseNumber) {
+      return null;
+    }
+    return 'random';
+  }
+
+  // Card not available in this phase
+  return null;
+}
+
+/**
+ * Get the number of copies for a card in a given shop type
+ * @param {Object} cardDef - Card definition
+ * @param {string} shopType - 'essential' or 'random'
+ * @returns {number} - Number of copies
+ */
+export function getCardShopCopies(cardDef, shopType) {
+  if (shopType === 'essential') {
+    return cardDef.essentialShopCopies || cardDef.shopCopies || 10;
+  } else if (shopType === 'random') {
+    return cardDef.randomShopCopies || cardDef.shopCopies || 10;
+  }
+  return 0;
+}
+
+/**
+ * Determine what changed for a card between phases
+ * @param {Object} cardDef - Card definition
+ * @param {number} oldPhase - Previous phase number
+ * @param {number} newPhase - New phase number
+ * @returns {string|null} - 'retired', 'added', 'promoted' (random->essential), or null
+ */
+export function getCardChangeType(cardDef, oldPhase, newPhase) {
+  const oldShopType = getCardShopType(cardDef, oldPhase);
+  const newShopType = getCardShopType(cardDef, newPhase);
+
+  // Card retired
+  if (oldShopType && !newShopType) {
+    return 'retired';
+  }
+
+  // Card newly added
+  if (!oldShopType && newShopType) {
+    return 'added';
+  }
+
+  // Card promoted from random to essential
+  if (oldShopType === 'random' && newShopType === 'essential') {
+    return 'promoted';
+  }
+
+  // No change
+  return null;
+}

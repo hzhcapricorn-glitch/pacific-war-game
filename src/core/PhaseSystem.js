@@ -6,6 +6,7 @@ import phase1Data from '../data/phases/phase1.json';
 import phase1Missions from '../data/cards/mission_phase1.json';
 import phase2Data from '../data/phases/phase2.json';
 import phase2Missions from '../data/cards/mission_phase2.json';
+import { getCardShopType, getCardShopCopies, getCardChangeType } from './ShopSystem';
 
 /**
  * Load phase data by phase number
@@ -45,10 +46,20 @@ export function loadPhaseMissions(phaseNumber) {
  * Apply phase transition - handle card lifecycle changes
  * @param {Object} state - Current game state
  * @param {import('../models/Phase').StrategicPhase} newPhase - New phase data
- * @returns {Object} - Updated state
+ * @param {number} phaseNumber - New phase number
+ * @param {Array} allCombatCards - All combat card definitions
+ * @returns {Object} - Updated state with phaseCardChanges field
  */
-export function applyPhaseTransition(state, newPhase) {
+export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCards) {
   const newState = { ...state };
+  const oldPhase = state.currentPhase || 0; // 0 means not initialized yet
+
+  // Track card changes for display in transition modal
+  const cardChanges = {
+    retired: [],
+    added: [],
+    promoted: []
+  };
 
   // Ensure zones exist
   if (!newState.zones) {
@@ -64,38 +75,21 @@ export function applyPhaseTransition(state, newPhase) {
     };
   }
 
-  // Remove cards that retire this phase
-  if (newPhase.cardsToRetire && newPhase.cardsToRetire.length > 0) {
-    // Remove from essential shop
-    newState.zones.essentialShop = (newState.zones.essentialShop || []).filter(
-      card => !newPhase.cardsToRetire.includes(card.id)
-    );
-
-    // Remove from random shop
-    newState.zones.randomShop = (newState.zones.randomShop || []).filter(
-      card => !newPhase.cardsToRetire.includes(card.id)
-    );
-
-    // Remove from random shop deck
-    newState.zones.randomShopDeck = (newState.zones.randomShopDeck || []).filter(
-      card => !newPhase.cardsToRetire.includes(card.id)
-    );
-  }
-
-  // Return deployed logistics cards to shop (as per requirements)
+  // Return deployed logistics cards to shop first (before processing changes)
   const logisticsCards = (newState.zones.deployed || []).filter(
     card => card.cardCategory === 'logistics'
   );
 
   logisticsCards.forEach(card => {
-    if (card.shopType === 'essential') {
-      // Return to essential shop
+    // Determine shop type for this card in new phase
+    const newShopType = getCardShopType(card, phaseNumber);
+
+    if (newShopType === 'essential') {
       const existingInShop = (newState.zones.essentialShop || []).find(c => c.id === card.id);
       if (!existingInShop) {
         newState.zones.essentialShop = [...(newState.zones.essentialShop || []), { ...card, status: 'ready' }];
       }
-    } else if (card.shopType === 'random') {
-      // Return to random shop deck
+    } else if (newShopType === 'random') {
       newState.zones.randomShopDeck = [...(newState.zones.randomShopDeck || []), { ...card, status: 'ready' }];
     }
   });
@@ -105,8 +99,89 @@ export function applyPhaseTransition(state, newPhase) {
     card => card.cardCategory !== 'logistics'
   );
 
-  // Add new cards that appear this phase
-  // This will be implemented when we load the full card database with phase filtering
+  // Skip shop rebuild during initial setup (oldPhase === 0)
+  // INIT_GAME has already set up the shops correctly
+  if (oldPhase === 0) {
+    newState.phaseCardChanges = cardChanges;
+    return newState;
+  }
+
+  // Process all cards to determine changes and rebuild shops
+  if (allCombatCards && allCombatCards.length > 0) {
+    // Build a map of existing card instances
+    const existingCards = new Map();
+    [...newState.zones.essentialShop, ...newState.zones.randomShopDeck, ...newState.zones.randomShop].forEach(card => {
+      if (!existingCards.has(card.id)) {
+        existingCards.set(card.id, []);
+      }
+      existingCards.get(card.id).push(card);
+    });
+
+    // Rebuild shops based on new phase
+    const newEssentialShop = [];
+    const newRandomShopDeck = [];
+    let cardInstanceId = Date.now();
+
+    allCombatCards.forEach(cardDef => {
+      const changeType = getCardChangeType(cardDef, oldPhase, phaseNumber);
+      const newShopType = getCardShopType(cardDef, phaseNumber);
+
+      // Track changes
+      if (changeType === 'retired') {
+        if (!cardChanges.retired.find(c => c.id === cardDef.id)) {
+          cardChanges.retired.push({
+            id: cardDef.id,
+            name: cardDef.name,
+            rarity: cardDef.rarity
+          });
+        }
+      } else if (changeType === 'added') {
+        if (!cardChanges.added.find(c => c.id === cardDef.id)) {
+          cardChanges.added.push({
+            id: cardDef.id,
+            name: cardDef.name,
+            rarity: cardDef.rarity
+          });
+        }
+      } else if (changeType === 'promoted') {
+        if (!cardChanges.promoted.find(c => c.id === cardDef.id)) {
+          cardChanges.promoted.push({
+            id: cardDef.id,
+            name: cardDef.name,
+            rarity: cardDef.rarity
+          });
+        }
+      }
+
+      // Add cards to appropriate shop
+      if (newShopType) {
+        const existingInstances = existingCards.get(cardDef.id) || [];
+        const shopCopies = getCardShopCopies(cardDef, newShopType);
+        const targetShop = newShopType === 'essential' ? newEssentialShop : newRandomShopDeck;
+
+        // Reuse existing instances first
+        for (let i = 0; i < shopCopies; i++) {
+          if (i < existingInstances.length) {
+            targetShop.push({ ...existingInstances[i], status: 'ready' });
+          } else {
+            // Create new instance
+            targetShop.push({
+              ...cardDef,
+              instanceId: `${cardDef.id}_${cardInstanceId++}`,
+              status: 'ready'
+            });
+          }
+        }
+      }
+    });
+
+    newState.zones.essentialShop = newEssentialShop;
+    newState.zones.randomShopDeck = newRandomShopDeck;
+    newState.zones.randomShop = []; // Clear random shop, will be refilled on next turn
+  }
+
+  // Store card changes in state for modal display
+  newState.phaseCardChanges = cardChanges;
 
   return newState;
 }

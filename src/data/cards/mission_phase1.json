@@ -8,9 +8,9 @@
     "difficulty": "hard",
     "image": "/pacific-war-game/img/Mission_hard.jpg",
     "requiredGroundPower": 0,
-    "requiredSeaPower": 12,
-    "requiredAirDefense": 10,
-    "requiredAirSuperiority": 8,
+    "requiredSeaPower": 1,
+    "requiredAirDefense": 1,
+    "requiredAirSuperiority": 1,
     "reward": {
       "description": "夺回太平洋主动权，获得3点补给和2点最大补给保留",
       "supply": 3,
