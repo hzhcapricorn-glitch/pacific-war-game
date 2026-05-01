@@ -1,0 +1,115 @@
+[
+  {
+    "id": "mission_guadalcanal",
+    "name": "保卫瓜岛机场",
+    "type": "mission",
+    "missionType": "main",
+    "phase": 2,
+    "difficulty": "hell",
+    "image": "/pacific-war-game/img/Mission_hell.jpg",
+    "requiredGroundPower": 8,
+    "requiredSeaPower": 15,
+    "requiredAirDefense": 12,
+    "requiredAirSuperiority": 10,
+    "reward": {
+      "description": "成功守住亨德森机场，夺取战略主动权，获得5点补给和3点最大补给保留",
+      "supply": 5,
+      "maxSupply": 3
+    },
+    "loss": {
+      "description": "随机损失3张参战卡牌",
+      "randomLoss": 3
+    },
+    "missionConstraints": [],
+    "flavor": "太平洋战争的转折点，消耗战的地狱"
+  },
+  {
+    "id": "mission_eastern_solomons",
+    "name": "东所罗门海战",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 2,
+    "difficulty": "hard",
+    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 10,
+    "requiredAirDefense": 8,
+    "requiredAirSuperiority": 8,
+    "reward": {
+      "description": "击退日军增援舰队，获得3点补给和2点额外回合",
+      "supply": 3,
+      "extraTurns": 2
+    },
+    "loss": {
+      "description": "随机损失2张参战卡牌",
+      "randomLoss": 2
+    },
+    "missionConstraints": [],
+    "flavor": "阻断日军的海上运输线"
+  },
+  {
+    "id": "mission_ironbottom_sound",
+    "name": "铁底湾夜战",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 2,
+    "difficulty": "hard",
+    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 12,
+    "requiredAirDefense": 5,
+    "requiredAirSuperiority": 0,
+    "reward": {
+      "description": "夜战胜利，获得战场优势：夜战专家",
+      "battlefieldBuff": {
+        "id": "night_battle_expert",
+        "name": "夜战专家",
+        "description": "海军对海火力+2",
+        "isBuff": true,
+        "effect": {
+          "type": "add_combat_power",
+          "powerType": "sea",
+          "value": 2
+        }
+      }
+    },
+    "loss": {
+      "description": "随机损失2张参战卡牌",
+      "randomLoss": 2
+    },
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["air"],
+        "shortName": "夜战",
+        "name": "夜间战斗",
+        "message": "夜间战斗，空军无法参战",
+        "description": "夜间视线受限，空军单位无法参与战斗"
+      }
+    ],
+    "flavor": "黑暗中的殊死搏斗，无数军舰葬身铁底湾"
+  },
+  {
+    "id": "mission_tokyo_express",
+    "name": "东京特快",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 2,
+    "difficulty": "normal",
+    "image": "/pacific-war-game/img/Mission_normal.jpeg",
+    "requiredGroundPower": 3,
+    "requiredSeaPower": 8,
+    "requiredAirDefense": 10,
+    "requiredAirSuperiority": 6,
+    "reward": {
+      "description": "拦截日军运输，获得1张SBD无畏轰炸机",
+      "card": "sbd_dauntless"
+    },
+    "loss": {
+      "description": "随机损失1张参战卡牌",
+      "randomLoss": 1
+    },
+    "missionConstraints": [],
+    "flavor": "切断日军的生命线"
+  }
+]

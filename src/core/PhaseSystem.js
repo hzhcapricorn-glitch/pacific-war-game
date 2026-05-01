@@ -4,6 +4,8 @@
 
 import phase1Data from '../data/phases/phase1.json';
 import phase1Missions from '../data/cards/mission_phase1.json';
+import phase2Data from '../data/phases/phase2.json';
+import phase2Missions from '../data/cards/mission_phase2.json';
 
 /**
  * Load phase data by phase number
@@ -14,6 +16,8 @@ export function loadPhaseData(phaseNumber) {
   switch (phaseNumber) {
     case 1:
       return phase1Data;
+    case 2:
+      return phase2Data;
     // Future phases will be added here
     default:
       throw new Error(`Phase ${phaseNumber} not implemented yet`);
@@ -29,6 +33,8 @@ export function loadPhaseMissions(phaseNumber) {
   switch (phaseNumber) {
     case 1:
       return phase1Missions;
+    case 2:
+      return phase2Missions;
     // Future phases will be added here
     default:
       throw new Error(`Phase ${phaseNumber} missions not implemented yet`);

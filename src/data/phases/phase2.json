@@ -1,0 +1,11 @@
+{
+  "id": "phase_2_attrition",
+  "name": "消耗战地狱",
+  "historicalContext": "1942年8月至1943年2月，瓜达尔卡纳尔岛成为太平洋战争的关键战场。美军必须保卫刚刚夺取的亨德森机场，面对日军疯狂的反扑。海上激烈的夜战、丛林中的残酷战斗、以及日军的「东京特快」运输，将这里变成了真正的消耗战地狱。",
+  "turnLimit": 20,
+  "mainMission": "mission_guadalcanal",
+  "sideMissions": ["mission_eastern_solomons", "mission_ironbottom_sound", "mission_tokyo_express"],
+  "battlefieldConditions": [],
+  "cardsToRetire": [],
+  "cardsToAdd": []
+}

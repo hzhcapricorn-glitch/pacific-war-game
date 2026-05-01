@@ -116,9 +116,27 @@ function GameBoard() {
     const phaseCompletion = state.completedMissions[phaseKey];
 
     if (phaseCompletion && phaseCompletion.main && state.turnsRemaining > 0) {
-      // Main mission complete - could trigger next phase
-      // For phase 1, this is the end of the game for now
-      console.log('Phase complete! Main mission accomplished.');
+      // Main mission complete
+      console.log(`Phase ${state.currentPhase} complete! Main mission accomplished.`);
+
+      // Check if there is a next phase
+      const nextPhaseNumber = state.currentPhase + 1;
+      try {
+        // Try to load next phase data
+        const nextPhaseData = loadPhaseData(nextPhaseNumber);
+
+        // If successful, show phase transition modal after a short delay
+        setTimeout(() => {
+          actions.startPhase(nextPhaseNumber);
+          setShowPhaseTransitionModal(true);
+        }, 1000);
+      } catch (error) {
+        // No next phase - game complete!
+        console.log('All phases complete! Game won!');
+        setTimeout(() => {
+          actions.gameOver();
+        }, 1000);
+      }
     }
   }, [state.completedMissions, state.phase, gameInitialized, state.phaseData]);
 
@@ -479,11 +497,21 @@ function GameBoard() {
 
   // 游戏结束界面
   if (state.phase === GamePhase.GAME_OVER) {
+    // Check if game was won (completed all phases)
+    const gameWon = state.phaseData && state.completedMissions[`phase_${state.currentPhase}`]?.main;
+
     return (
       <div className="game-over">
-        <h1>游戏结束！</h1>
+        <h1>{gameWon ? '🎉 胜利！' : '游戏结束'}</h1>
+        {gameWon && (
+          <div className="victory-message">
+            <h2>恭喜完成「{state.phaseData.name}」</h2>
+            <p>你成功指挥美军完成了太平洋战场的战略目标，夺回了战争主动权！</p>
+          </div>
+        )}
         <div className="stats">
           <h2>统计信息</h2>
+          <p>完成阶段: {state.currentPhase}</p>
           <p>总回合数: {state.stats.totalTurns}</p>
           <p>胜利战斗: {state.stats.battlesWon}</p>
           <p>打出卡牌数: {state.stats.cardsPlayed}</p>
