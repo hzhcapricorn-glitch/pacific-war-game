@@ -130,6 +130,11 @@ export function checkPhaseComplete(state) {
 export function applyBattlefieldCondition(state, condition) {
   const newState = { ...state };
 
+  // Skip conditions without effect (e.g., mission constraints)
+  if (!condition.effect || !condition.effect.type) {
+    return newState;
+  }
+
   switch (condition.effect.type) {
     case 'block_shop_card':
       // Filter will be applied in shop system
@@ -173,7 +178,7 @@ export function getEffectiveDrawCount(state) {
   // Check battlefield conditions
   if (state.battlefieldConditions) {
     state.battlefieldConditions.forEach(condition => {
-      if (condition.effect.type === 'modify_draw_count') {
+      if (condition.effect && condition.effect.type === 'modify_draw_count') {
         baseDrawCount += condition.effect.value;
       }
     });
@@ -210,6 +215,7 @@ export function getCombatPowerBonus(state, powerType) {
 
   state.battlefieldConditions.forEach(condition => {
     if (
+      condition.effect &&
       condition.effect.type === 'add_combat_power' &&
       condition.effect.powerType === powerType
     ) {
@@ -233,6 +239,7 @@ export function isCardBlockedByConditions(card, state) {
 
   for (const condition of state.battlefieldConditions) {
     if (
+      condition.effect &&
       condition.effect.type === 'block_shop_card' &&
       condition.effect.cardIds &&
       condition.effect.cardIds.includes(card.id)
@@ -266,7 +273,7 @@ export function getShopRefreshCount(state) {
   // Apply battlefield conditions
   if (state.battlefieldConditions) {
     state.battlefieldConditions.forEach(condition => {
-      if (condition.effect.type === 'modify_shop_refresh_count') {
+      if (condition.effect && condition.effect.type === 'modify_shop_refresh_count') {
         baseCount += condition.effect.value;
       }
     });

@@ -834,6 +834,16 @@ button:disabled {
   border-color: rgba(239, 68, 68, 0.5);
 }
 
+.condition-item.condition-constraint {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.condition-item.condition-constraint:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
 /* ==========================================
    Modal Components (Shared Styles)
    ========================================== */

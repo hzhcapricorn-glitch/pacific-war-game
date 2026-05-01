@@ -233,6 +233,17 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
                   {getMissionRequirementLine()}
                 </div>
                 {card.reward && <div className="detail-mission-reward">✓ {card.reward.description}</div>}
+                {card.missionConstraints && card.missionConstraints.length > 0 && (
+                  <div className="detail-mission-constraints">
+                    <span className="constraint-label">⚠️ 限制：</span>
+                    {card.missionConstraints.map((constraint, idx) => (
+                      <span key={idx}>
+                        {constraint.shortName || constraint.name}
+                        {idx < card.missionConstraints.length - 1 && '，'}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </>
             ) : isLeader ? (
               <>

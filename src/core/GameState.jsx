@@ -102,6 +102,45 @@ const ActionTypes = {
 let logIdCounter = 0;
 
 /**
+ * 构建战场局势列表（阶段全局buff + 当前任务限制）
+ */
+function buildBattlefieldConditions(phaseData, currentMission) {
+  const conditions = [];
+
+  // 添加阶段全局buff/debuff
+  if (phaseData && phaseData.battlefieldConditions) {
+    phaseData.battlefieldConditions.forEach(condition => {
+      conditions.push({
+        ...condition,
+        source: 'phase'
+      });
+    });
+  }
+
+  // 添加当前任务的限制条件
+  if (currentMission && currentMission.missionConstraints) {
+    currentMission.missionConstraints.forEach((constraint, index) => {
+      // 确保约束有名称，否则跳过
+      const constraintName = constraint.shortName || constraint.name;
+      if (!constraintName) {
+        console.warn('Mission constraint missing name:', constraint);
+        return;
+      }
+
+      conditions.push({
+        id: `mission_constraint_${index}`,
+        name: constraintName,
+        description: constraint.description || constraint.message || constraintName,
+        isBuff: false, // 任务限制视为debuff
+        source: 'mission'
+      });
+    });
+  }
+
+  return conditions;
+}
+
+/**
  * 添加日志条目的辅助函数
  */
 function addLogEntry(state, message, type = 'info') {
@@ -599,15 +638,13 @@ function gameStateReducer(state, action) {
         const newReports = [combatReport, ...state.combatReports].slice(0, 20);
         newState.combatReports = newReports;
 
-        // 添加可点击的损失日志
-        if (cardsLost.length > 0) {
-          const lossLog = {
-            message: `💔 战斗结束`,
-            reportId, // 关联战斗简报ID
-            isClickable: true
-          };
-          newState.battleLog = addLogEntry(newState, lossLog, 'combat_report');
-        }
+        // 添加可点击的战斗简报链接（每次战斗都添加）
+        const reportLog = {
+          message: `📋 战斗结束`,
+          reportId, // 关联战斗简报ID
+          isClickable: true
+        };
+        newState.battleLog = addLogEntry(newState, reportLog, 'combat_report');
       } else {
         // 兼容旧代码：如果没有combatResult
         if (cardsLost.length > 0) {
@@ -884,14 +921,17 @@ function gameStateReducer(state, action) {
       let newState = applyPhaseTransition(state, phaseData);
 
       // Set up new phase
+      const initialMission = phaseMissions.find(m => m.id === phaseData.mainMission) || phaseMissions[0];
+      const initialBattlefieldConditions = buildBattlefieldConditions(phaseData, initialMission);
+
       newState = {
         ...newState,
         currentPhase: phaseNumber,
         phaseData: phaseData,
         availableMissions: phaseMissions,
-        currentMission: phaseMissions.find(m => m.id === phaseData.mainMission) || phaseMissions[0],
+        currentMission: initialMission,
         turnsRemaining: phaseData.turnLimit,
-        battlefieldConditions: phaseData.battlefieldConditions || [],
+        battlefieldConditions: initialBattlefieldConditions,
         completedMissions: {
           ...state.completedMissions,
           [`phase_${phaseNumber}`]: { main: false, side: [] }
@@ -914,9 +954,13 @@ function gameStateReducer(state, action) {
 
       if (!mission) return state;
 
+      // 更新战场局势（阶段全局buff + 当前任务限制）
+      const newBattlefieldConditions = buildBattlefieldConditions(state.phaseData, mission);
+
       const newState = {
         ...state,
-        currentMission: mission
+        currentMission: mission,
+        battlefieldConditions: newBattlefieldConditions
       };
 
       newState.battleLog = addLogEntry(

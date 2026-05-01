@@ -15,8 +15,17 @@
     "airSlots": 0,
     "abilities": [
       {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
         "type": "combat_boost",
-        "trigger": "combat",
+        "trigger": "during_combat",
         "name": "蛮牛",
         "description": "战斗阶段，如果空军单位对海战斗力不为0，则其对海战斗力额外+1",
         "effect": {
@@ -43,6 +52,15 @@
     "redeployCost": 0,
     "airSlots": 0,
     "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
       {
         "type": "modify_draw_count",
         "trigger": "phase_start",

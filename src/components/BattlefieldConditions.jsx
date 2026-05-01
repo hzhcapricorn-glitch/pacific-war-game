@@ -37,16 +37,26 @@ function BattlefieldConditions({ conditions = [] }) {
 
       {/* 紧凑列表区域 */}
       <div className="conditions-list">
-        {conditions.map((condition, index) => (
-          <div
-            key={condition.id || index}
-            className={`condition-item ${condition.isBuff ? 'condition-buff' : 'condition-debuff'}`}
-            onMouseEnter={() => setHoveredCondition(condition)}
-            onMouseLeave={() => setHoveredCondition(null)}
-          >
-            {condition.name}
-          </div>
-        ))}
+        {conditions.map((condition, index) => {
+          // 判断是否为任务限制（来自 mission）
+          const isMissionConstraint = condition.source === 'mission';
+          const itemClass = isMissionConstraint
+            ? 'condition-constraint'
+            : condition.isBuff
+            ? 'condition-buff'
+            : 'condition-debuff';
+
+          return (
+            <div
+              key={condition.id || index}
+              className={`condition-item ${itemClass}`}
+              onMouseEnter={() => setHoveredCondition(condition)}
+              onMouseLeave={() => setHoveredCondition(null)}
+            >
+              {condition.name}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

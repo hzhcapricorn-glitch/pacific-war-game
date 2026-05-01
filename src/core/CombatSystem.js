@@ -40,7 +40,7 @@ export function calculateAirSuperiority(cards) {
 /**
  * 计算所有类型的火力
  * @param {Array} cards - 参战卡牌数组
- * @param {Object} context - 可选的上下文对象（包含state等，用于能力处理）
+ * @param {Object} context - 可选的上下文对象（包含state、mission等，用于能力处理）
  * @returns {Object} { groundPower, seaPower, airPower, airDefense, airSuperiority }
  */
 export function calculateAllFirePowers(cards, context = null) {
@@ -58,34 +58,95 @@ export function calculateAllFirePowers(cards, context = null) {
     return basePowers;
   }
 
-  // 处理combat_boost能力
-  const combatModifiers = cards.flatMap(card =>
+  // 应用任务约束的火力调整
+  const mission = context.mission || context.state?.currentMission;
+  if (mission && mission.missionConstraints) {
+    const powerModifiers = mission.missionConstraints.filter(c => c.type === 'modify_unit_power');
+
+    powerModifiers.forEach(constraint => {
+      const { unitTypes, powerType, multiplier } = constraint;
+
+      // 筛选出受影响的单位
+      const affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
+
+      // 计算调整量（原值 * (multiplier - 1)，因为基础火力已经计算过了）
+      affectedCards.forEach(card => {
+        const originalPower = getCardFirePower(card, powerType);
+        const adjustment = originalPower * (multiplier - 1);
+
+        if (powerType === 'ground') {
+          basePowers.groundPower += adjustment;
+        } else if (powerType === 'sea') {
+          basePowers.seaPower += adjustment;
+        } else if (powerType === 'air') {
+          basePowers.airPower += adjustment;
+          basePowers.airDefense += adjustment;
+          basePowers.airSuperiority += adjustment;
+        }
+      });
+    });
+  }
+
+  // 获取所有部署区卡牌（包括未参战的，如领袖）
+  const allDeployedCards = context.state?.zones?.deployed || cards;
+
+  // 处理combat_boost能力（从所有部署区卡牌中检查）
+  const combatModifiers = allDeployedCards.flatMap(card =>
     processAbilities(card, 'during_combat', {
       state: context.state,
       card,
-      cards
+      cards  // 传入参战卡牌列表用于目标筛选
     })
   ).filter(result => result.type === 'combat_modifier');
 
   // 应用修正值
   combatModifiers.forEach(modifierResult => {
-    const { powerType, value, scope } = modifierResult.modifier;
+    const modifier = modifierResult.modifier;
 
-    // 根据powerType应用增益
-    if (powerType === 'all') {
-      basePowers.groundPower += value;
-      basePowers.seaPower += value;
-      basePowers.airPower += value;
-      basePowers.airDefense += value;
-      basePowers.airSuperiority += value;
-    } else if (powerType === 'groundPower' || powerType === 'ground') {
-      basePowers.groundPower += value;
-    } else if (powerType === 'seaPower' || powerType === 'sea') {
-      basePowers.seaPower += value;
-    } else if (powerType === 'airPower' || powerType === 'air') {
-      basePowers.airPower += value;
-      basePowers.airDefense += value;
-      basePowers.airSuperiority += value;
+    // 新格式：支持目标选择（如哈尔西的能力）
+    if (modifier.target && modifier.stat) {
+      const { target, stat, value } = modifier;
+
+      // 根据目标类型筛选卡牌
+      let targetCards = [];
+      if (target === 'air_units_with_sea_power') {
+        // 空军单位且对海战斗力不为0
+        targetCards = cards.filter(c => c.unitType === 'air' && (c.seaPower || 0) > 0);
+      } else if (target === 'all') {
+        targetCards = cards;
+      }
+
+      // 为每个目标卡牌应用加成
+      const boost = value * targetCards.length;
+      if (stat === 'seaPower') {
+        basePowers.seaPower += boost;
+      } else if (stat === 'groundPower') {
+        basePowers.groundPower += boost;
+      } else if (stat === 'airPower') {
+        basePowers.airPower += boost;
+        basePowers.airDefense += boost;
+        basePowers.airSuperiority += boost;
+      }
+    }
+    // 旧格式：全局增益
+    else if (modifier.powerType) {
+      const { powerType, value } = modifier;
+
+      if (powerType === 'all') {
+        basePowers.groundPower += value;
+        basePowers.seaPower += value;
+        basePowers.airPower += value;
+        basePowers.airDefense += value;
+        basePowers.airSuperiority += value;
+      } else if (powerType === 'groundPower' || powerType === 'ground') {
+        basePowers.groundPower += value;
+      } else if (powerType === 'seaPower' || powerType === 'sea') {
+        basePowers.seaPower += value;
+      } else if (powerType === 'airPower' || powerType === 'air') {
+        basePowers.airPower += value;
+        basePowers.airDefense += value;
+        basePowers.airSuperiority += value;
+      }
     }
   });
 
@@ -160,17 +221,17 @@ export function applyReward(reward, gameState) {
 /**
  * 计算战斗损失 - 随机选择需要损失的卡牌，支持重甲和幸运能力
  * @param {Array} participatingCards - 参战卡牌数组
- * @param {Object} loss - 损失对象 { type, count, description }
+ * @param {Object} loss - 损失对象 { randomLoss, description }
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
  * @returns {Object} { lostCardIds: Array, damageDetails: Array }
  */
 export function calculateLosses(participatingCards, loss, airDefenseSufficient) {
-  if (!loss || loss.count === 0 || participatingCards.length === 0) {
+  if (!loss || !loss.randomLoss || loss.randomLoss === 0 || participatingCards.length === 0) {
     return { lostCardIds: [], damageDetails: [] };
   }
 
   // 对空火力不足时损失加倍
-  let lossCount = loss.count;
+  let lossCount = loss.randomLoss;
   if (!airDefenseSufficient) {
     lossCount *= 2;
   }
@@ -278,8 +339,8 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient) 
  * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, damageDetails, airDefenseSufficient, airSuperiorityAchieved }
  */
 export function resolveCombat(selectedCards, mission, gameState) {
-  // 计算己方火力（包括combat_boost能力）
-  const attackPowers = calculateAllFirePowers(selectedCards, { state: gameState });
+  // 计算己方火力（包括combat_boost能力和任务约束）
+  const attackPowers = calculateAllFirePowers(selectedCards, { state: gameState, mission });
   const requiredPowers = {
     groundPower: mission.requiredGroundPower || 0,
     seaPower: mission.requiredSeaPower || 0,
@@ -367,6 +428,7 @@ export function getCombatSummary(combatResult) {
     summary += '\n战损情况:\n';
     damageDetails.forEach(detail => {
       const { card, hits, armorValue, isDestroyed } = detail;
+      const cardName = card.name.replace(/\n/g, '');
 
       // 检查是否有返航能力
       const hasReturnAbility = hasReturnToBaseAbility(card);
@@ -374,27 +436,40 @@ export function getCombatSummary(combatResult) {
       if (armorValue > 0) {
         // 有重甲的单位
         if (isDestroyed) {
-          summary += `  - ${card.name} 被重创${hits}次并击沉 🛡️💥\n`;
+          summary += `  - ${cardName} 被重创${hits}次并击沉 🛡️💥\n`;
         } else {
-          summary += `  - ${card.name} 被重创${hits}次但未被击沉 🛡️\n`;
+          summary += `  - ${cardName} 被重创${hits}次但未被击沉 🛡️\n`;
         }
       } else if (hasReturnAbility) {
         // 有返航能力的空军
         if (airSuperiorityAchieved) {
-          summary += `  - ${card.name} 被击中但成功返航 ✈️\n`;
+          summary += `  - ${cardName} 被击中但成功返航 ✈️\n`;
         } else {
-          summary += `  - ${card.name} 被击中并坠毁 ✈️💥\n`;
+          summary += `  - ${cardName} 被击中并坠毁 ✈️💥\n`;
         }
       } else {
-        // 普通单位
-        summary += `  - ${card.name} 损失\n`;
+        // 普通单位：根据单位类型使用不同的词汇
+        let lossText = '损失';
+        if (card.unitType === 'navy') {
+          lossText = '沉没';
+        } else if (card.unitType === 'army') {
+          lossText = '阵亡';
+        }
+        summary += `  - ${cardName} ${lossText}\n`;
       }
     });
   } else if (lostCards && lostCards.length > 0) {
     // 兼容旧版：如果没有damageDetails但有lostCards
     summary += `\n损失卡牌 (${lostCards.length}张):\n`;
     lostCards.forEach(card => {
-      summary += `  - ${card.name}\n`;
+      const cardName = card.name.replace(/\n/g, '');
+      let lossText = '损失';
+      if (card.unitType === 'navy') {
+        lossText = '沉没';
+      } else if (card.unitType === 'army') {
+        lossText = '阵亡';
+      }
+      summary += `  - ${cardName} ${lossText}\n`;
     });
   }
 

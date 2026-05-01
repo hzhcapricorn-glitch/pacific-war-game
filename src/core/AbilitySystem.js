@@ -63,6 +63,21 @@ function handleGoesToDiscardAbility(ability, card, context) {
  * 战斗增益能力 - 增加战斗火力
  */
 function handleCombatBoostAbility(ability, card, context) {
+  // 支持新的effect格式（如哈尔西的特殊目标）
+  if (ability.effect) {
+    return {
+      type: 'combat_modifier',
+      modifier: {
+        target: ability.effect.target,
+        stat: ability.effect.stat,
+        value: ability.effect.value,
+        cards: context.cards // 传递参战卡牌列表用于目标筛选
+      },
+      log: null // 日志将在应用时生成
+    };
+  }
+
+  // 兼容旧的格式
   return {
     type: 'combat_modifier',
     modifier: {
@@ -454,20 +469,34 @@ export function hasReturnToBaseAbility(card) {
  * @param {Object} card - 卡牌对象
  * @returns {Object} { canParticipate: boolean, reason?: string }
  */
-export function canParticipateInCombat(card) {
-  if (!card.abilities) {
-    return { canParticipate: true };
+export function canParticipateInCombat(card, missionConstraints = []) {
+  // 检查卡牌自身的能力限制
+  if (card.abilities) {
+    const restriction = card.abilities.find(
+      ability => ability.type === 'cannot_participate_in_combat'
+    );
+
+    if (restriction) {
+      return {
+        canParticipate: false,
+        reason: restriction.ui?.blockMessage || '该卡牌不能参加战斗'
+      };
+    }
   }
 
-  const restriction = card.abilities.find(
-    ability => ability.type === 'cannot_participate_in_combat'
+  // 检查任务约束：禁止某种单位类型
+  const unitTypeRestriction = missionConstraints.find(
+    constraint => constraint.type === 'restrict_unit_type'
   );
 
-  if (restriction) {
-    return {
-      canParticipate: false,
-      reason: restriction.ui?.blockMessage || '该卡牌不能参加战斗'
-    };
+  if (unitTypeRestriction) {
+    const restrictedTypes = unitTypeRestriction.unitTypes || [];
+    if (restrictedTypes.includes(card.unitType)) {
+      return {
+        canParticipate: false,
+        reason: unitTypeRestriction.message || `该任务不允许${card.unitType === 'army' ? '陆军' : card.unitType === 'navy' ? '海军' : '空军'}参战`
+      };
+    }
   }
 
   return { canParticipate: true };

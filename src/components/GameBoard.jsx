@@ -306,8 +306,9 @@ function GameBoard() {
       const isInDeployed = (state.zones.deployed || []).some(c => c.instanceId === card.instanceId);
 
       if (isInDeployed && card.status === 'ready') {
-        // 检查卡牌是否可以参加战斗（后勤卡不能参加战斗）
-        const combatCheck = canParticipateInCombat(card);
+        // 检查卡牌是否可以参加战斗（检查卡牌能力和任务约束）
+        const missionConstraints = state.currentMission?.missionConstraints || [];
+        const combatCheck = canParticipateInCombat(card, missionConstraints);
         if (!combatCheck.canParticipate) {
           alert(combatCheck.reason || `「${card.name}」不能参加战斗！`);
           return;
@@ -454,7 +455,7 @@ function GameBoard() {
     const selectedCards = (state.zones.deployed || []).filter(card =>
       state.selectedForCombat.includes(card.instanceId)
     );
-    return calculateAllFirePowers(selectedCards, { state });
+    return calculateAllFirePowers(selectedCards, { state, mission: state.currentMission });
   };
 
   // 计算航空槽位相关信息

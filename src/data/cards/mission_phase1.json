@@ -36,7 +36,7 @@
     "requiredAirDefense": 6,
     "requiredAirSuperiority": 5,
     "reward": {
-      "description": "阻止日军进攻澳大利亚，获得2点补给和2点额外回合",
+      "description": "胜利后获得2点补给和2点额外回合",
       "supply": 2,
       "extraTurns": 2
     },
@@ -44,12 +44,30 @@
       "description": "随机损失1张参战卡牌",
       "randomLoss": 1
     },
-    "missionConstraints": [],
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army"],
+        "shortName": "仅海战",
+        "name": "纯海战环境",
+        "message": "纯海战环境，不允许陆军参战",
+        "description": "该任务为纯海战，陆军单位无法参战"
+      },
+      {
+        "type": "modify_unit_power",
+        "unitTypes": ["navy"],
+        "powerType": "sea",
+        "multiplier": 0,
+        "shortName": "海军对海=0",
+        "name": "海军对海火力归零",
+        "description": "航母战时代，海军舰炮作用有限，海军单位对海火力归零"
+      }
+    ],
     "flavor": "历史上第一次航母对决"
   },
   {
     "id": "mission_darwin",
-    "name": "达尔文港防御",
+    "name": "防御达尔文港",
     "type": "mission",
     "missionType": "side",
     "phase": 1,
@@ -72,7 +90,7 @@
   },
   {
     "id": "mission_aleutian",
-    "name": "阿留申群岛拦截",
+    "name": "阿留申群岛",
     "type": "mission",
     "missionType": "side",
     "phase": 1,
