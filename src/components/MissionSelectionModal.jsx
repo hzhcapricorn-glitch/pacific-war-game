@@ -15,6 +15,7 @@ function MissionSelectionModal({
   phaseData,
   missions,
   currentMissionId,
+  turnsRemaining,
   onSelectMission,
   onClose,
   onCardHover,
@@ -42,7 +43,7 @@ function MissionSelectionModal({
         <div className="phase-info-header">
           <div className="phase-info-top">
             <h2>{phaseData.name}</h2>
-            <span className="phase-turns">剩余 {phaseData.turnLimit} 回合</span>
+            <span className="phase-turns">剩余 {turnsRemaining !== undefined ? turnsRemaining : phaseData.turnLimit} 回合</span>
             <button className="modal-close-inline" onClick={onClose}>×</button>
           </div>
           <div className="phase-context-text">
