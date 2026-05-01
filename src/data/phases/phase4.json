@@ -1,0 +1,11 @@
+{
+  "id": "phase_4_final_assault",
+  "name": "末日决战",
+  "historicalContext": "1945年，战争进入最后阶段。美军攻占硫磺岛和冲绳岛，将战火烧到日本本土。B-29轰炸机日夜不停地轰炸日本工业设施，火烧东京更是造成了空前的破坏。日本顽强抵抗，神风特攻队疯狂反扑，但战争的结局已成定局。最终，对日本本土的两颗原子弹彻底结束了这场战争。",
+  "turnLimit": 30,
+  "mainMission": "mission_tokyo",
+  "sideMissions": ["mission_okinawa", "mission_iwo_jima", "mission_firebombing"],
+  "battlefieldConditions": [],
+  "cardsToRetire": [],
+  "cardsToAdd": []
+}

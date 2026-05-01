@@ -1,0 +1,11 @@
+{
+  "id": "phase_3_counteroffensive",
+  "name": "战略大反攻",
+  "historicalContext": "1944年，美军在太平洋战场发起战略大反攻。从中太平洋突破马里亚纳群岛，从西南太平洋进攻菲律宾，双管齐下向日本本土步步逼近。马里亚纳海战摧毁了日本海军航空兵的精锐，莱特湾海战彻底粉碎了日本联合舰队的最后挣扎。菲律宾的夺取为美军最终进攻日本本土铺平了道路。",
+  "turnLimit": 25,
+  "mainMission": "mission_philippines",
+  "sideMissions": ["mission_saipan", "mission_philippine_sea", "mission_leyte_gulf"],
+  "battlefieldConditions": [],
+  "cardsToRetire": [],
+  "cardsToAdd": []
+}

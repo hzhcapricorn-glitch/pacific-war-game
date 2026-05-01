@@ -6,6 +6,10 @@ import phase1Data from '../data/phases/phase1.json';
 import phase1Missions from '../data/cards/mission_phase1.json';
 import phase2Data from '../data/phases/phase2.json';
 import phase2Missions from '../data/cards/mission_phase2.json';
+import phase3Data from '../data/phases/phase3.json';
+import phase3Missions from '../data/cards/mission_phase3.json';
+import phase4Data from '../data/phases/phase4.json';
+import phase4Missions from '../data/cards/mission_phase4.json';
 import { getCardShopType, getCardShopCopies, getCardChangeType } from './ShopSystem';
 
 /**
@@ -19,7 +23,10 @@ export function loadPhaseData(phaseNumber) {
       return phase1Data;
     case 2:
       return phase2Data;
-    // Future phases will be added here
+    case 3:
+      return phase3Data;
+    case 4:
+      return phase4Data;
     default:
       throw new Error(`Phase ${phaseNumber} not implemented yet`);
   }
@@ -36,7 +43,10 @@ export function loadPhaseMissions(phaseNumber) {
       return phase1Missions;
     case 2:
       return phase2Missions;
-    // Future phases will be added here
+    case 3:
+      return phase3Missions;
+    case 4:
+      return phase4Missions;
     default:
       throw new Error(`Phase ${phaseNumber} missions not implemented yet`);
   }

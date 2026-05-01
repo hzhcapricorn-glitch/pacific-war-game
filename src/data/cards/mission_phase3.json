@@ -1,0 +1,106 @@
+[
+  {
+    "id": "mission_philippines",
+    "name": "夺取菲律宾",
+    "type": "mission",
+    "missionType": "main",
+    "phase": 3,
+    "difficulty": "hell",
+    "image": "/pacific-war-game/img/Mission_hell.jpg",
+    "requiredGroundPower": 12,
+    "requiredSeaPower": 18,
+    "requiredAirDefense": 15,
+    "requiredAirSuperiority": 15,
+    "reward": {
+      "description": "夺取菲律宾，建立前进基地，获得6点补给和4点最大补给保留",
+      "supply": 6,
+      "maxSupply": 4
+    },
+    "loss": {
+      "description": "随机损失4张参战卡牌",
+      "randomLoss": 4
+    },
+    "missionConstraints": [],
+    "flavor": "麦克阿瑟的承诺：我将回来"
+  },
+  {
+    "id": "mission_saipan",
+    "name": "夺取塞班岛",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 3,
+    "difficulty": "hard",
+    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "requiredGroundPower": 10,
+    "requiredSeaPower": 12,
+    "requiredAirDefense": 10,
+    "requiredAirSuperiority": 8,
+    "reward": {
+      "description": "占领塞班岛，B-29轰炸机可以直接轰炸日本本土，获得4点补给和3点额外回合",
+      "supply": 4,
+      "extraTurns": 3
+    },
+    "loss": {
+      "description": "随机损失3张参战卡牌",
+      "randomLoss": 3
+    },
+    "missionConstraints": [],
+    "flavor": "进攻日本本土的跳板"
+  },
+  {
+    "id": "mission_philippine_sea",
+    "name": "马里亚纳海战",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 3,
+    "difficulty": "hard",
+    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 15,
+    "requiredAirDefense": 12,
+    "requiredAirSuperiority": 15,
+    "reward": {
+      "description": "马里亚纳猎火鸡大赛，彻底摧毁日本航空力量，获得战场优势：制空权",
+      "battlefieldBuff": {
+        "id": "air_supremacy",
+        "name": "绝对制空权",
+        "description": "空军对空火力+3，空军对海火力+2",
+        "isBuff": true,
+        "effect": {
+          "type": "add_combat_power",
+          "powerType": "air",
+          "value": 3
+        }
+      }
+    },
+    "loss": {
+      "description": "随机损失3张参战卡牌",
+      "randomLoss": 3
+    },
+    "missionConstraints": [],
+    "flavor": "史上最大规模的航母决战"
+  },
+  {
+    "id": "mission_leyte_gulf",
+    "name": "莱特湾海战",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 3,
+    "difficulty": "hell",
+    "image": "/pacific-war-game/img/Mission_hell.jpg",
+    "requiredGroundPower": 8,
+    "requiredSeaPower": 20,
+    "requiredAirDefense": 12,
+    "requiredAirSuperiority": 10,
+    "reward": {
+      "description": "粉碎日本联合舰队的最后反扑，获得1张埃塞克斯级航母",
+      "card": "essex_carrier"
+    },
+    "loss": {
+      "description": "随机损失4张参战卡牌",
+      "randomLoss": 4
+    },
+    "missionConstraints": [],
+    "flavor": "史上最大规模的海战，日本海军的终结"
+  }
+]

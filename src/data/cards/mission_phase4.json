@@ -1,0 +1,115 @@
+[
+  {
+    "id": "mission_tokyo",
+    "name": "攻占东京",
+    "type": "mission",
+    "missionType": "main",
+    "phase": 4,
+    "difficulty": "hell",
+    "image": "/pacific-war-game/img/Mission_hell.jpg",
+    "requiredGroundPower": 15,
+    "requiredSeaPower": 20,
+    "requiredAirDefense": 18,
+    "requiredAirSuperiority": 20,
+    "reward": {
+      "description": "攻占东京，日本无条件投降，太平洋战争胜利！",
+      "supply": 10,
+      "maxSupply": 5
+    },
+    "loss": {
+      "description": "随机损失5张参战卡牌",
+      "randomLoss": 5
+    },
+    "missionConstraints": [],
+    "flavor": "战争的终结，和平的开始"
+  },
+  {
+    "id": "mission_okinawa",
+    "name": "冲绳战役",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 4,
+    "difficulty": "hell",
+    "image": "/pacific-war-game/img/Mission_hell.jpg",
+    "requiredGroundPower": 15,
+    "requiredSeaPower": 15,
+    "requiredAirDefense": 20,
+    "requiredAirSuperiority": 12,
+    "reward": {
+      "description": "突破日本本土防线最后屏障，获得5点补给和4点额外回合",
+      "supply": 5,
+      "extraTurns": 4
+    },
+    "loss": {
+      "description": "随机损失4张参战卡牌",
+      "randomLoss": 4
+    },
+    "missionConstraints": [],
+    "flavor": "神风特攻队的疯狂反扑，太平洋战争中最血腥的战役"
+  },
+  {
+    "id": "mission_iwo_jima",
+    "name": "硫磺岛战役",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 4,
+    "difficulty": "hard",
+    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "requiredGroundPower": 12,
+    "requiredSeaPower": 10,
+    "requiredAirDefense": 8,
+    "requiredAirSuperiority": 10,
+    "reward": {
+      "description": "夺取硫磺岛，战斗机可护航轰炸日本，获得战场优势：战斗机护航",
+      "battlefieldBuff": {
+        "id": "fighter_escort",
+        "name": "战斗机护航",
+        "description": "空军对地火力+2，空军防空火力+3",
+        "isBuff": true,
+        "effect": {
+          "type": "add_combat_power",
+          "powerType": "air",
+          "value": 3
+        }
+      }
+    },
+    "loss": {
+      "description": "随机损失3张参战卡牌",
+      "randomLoss": 3
+    },
+    "missionConstraints": [],
+    "flavor": "太平洋的绞肉机，星条旗插上折钵山"
+  },
+  {
+    "id": "mission_firebombing",
+    "name": "火烧东京",
+    "type": "mission",
+    "missionType": "side",
+    "phase": 4,
+    "difficulty": "normal",
+    "image": "/pacific-war-game/img/Mission_normal.jpeg",
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 0,
+    "requiredAirDefense": 8,
+    "requiredAirSuperiority": 15,
+    "reward": {
+      "description": "大规模战略轰炸摧毁日本工业，获得1张B-29超级空中堡垒",
+      "card": "b29_superfortress"
+    },
+    "loss": {
+      "description": "随机损失2张参战卡牌",
+      "randomLoss": 2
+    },
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army", "navy"],
+        "shortName": "战略轰炸",
+        "name": "战略轰炸任务",
+        "message": "战略轰炸任务，只允许空军参战",
+        "description": "这是纯空军战略轰炸任务，陆军和海军无法参与"
+      }
+    ],
+    "flavor": "一夜之间，东京化为火海"
+  }
+]
