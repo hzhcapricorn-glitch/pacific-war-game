@@ -1456,6 +1456,33 @@ button:disabled {
   background: rgba(72, 187, 120, 0.1);
 }
 
+.mission-card-compact.mission-completed {
+  opacity: 0.5;
+  filter: grayscale(0.7);
+  position: relative;
+}
+
+.mission-card-compact.mission-completed:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.mission-completed-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(72, 187, 120, 0.95);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 10;
+}
+
 .mission-detail-panel {
   width: 350px;
   height: 500px;

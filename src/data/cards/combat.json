@@ -6,7 +6,7 @@
     "cardCategory": "tactical",
     "rarity": "N",
     "retirePhase": 2,
-    "cost": 1,
+    "cost": 0,
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -22,9 +22,7 @@
       }
     ],
     "flavor": "珍珠港的伤痛提醒我们，后勤是反击的基础",
-    "image": "/pacific-war-game/img/starter_supply.jpeg",
-    "appearInEssentialPhase": 1,
-    "essentialShopCopies": 10
+    "image": "/pacific-war-game/img/starter_supply.jpeg"
   },
   {
     "id": "medium_supply",
@@ -50,10 +48,8 @@
     ],
     "flavor": "分段建造的奇迹，大洋丑小鸭",
     "image": "/pacific-war-game/img/medium_supply.png",
-    "appearInEssentialPhase": 2,
-    "essentialShopCopies": 10,
-    "appearInRandomPhase": 1,
-    "randomShopCopies": 7
+    "appearInEssentialPhase": 1,
+    "essentialShopCopies": 7
   },
   {
     "id": "large_supply",
@@ -650,6 +646,7 @@
     "airPower": 2,
     "airSlots": 2,
     "image": "/pacific-war-game/img/yorktown.png",
+    "backgroundImage": "/pacific-war-game/img/Background_sea.jpeg",
     "abilities": [
       {
         "type": "protect",

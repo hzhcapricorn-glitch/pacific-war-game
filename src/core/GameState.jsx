@@ -543,6 +543,12 @@ function gameStateReducer(state, action) {
               ...phaseCompletion,
               side: [...phaseCompletion.side, state.currentMission.id]
             };
+            // 支线任务完成后自动切换回主线任务，但保留战场buff
+            const mainMission = state.availableMissions?.find(m => m.missionType === 'main');
+            if (mainMission) {
+              newCurrentMission = mainMission;
+              // 注意：战场条件的更新会在下面统一处理
+            }
           }
 
           // Process mission rewards (will be applied in newState below)
@@ -584,7 +590,7 @@ function gameStateReducer(state, action) {
         });
       }
 
-      const newState = {
+      let newState = {
         ...state,
         zones: {
           ...state.zones,
@@ -598,6 +604,18 @@ function gameStateReducer(state, action) {
         stats: newStats,
         completedMissions: newCompletedMissions
       };
+
+      // 如果支线任务完成后切换到了主线任务，需要更新战场条件
+      if (victory && state.currentMission?.missionType === 'side' && newCurrentMission?.missionType === 'main') {
+        // 构建新的战场条件（阶段全局buff + 主线任务限制）
+        const baseBattlefieldConditions = buildBattlefieldConditions(state.phaseData, newCurrentMission);
+        // 保留任务奖励buff
+        const rewardBuffs = (state.battlefieldConditions || []).filter(
+          condition => condition.source === 'reward'
+        );
+        // 合并条件
+        newState.battlefieldConditions = [...baseBattlefieldConditions, ...rewardBuffs];
+      }
 
       // 添加战斗日志
       const participatingCards = state.zones.deployed.filter(c =>
@@ -682,7 +700,10 @@ function gameStateReducer(state, action) {
         if (reward.battlefieldBuff) {
           newState.battlefieldConditions = [
             ...newState.battlefieldConditions,
-            reward.battlefieldBuff
+            {
+              ...reward.battlefieldBuff,
+              source: 'reward' // 标记为任务奖励buff，切换任务时保留
+            }
           ];
           newState.battleLog = addLogEntry(
             newState,
@@ -954,8 +975,16 @@ function gameStateReducer(state, action) {
 
       if (!mission) return state;
 
-      // 更新战场局势（阶段全局buff + 当前任务限制）
-      const newBattlefieldConditions = buildBattlefieldConditions(state.phaseData, mission);
+      // 构建新的战场条件（阶段全局buff + 当前任务限制）
+      const baseBattlefieldConditions = buildBattlefieldConditions(state.phaseData, mission);
+
+      // 保留现有的任务奖励buff（source !== 'phase' 且 source !== 'mission'）
+      const rewardBuffs = (state.battlefieldConditions || []).filter(
+        condition => condition.source !== 'phase' && condition.source !== 'mission'
+      );
+
+      // 合并：阶段buff + 奖励buff + 新任务约束
+      const newBattlefieldConditions = [...baseBattlefieldConditions, ...rewardBuffs];
 
       const newState = {
         ...state,

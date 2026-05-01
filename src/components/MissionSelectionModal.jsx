@@ -16,6 +16,8 @@ function MissionSelectionModal({
   missions,
   currentMissionId,
   turnsRemaining,
+  completedMissions,
+  currentPhase,
   onSelectMission,
   onClose,
   onCardHover,
@@ -31,7 +33,20 @@ function MissionSelectionModal({
   const mainMission = missions.find(m => m.missionType === 'main');
   const sideMissions = missions.filter(m => m.missionType === 'side');
 
+  // 获取当前阶段已完成的任务列表
+  const phaseKey = `phase_${currentPhase}`;
+  const completedSideMissions = completedMissions?.[phaseKey]?.side || [];
+
+  // 检查任务是否已完成
+  const isMissionCompleted = (missionId) => {
+    return completedSideMissions.includes(missionId);
+  };
+
   const handleMissionClick = (missionId) => {
+    // 防止选择已完成的任务
+    if (isMissionCompleted(missionId)) {
+      return;
+    }
     onSelectMission(missionId);
     onClose();
   };
@@ -80,20 +95,27 @@ function MissionSelectionModal({
               <div className="mission-row">
                 <div className="mission-row-label">支线</div>
                 <div className="mission-cards-horizontal">
-                  {sideMissions.map(mission => (
-                    <div
-                      key={mission.id}
-                      className={`mission-card-compact ${currentMissionId === mission.id ? 'current-selected' : ''}`}
-                      onMouseEnter={() => setHoveredMissionId(mission.id)}
-                      onClick={() => handleMissionClick(mission.id)}
-                    >
-                      <Card
-                        card={mission}
-                        onHover={onCardHover}
-                        onHoverEnd={onCardHoverEnd}
-                      />
-                    </div>
-                  ))}
+                  {sideMissions.map(mission => {
+                    const isCompleted = isMissionCompleted(mission.id);
+                    return (
+                      <div
+                        key={mission.id}
+                        className={`mission-card-compact ${currentMissionId === mission.id ? 'current-selected' : ''} ${isCompleted ? 'mission-completed' : ''}`}
+                        onMouseEnter={() => !isCompleted && setHoveredMissionId(mission.id)}
+                        onClick={() => handleMissionClick(mission.id)}
+                        style={isCompleted ? { cursor: 'not-allowed' } : {}}
+                      >
+                        <Card
+                          card={mission}
+                          onHover={onCardHover}
+                          onHoverEnd={onCardHoverEnd}
+                        />
+                        {isCompleted && (
+                          <div className="mission-completed-badge">已完成</div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

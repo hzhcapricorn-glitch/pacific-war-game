@@ -852,6 +852,8 @@ function GameBoard() {
           missions={state.availableMissions}
           currentMissionId={state.currentMission?.id}
           turnsRemaining={state.turnsRemaining}
+          completedMissions={state.completedMissions}
+          currentPhase={state.currentPhase}
           onSelectMission={handleSelectMission}
           onClose={() => setShowMissionSelectionModal(false)}
           onCardHover={setHoveredCard}
