@@ -36,7 +36,8 @@
     "requiredAirDefense": 6,
     "requiredAirSuperiority": 5,
     "reward": {
-      "description": "胜利后获得战场优势：双鹤折翼",
+      "description": "胜利后获得战场优势：双鹤折翼，并获得3点额外回合",
+      "extraTurns": 3,
       "battlefieldBuff": {
         "id": "damaged_carriers",
         "name": "双鹤折翼",
