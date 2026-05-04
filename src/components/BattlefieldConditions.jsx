@@ -8,10 +8,24 @@ import React, { useState } from 'react';
  * - 上方：悬停时显示详细描述
  * - 下方：紧凑列表显示所有条件
  */
-function BattlefieldConditions({ conditions = [] }) {
+function BattlefieldConditions({ conditions = [], currentMission = null }) {
   const [hoveredCondition, setHoveredCondition] = useState(null);
 
   if (!conditions || conditions.length === 0) {
+    return null;
+  }
+
+  // Filter conditions based on scope and current mission type
+  const isMainMission = currentMission?.missionType === 'main';
+  const visibleConditions = conditions.filter(condition => {
+    // If buff has "current_main_only" scope, only show for main missions
+    if (condition.scope === 'current_main_only' && !isMainMission) {
+      return false;
+    }
+    return true;
+  });
+
+  if (visibleConditions.length === 0) {
     return null;
   }
 
@@ -21,7 +35,7 @@ function BattlefieldConditions({ conditions = [] }) {
         <h4>战场局势</h4>
       </div>
 
-      {/* 详细描述区域（悬停时显示，固定高度：1行标题+2行描述） */}
+      {/* 详细描述区域（悬停时显示，固定高度：1行标题+3行描述） */}
       <div className="condition-detail-area">
         {hoveredCondition ? (
           <div className="condition-detail">
@@ -35,9 +49,9 @@ function BattlefieldConditions({ conditions = [] }) {
         )}
       </div>
 
-      {/* 紧凑列表区域 */}
+      {/* 紧凑列表区域 - 自适应换行布局 */}
       <div className="conditions-list">
-        {conditions.map((condition, index) => {
+        {visibleConditions.map((condition, index) => {
           // 判断是否为任务限制（来自 mission）
           const isMissionConstraint = condition.source === 'mission';
           const itemClass = isMissionConstraint

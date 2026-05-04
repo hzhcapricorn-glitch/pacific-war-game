@@ -18,7 +18,8 @@ function Shop({
   onDebugAddSupply,
   onDebugRefreshShop,
   onDebugDrawCard,
-  onDebugUntapAll
+  onDebugUntapAll,
+  onDebugToggleBuffPanel
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
@@ -77,7 +78,7 @@ function Shop({
     <div className={`shop ${!isShopPhase ? 'shop-disabled' : ''}`}>
       <div className="shop-header">
         <h3>商店</h3>
-        {(onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll) && (
+        {(onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll || onDebugToggleBuffPanel) && (
           <div className="debug-controls-inline">
             {onDebugAddSupply && (
               <button onClick={onDebugAddSupply} className="btn-debug-inline">
@@ -97,6 +98,11 @@ function Shop({
             {onDebugUntapAll && (
               <button onClick={onDebugUntapAll} className="btn-debug-inline">
                 整备所有
+              </button>
+            )}
+            {onDebugToggleBuffPanel && (
+              <button onClick={onDebugToggleBuffPanel} className="btn-debug-inline">
+                Buff面板
               </button>
             )}
           </div>

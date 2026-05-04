@@ -157,12 +157,12 @@ export function calculateAllFirePowers(cards, context = null) {
 /**
  * 判断战斗是否胜利
  * @param {Object} attackPowers - 己方火力 { groundPower, seaPower, airPower }
- * @param {Object} mission - 任务对象（包含火力需求）
+ * @param {Object} requiredPowers - 调整后的任务需求（可以是mission对象或者已调整的需求对象）
  * @returns {boolean} 是否胜利
  */
-export function isVictorious(attackPowers, mission) {
-  const groundMet = attackPowers.groundPower >= (mission.requiredGroundPower || 0);
-  const seaMet = attackPowers.seaPower >= (mission.requiredSeaPower || 0);
+export function isVictorious(attackPowers, requiredPowers) {
+  const groundMet = attackPowers.groundPower >= (requiredPowers.groundPower || requiredPowers.requiredGroundPower || 0);
+  const seaMet = attackPowers.seaPower >= (requiredPowers.seaPower || requiredPowers.requiredSeaPower || 0);
   // 对空火力不足不影响胜利，但会影响损失
   return groundMet && seaMet;
 }
@@ -170,21 +170,21 @@ export function isVictorious(attackPowers, mission) {
 /**
  * 检查防空火力是否满足（用于判断损失是否加倍）
  * @param {Object} attackPowers - 己方火力
- * @param {Object} mission - 任务对象
+ * @param {Object} requiredPowers - 调整后的任务需求（可以是mission对象或者已调整的需求对象）
  * @returns {boolean} 防空火力是否满足
  */
-export function isAirDefenseSufficient(attackPowers, mission) {
-  return attackPowers.airDefense >= (mission.requiredAirDefense || mission.requiredAirPower || 0);
+export function isAirDefenseSufficient(attackPowers, requiredPowers) {
+  return attackPowers.airDefense >= (requiredPowers.airDefense || requiredPowers.requiredAirDefense || requiredPowers.requiredAirPower || 0);
 }
 
 /**
  * 检查制空火力是否满足（用于判断返航能力是否触发）
  * @param {Object} attackPowers - 己方火力
- * @param {Object} mission - 任务对象
+ * @param {Object} requiredPowers - 调整后的任务需求（可以是mission对象或者已调整的需求对象）
  * @returns {boolean} 制空火力是否满足
  */
-export function isAirSuperiorityAchieved(attackPowers, mission) {
-  return attackPowers.airSuperiority >= (mission.requiredAirSuperiority || mission.requiredAirPower || 0);
+export function isAirSuperiorityAchieved(attackPowers, requiredPowers) {
+  return attackPowers.airSuperiority >= (requiredPowers.airSuperiority || requiredPowers.requiredAirSuperiority || requiredPowers.requiredAirPower || 0);
 }
 
 /**
@@ -352,14 +352,14 @@ export function resolveCombat(selectedCards, mission, gameState) {
     gameState.battlefieldConditions || []
   );
 
-  // 判断胜负
-  const victory = isVictorious(attackPowers, mission);
+  // 判断胜负（使用调整后的需求）
+  const victory = isVictorious(attackPowers, requiredPowers);
 
-  // 检查防空火力是否满足（影响损失加倍）
-  const airDefenseSufficient = isAirDefenseSufficient(attackPowers, mission);
+  // 检查防空火力是否满足（影响损失加倍，使用调整后的需求）
+  const airDefenseSufficient = isAirDefenseSufficient(attackPowers, requiredPowers);
 
-  // 检查制空火力是否满足（影响返航能力）
-  const airSuperiorityAchieved = isAirSuperiorityAchieved(attackPowers, mission);
+  // 检查制空火力是否满足（影响返航能力，使用调整后的需求）
+  const airSuperiorityAchieved = isAirSuperiorityAchieved(attackPowers, requiredPowers);
 
   // 应用奖励（仅在胜利时）
   const rewards = victory ? applyReward(mission.reward, gameState) : { supply: 0, maxSupply: 0, victory: false };

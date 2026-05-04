@@ -784,7 +784,7 @@ button:disabled {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   padding: 8px;
-  min-height: 60px;
+  min-height: 80px; /* 增加高度以容纳3行 */
   margin-bottom: 8px;
 }
 
@@ -792,7 +792,7 @@ button:disabled {
   color: #718096;
   font-size: 12px;
   text-align: center;
-  padding: 20px 0;
+  padding: 28px 0; /* 调整垂直居中 */
 }
 
 .condition-detail {
@@ -809,13 +809,14 @@ button:disabled {
 .condition-detail-description {
   font-size: 12px;
   color: #cbd5e0;
-  line-height: 1.4;
+  line-height: 1.5; /* 调整行高以容纳更多文字 */
 }
 
 .conditions-list {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap; /* 允许换行 */
+  gap: 6px; /* 横向和纵向间距 */
+  align-items: flex-start;
 }
 
 .condition-item {
@@ -827,12 +828,14 @@ button:disabled {
   color: #e2e8f0;
   cursor: pointer;
   transition: all 0.2s;
+  width: auto; /* 宽度自适应内容 */
+  white-space: nowrap; /* 不换行 */
 }
 
 .condition-item:hover {
   background: rgba(66, 153, 225, 0.2);
   border-color: rgba(66, 153, 225, 0.4);
-  transform: translateX(2px);
+  transform: scale(1.05); /* 改为放大效果，因为横向布局不适合移动 */
 }
 
 .condition-item.condition-buff {
@@ -1330,10 +1333,10 @@ button:disabled {
   font-size: 12px;
   color: #cbd5e0;
   line-height: 1.4;
-  height: 34px; /* 2 lines */
+  max-height: 60px; /* 3 lines (12px * 1.4 * 3 ≈ 50px + 余量) */
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3; /* 改为3行 */
   -webkit-box-orient: vertical;
 }
 
@@ -1617,4 +1620,314 @@ button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+/* ==================== Debug Buff Panel Styles ==================== */
+
+.debug-buff-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.debug-buff-panel {
+  background: #1a1a2e;
+  border: 2px solid #4ade80;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(74, 222, 128, 0.3);
+}
+
+.debug-buff-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(74, 222, 128, 0.1);
+  border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.debug-buff-panel-header h2 {
+  margin: 0;
+  color: #4ade80;
+  font-size: 20px;
+}
+
+.debug-buff-panel .close-button {
+  background: none;
+  border: none;
+  color: #4ade80;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.debug-buff-panel .close-button:hover {
+  transform: scale(1.2);
+}
+
+.debug-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-section h3 {
+  margin: 0 0 12px 0;
+  color: #a78bfa;
+  font-size: 16px;
+}
+
+.active-buffs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.active-buff-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 6px;
+}
+
+.buff-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.buff-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.buff-badge.buff {
+  background: #4ade80;
+  color: #1a1a2e;
+}
+
+.buff-badge.debuff {
+  background: #ef4444;
+  color: white;
+}
+
+.buff-name {
+  color: white;
+  font-weight: 500;
+}
+
+.buff-source {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.remove-buff-button {
+  padding: 4px 12px;
+  background: #ef4444;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.remove-buff-button:hover {
+  background: #dc2626;
+}
+
+.buff-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 6px 12px;
+  background: #2d2d44;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.buff-registry-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 50vh;
+}
+
+.buff-registry-item {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.buff-registry-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.buff-registry-item.active {
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.buff-registry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.buff-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.buff-id {
+  color: #64748b;
+  font-size: 11px;
+  font-family: monospace;
+}
+
+.add-buff-button {
+  padding: 6px 16px;
+  background: #4ade80;
+  border: none;
+  border-radius: 6px;
+  color: #1a1a2e;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-buff-button:hover:not(:disabled) {
+  background: #22c55e;
+  transform: translateY(-1px);
+}
+
+.add-buff-button:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.add-buff-button.active {
+  background: #334155;
+  color: #4ade80;
+}
+
+.buff-description {
+  color: #cbd5e1;
+  font-size: 13px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.buff-effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.effect-tag {
+  padding: 3px 8px;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
+  color: #c4b5fd;
+  font-size: 11px;
+}
+
+.buff-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.meta-tag {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.meta-tag.category {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.meta-tag.scope {
+  background: rgba(236, 72, 153, 0.2);
+  color: #f9a8d4;
+  border: 1px solid rgba(236, 72, 153, 0.3);
+}
+
+.meta-tag.tag {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.buff-active-info {
+  margin-top: 8px;
+  padding: 6px;
+  background: rgba(74, 222, 128, 0.1);
+  border-left: 3px solid #4ade80;
+  color: #4ade80;
+  font-size: 11px;
+}
+
+.empty-message {
+  color: #64748b;
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
 }

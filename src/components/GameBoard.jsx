@@ -13,6 +13,7 @@ import PhaseTransitionModal from './PhaseTransitionModal';
 import MissionSelectionModal from './MissionSelectionModal';
 import LeaderSelectionModal from './LeaderSelectionModal';
 import BattlefieldConditions from './BattlefieldConditions';
+import DebugBuffPanel from './DebugBuffPanel';
 
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
@@ -26,6 +27,7 @@ import { resolveCombat, getCombatSummary, calculateCombatPower, calculateAllFire
 import { canParticipateInCombat } from '../core/AbilitySystem';
 import { getCardShopType, getCardShopCopies } from '../core/ShopSystem';
 import { loadPhaseData, isCardBlockedByConditions, getEffectiveDrawCount } from '../core/PhaseSystem';
+import { applyBuffsToMissionRequirements } from '../core/BuffSystem';
 
 /**
  * GameBoard Component - 主游戏面板
@@ -49,6 +51,8 @@ function GameBoard() {
   const [showLeaderSelectionModal, setShowLeaderSelectionModal] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState(null);
   const [availableLeaders, setAvailableLeaders] = useState([]);
+  // Debug buff panel
+  const [showDebugBuffPanel, setShowDebugBuffPanel] = useState(false);
 
   // 初始化游戏 - 显示领袖选择
   useEffect(() => {
@@ -93,6 +97,19 @@ function GameBoard() {
 
     autoExecutePhase();
   }, [state.phase, gameInitialized]);
+
+  // Keyboard shortcut for debug buff panel (Ctrl+Shift+B)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'B') {
+        e.preventDefault();
+        setShowDebugBuffPanel(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 监测补给变化并触发动画
   useEffect(() => {
@@ -476,6 +493,14 @@ function GameBoard() {
     return calculateAllFirePowers(selectedCards, { state, mission: state.currentMission });
   };
 
+  // 计算调整后的任务需求（应用buff效果）
+  const getAdjustedMissionRequirements = () => {
+    if (!state.currentMission) {
+      return { groundPower: 0, seaPower: 0, airDefense: 0, airSuperiority: 0 };
+    }
+    return applyBuffsToMissionRequirements(state.currentMission, state.battlefieldConditions || []);
+  };
+
   // 计算航空槽位相关信息
   const getAirSlotInfo = () => {
     const selectedCards = (state.zones.deployed || []).filter(card =>
@@ -562,26 +587,26 @@ function GameBoard() {
           <div className="combat-info">
             <div className="combat-stat">
               <span className="label">对地火力:</span>
-              <span className="value" style={{color: selectedFirePowers().groundPower >= (state.currentMission.requiredGroundPower || 0) ? '#34d399' : '#ef4444'}}>
-                {selectedFirePowers().groundPower} / {state.currentMission.requiredGroundPower || 0}
+              <span className="value" style={{color: selectedFirePowers().groundPower >= getAdjustedMissionRequirements().groundPower ? '#34d399' : '#ef4444'}}>
+                {selectedFirePowers().groundPower} / {getAdjustedMissionRequirements().groundPower}
               </span>
             </div>
             <div className="combat-stat">
               <span className="label">对海火力:</span>
-              <span className="value" style={{color: selectedFirePowers().seaPower >= (state.currentMission.requiredSeaPower || 0) ? '#34d399' : '#ef4444'}}>
-                {selectedFirePowers().seaPower} / {state.currentMission.requiredSeaPower || 0}
+              <span className="value" style={{color: selectedFirePowers().seaPower >= getAdjustedMissionRequirements().seaPower ? '#34d399' : '#ef4444'}}>
+                {selectedFirePowers().seaPower} / {getAdjustedMissionRequirements().seaPower}
               </span>
             </div>
             <div className="combat-stat">
               <span className="label">防空火力:</span>
-              <span className="value" style={{color: selectedFirePowers().airDefense >= (state.currentMission.requiredAirDefense || 0) ? '#34d399' : '#f59e0b'}}>
-                {selectedFirePowers().airDefense} / {state.currentMission.requiredAirDefense || 0}
+              <span className="value" style={{color: selectedFirePowers().airDefense >= getAdjustedMissionRequirements().airDefense ? '#34d399' : '#f59e0b'}}>
+                {selectedFirePowers().airDefense} / {getAdjustedMissionRequirements().airDefense}
               </span>
             </div>
             <div className="combat-stat">
               <span className="label">制空火力:</span>
-              <span className="value" style={{color: selectedFirePowers().airSuperiority >= (state.currentMission.requiredAirSuperiority || 0) ? '#34d399' : '#f59e0b'}}>
-                {selectedFirePowers().airSuperiority} / {state.currentMission.requiredAirSuperiority || 0}
+              <span className="value" style={{color: selectedFirePowers().airSuperiority >= getAdjustedMissionRequirements().airSuperiority ? '#34d399' : '#f59e0b'}}>
+                {selectedFirePowers().airSuperiority} / {getAdjustedMissionRequirements().airSuperiority}
               </span>
             </div>
             <div className="combat-stat">
@@ -641,7 +666,10 @@ function GameBoard() {
 
           {/* 战场局势 */}
           {state.phaseData && state.battlefieldConditions && state.battlefieldConditions.length > 0 && (
-            <BattlefieldConditions conditions={state.battlefieldConditions} />
+            <BattlefieldConditions
+              conditions={state.battlefieldConditions}
+              currentMission={state.currentMission}
+            />
           )}
         </div>
 
@@ -677,6 +705,7 @@ function GameBoard() {
                   }
                 });
               }}
+              onDebugToggleBuffPanel={() => setShowDebugBuffPanel(prev => !prev)}
             />
           </div>
 
@@ -858,6 +887,16 @@ function GameBoard() {
           onClose={() => setShowMissionSelectionModal(false)}
           onCardHover={setHoveredCard}
           onCardHoverEnd={() => setHoveredCard(null)}
+        />
+      )}
+
+      {/* Debug Buff Panel */}
+      {showDebugBuffPanel && (
+        <DebugBuffPanel
+          gameState={state}
+          onAddBuff={(buffId) => actions.debugAddBuff(buffId)}
+          onRemoveBuff={(buffIndex) => actions.debugRemoveBuff(buffIndex)}
+          onClose={() => setShowDebugBuffPanel(false)}
         />
       )}
     </div>

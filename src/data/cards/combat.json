@@ -647,13 +647,8 @@
     "airSlots": 2,
     "image": "/pacific-war-game/img/yorktown.png",
     "backgroundImage": "/pacific-war-game/img/Background_sea.jpeg",
-    "abilities": [
-      {
-        "type": "protect",
-        "trigger": "during_combat_loss"
-      }
-    ],
-    "flavor": "企业号 vs IJN",
+    "abilities": [],
+    "flavor": "企业号的姐妹们",
     "appearInRandomPhase": 1,
     "randomShopCopies": 2
   },

@@ -80,6 +80,18 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
 
     const names = [];
     card.abilities.forEach(ability => {
+      // 排除"领袖"能力（cannot_participate_in_combat）
+      if (ability.type === 'cannot_participate_in_combat') {
+        return;
+      }
+
+      // 领袖特殊能力：使用能力的 name 字段
+      if (ability.name && (ability.type === 'combat_boost' || ability.type === 'modify_draw_count')) {
+        names.push(ability.name);
+        return;
+      }
+
+      // 标准能力类型
       if (ability.type === 'supply') {
         names.push(`补给+${ability.value || 1}`);
       } else if (ability.type === 'draw') {
@@ -322,7 +334,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
               )}
             </div>
           )}
-          {!isMission && !isLeader && getAbilityNames().length > 0 && (
+          {!isMission && getAbilityNames().length > 0 && (
             <div className="card-abilities-compact">
               {getAbilityNames().map((name, idx) => (
                 <span key={idx} className="ability-name">{name}</span>

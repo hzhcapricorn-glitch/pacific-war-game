@@ -8,17 +8,15 @@
     "difficulty": "hard",
     "image": "/pacific-war-game/img/Mission_hard.jpg",
     "requiredGroundPower": 0,
-    "requiredSeaPower": 2,
-    "requiredAirDefense": 4,
-    "requiredAirSuperiority": 4,
+    "requiredSeaPower": 12,
+    "requiredAirDefense": 24,
+    "requiredAirSuperiority": 18,
     "reward": {
-      "description": "夺回太平洋主动权，获得3点补给和2点最大补给保留",
-      "supply": 3,
-      "maxSupply": 2
+      "description": "夺回太平洋主动权，进入下一个战略阶段"
     },
     "loss": {
-      "description": "随机损失2张参战卡牌",
-      "randomLoss": 2
+      "description": "随机损失参战卡牌",
+      "randomLoss": 4
     },
     "missionConstraints": [],
     "flavor": "决定太平洋战争走向的关键一战"
@@ -32,17 +30,17 @@
     "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_normal.jpeg",
     "requiredGroundPower": 0,
-    "requiredSeaPower": 2,
-    "requiredAirDefense": 3,
-    "requiredAirSuperiority": 3,
+    "requiredSeaPower": 6,
+    "requiredAirDefense": 8,
+    "requiredAirSuperiority": 6,
     "reward": {
-      "description": "胜利后获得战场优势：双鹤折翼，并获得3点额外回合",
-      "extraTurns": 3,
+      "description": "击败翔鹤瑞鹤，战场优势：双鹤折翼，回合+2",
+      "extraTurns": 2,
       "battlefieldBuffId": "damaged_carriers"
     },
     "loss": {
-      "description": "随机损失1张参战卡牌",
-      "randomLoss": 1
+      "description": "随机损失参战卡牌",
+      "randomLoss": 3
     },
     "missionConstraints": [
       {
@@ -73,17 +71,17 @@
     "phase": 1,
     "difficulty": "easy",
     "image": "/pacific-war-game/img/Mission_easy.jpeg",
-    "requiredGroundPower": 3,
-    "requiredSeaPower": 1,
-    "requiredAirDefense": 1,
+    "requiredGroundPower": 5,
+    "requiredSeaPower": 3,
+    "requiredAirDefense": 2,
     "requiredAirSuperiority": 1,
     "reward": {
-      "description": "保卫澳大利亚北部门户，获得1张F4F野猫战斗机",
-      "card": "f4f_wildcat"
+      "description": "保卫澳大利亚北部门户，回合+3",
+      "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失1张参战卡牌",
-      "randomLoss": 1
+      "description": "随机损失参战卡牌",
+      "randomLoss": 2
     },
     "missionConstraints": [],
     "flavor": "保卫南太平洋生命线"
@@ -97,18 +95,19 @@
     "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_normal.jpeg",
     "requiredGroundPower": 0,
-    "requiredSeaPower": 2,
-    "requiredAirDefense": 2,
-    "requiredAirSuperiority": 2,
+    "requiredSeaPower": 10,
+    "requiredAirDefense": 0,
+    "requiredAirSuperiority": 0,
     "reward": {
-      "description": "粉碎日军佯攻，获得战场优势：侦察增强",
-      "battlefieldBuffId": "enhanced_recon"
+      "description": "击败佯攻舰队，战场优势：寸土必争，回合+1",
+      "extraTurns": 1,
+      "battlefieldBuffId": "protect_the_land"
     },
     "loss": {
-      "description": "随机损失1张参战卡牌",
-      "randomLoss": 1
+      "description": "随机损失参战卡牌",
+      "randomLoss": 3
     },
     "missionConstraints": [],
-    "flavor": "不让日军分散我们的注意力"
+    "flavor": "即便是佯攻，也要寸土必争！"
   }
 ]

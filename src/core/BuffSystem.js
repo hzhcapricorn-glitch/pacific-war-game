@@ -58,9 +58,17 @@ export function applyBuffsToMissionRequirements(baseMission, battlefieldConditio
     airSuperiority: baseMission.requiredAirSuperiority || baseMission.requiredAirPower || 0
   };
 
+  // Check if current mission is main mission
+  const isMainMission = baseMission.missionType === 'main';
+
   // Apply each battlefield condition's effects
   battlefieldConditions.forEach(condition => {
     if (!condition.effect) return;
+
+    // Skip buffs with "current_main_only" scope if this is not a main mission
+    if (condition.scope === 'current_main_only' && !isMainMission) {
+      return;
+    }
 
     // Handle both single effect and array of effects
     const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect];

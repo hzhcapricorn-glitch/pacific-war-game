@@ -5,29 +5,30 @@
     "damaged_carriers": {
       "id": "damaged_carriers",
       "name": "双鹤折翼",
-      "description": "日军两艘航母受损退出战场，本阶段所有任务防空需求-2，制空需求-2，战斗损失-1",
+      "description": "翔鹤瑞鹤受损退出战场，仅对主线任务生效：防空需求-8，制空需求-6，对海需求-3",
       "category": "tactical_advantage",
       "isBuff": true,
       "effects": [
         {
           "type": "reduce_mission_requirement",
           "stat": "airDefense",
-          "value": 2,
-          "description": "防空需求-2"
+          "value": 8,
+          "description": "防空需求-8"
         },
         {
           "type": "reduce_mission_requirement",
           "stat": "airSuperiority",
-          "value": 2,
-          "description": "制空需求-2"
+          "value": 6,
+          "description": "制空需求-6"
         },
         {
-          "type": "reduce_random_loss",
-          "value": 1,
-          "description": "战斗损失-1"
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 4,
+          "description": "对海需求-3"
         }
       ],
-      "scope": "phase_only",
+      "scope": "current_main_only",
       "duration": "until_phase_end",
       "tags": ["naval", "carrier", "pacific_war"]
     },
@@ -67,6 +68,25 @@
       "scope": "phase_only",
       "duration": "until_phase_end",
       "tags": ["economy", "card_draw"]
+    },
+
+    "protect_the_land": {
+      "id": "protect_the_land",
+      "name": "寸土必争",
+      "description": "击败了日军对阿留申群岛的佯攻，减弱对中途岛的威胁，仅对主线任务生效：对海需求-4",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 4,
+          "description": "对海需求-4"
+        }
+      ],
+      "scope": "current_main_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "tactical"]
     },
 
     "air_supremacy": {
@@ -220,6 +240,7 @@
 
   "scopes": {
     "phase_only": "仅在当前阶段有效",
+    "current_main_only": "仅对当前阶段的主线任务有效，切换到支线任务时不生效",
     "permanent": "永久有效（直到游戏结束或关联单位失效）",
     "mission_only": "仅在当前任务中有效",
     "turn_based": "基于回合数持续"

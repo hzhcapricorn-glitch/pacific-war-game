@@ -94,7 +94,10 @@ const ActionTypes = {
   // Strategic Phase System
   START_PHASE: 'START_PHASE',
   SELECT_MISSION: 'SELECT_MISSION',
-  COMPLETE_MISSION: 'COMPLETE_MISSION'
+  COMPLETE_MISSION: 'COMPLETE_MISSION',
+  // Debug Actions
+  DEBUG_ADD_BUFF: 'DEBUG_ADD_BUFF',
+  DEBUG_REMOVE_BUFF: 'DEBUG_REMOVE_BUFF'
 };
 
 /**
@@ -1054,6 +1057,60 @@ function gameStateReducer(state, action) {
       };
     }
 
+    case ActionTypes.DEBUG_ADD_BUFF: {
+      const { buffId } = action.payload;
+      const buffCondition = createBattlefieldCondition(buffId, {
+        source: 'debug',
+        appliedAt: state.turn
+      });
+
+      if (!buffCondition) {
+        console.error(`[DEBUG] Buff ID not found: ${buffId}`);
+        return state;
+      }
+
+      const newState = {
+        ...state,
+        battlefieldConditions: [
+          ...state.battlefieldConditions,
+          buffCondition
+        ]
+      };
+
+      newState.battleLog = addLogEntry(
+        newState,
+        `🐛 DEBUG: 添加buff「${buffCondition.name}」`,
+        'debug'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.DEBUG_REMOVE_BUFF: {
+      const { buffIndex } = action.payload;
+      const removedBuff = state.battlefieldConditions[buffIndex];
+
+      if (!removedBuff) {
+        console.warn(`[DEBUG] Buff index out of range: ${buffIndex}`);
+        return state;
+      }
+
+      const newState = {
+        ...state,
+        battlefieldConditions: state.battlefieldConditions.filter(
+          (_, index) => index !== buffIndex
+        )
+      };
+
+      newState.battleLog = addLogEntry(
+        newState,
+        `🐛 DEBUG: 移除buff「${removedBuff.name}」`,
+        'debug'
+      );
+
+      return newState;
+    }
+
     default:
       return state;
   }
@@ -1183,6 +1240,15 @@ export function GameStateProvider({ children }) {
 
     completeMission: useCallback((missionId, missionType) => {
       dispatch({ type: ActionTypes.COMPLETE_MISSION, payload: { missionId, missionType } });
+    }, []),
+
+    // Debug Actions
+    debugAddBuff: useCallback((buffId) => {
+      dispatch({ type: ActionTypes.DEBUG_ADD_BUFF, payload: { buffId } });
+    }, []),
+
+    debugRemoveBuff: useCallback((buffIndex) => {
+      dispatch({ type: ActionTypes.DEBUG_REMOVE_BUFF, payload: { buffIndex } });
     }, [])
   };
 
