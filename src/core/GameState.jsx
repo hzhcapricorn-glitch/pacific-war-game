@@ -3,6 +3,7 @@ import { GamePhase, getNextPhase } from '../models/GamePhase';
 import { drawCards, moveCard, setCardStatus, shuffleDeck, createDeck } from './CardEngine';
 import { getCardAbilityEffects, isSupplyCard } from '../models/Card';
 import { processAbilities, getCardDestination, applyAbilityResults } from './AbilitySystem';
+import { createBattlefieldCondition } from '../data/buffs/BuffRegistry';
 import {
   loadPhaseData,
   loadPhaseMissions,
@@ -696,20 +697,41 @@ function gameStateReducer(state, action) {
           );
         }
 
-        // Battlefield buff reward
-        if (reward.battlefieldBuff) {
-          newState.battlefieldConditions = [
-            ...newState.battlefieldConditions,
-            {
-              ...reward.battlefieldBuff,
-              source: 'reward' // 标记为任务奖励buff，切换任务时保留
+        // Battlefield buff reward - support both inline and registry-based buffs
+        if (reward.battlefieldBuff || reward.battlefieldBuffId) {
+          let buffCondition = null;
+
+          // Priority 1: Load from registry by ID
+          if (reward.battlefieldBuffId) {
+            buffCondition = createBattlefieldCondition(reward.battlefieldBuffId, {
+              source: 'reward',
+              appliedAt: newState.turn
+            });
+            if (!buffCondition) {
+              console.error(`[GameState] Buff ID not found in registry: ${reward.battlefieldBuffId}`);
             }
-          ];
-          newState.battleLog = addLogEntry(
-            newState,
-            `⚡ 任务奖励：获得战场增益「${reward.battlefieldBuff.name}」`,
-            'reward'
-          );
+          }
+
+          // Priority 2: Use inline buff definition (backward compatibility)
+          if (!buffCondition && reward.battlefieldBuff) {
+            buffCondition = {
+              ...reward.battlefieldBuff,
+              source: 'reward',
+              appliedAt: newState.turn
+            };
+          }
+
+          if (buffCondition) {
+            newState.battlefieldConditions = [
+              ...newState.battlefieldConditions,
+              buffCondition
+            ];
+            newState.battleLog = addLogEntry(
+              newState,
+              `⚡ 任务奖励：获得战场增益「${buffCondition.name}」`,
+              'reward'
+            );
+          }
         }
       }
 

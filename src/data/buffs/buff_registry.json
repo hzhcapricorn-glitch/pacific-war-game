@@ -1,0 +1,227 @@
+{
+  "version": "1.0.0",
+  "description": "Centralized battlefield buff registry for Pacific War Game",
+  "buffs": {
+    "damaged_carriers": {
+      "id": "damaged_carriers",
+      "name": "双鹤折翼",
+      "description": "日军两艘航母受损退出战场，本阶段所有任务防空需求-2，制空需求-2，战斗损失-1",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airDefense",
+          "value": 2,
+          "description": "防空需求-2"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airSuperiority",
+          "value": 2,
+          "description": "制空需求-2"
+        },
+        {
+          "type": "reduce_random_loss",
+          "value": 1,
+          "description": "战斗损失-1"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "carrier", "pacific_war"]
+    },
+
+    "night_battle_expert": {
+      "id": "night_battle_expert",
+      "name": "夜战专家",
+      "description": "海军对海火力+2",
+      "category": "combat_bonus",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "add_combat_power",
+          "powerType": "sea",
+          "value": 2,
+          "description": "海军对海火力+2"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "night_battle"]
+    },
+
+    "enhanced_recon": {
+      "id": "enhanced_recon",
+      "name": "侦察增强",
+      "description": "每回合抽卡数+1",
+      "category": "economy",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "modify_draw_count",
+          "value": 1,
+          "description": "每回合抽卡数+1"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["economy", "card_draw"]
+    },
+
+    "air_supremacy": {
+      "id": "air_supremacy",
+      "name": "绝对制空权",
+      "description": "空军对空火力+3",
+      "category": "combat_bonus",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "add_combat_power",
+          "powerType": "air",
+          "value": 3,
+          "description": "空军对空火力+3"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["air", "aerial_combat", "pacific_war"]
+    },
+
+    "fighter_escort": {
+      "id": "fighter_escort",
+      "name": "战斗机护航",
+      "description": "空军对地火力+2，空军防空火力+3",
+      "category": "combat_bonus",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "add_combat_power",
+          "powerType": "air",
+          "value": 3,
+          "description": "空军防空火力+3"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["air", "fighter", "escort"]
+    },
+
+    "double_supply": {
+      "id": "double_supply",
+      "name": "双倍补给",
+      "description": "补给上限+5",
+      "category": "economy",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "modify_max_supply",
+          "value": 5,
+          "description": "补给上限+5"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["economy", "supply", "test"]
+    },
+
+    "full_assault": {
+      "id": "full_assault",
+      "name": "全军突击",
+      "description": "所有类型战斗力+2",
+      "category": "combat_bonus",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "add_combat_power",
+          "powerType": "ground",
+          "value": 2,
+          "description": "陆军对地火力+2"
+        },
+        {
+          "type": "add_combat_power",
+          "powerType": "sea",
+          "value": 2,
+          "description": "海军对海火力+2"
+        },
+        {
+          "type": "add_combat_power",
+          "powerType": "air",
+          "value": 2,
+          "description": "空军对空火力+2"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["combat", "multi_effect", "test"]
+    },
+
+    "expanded_market": {
+      "id": "expanded_market",
+      "name": "商店扩容",
+      "description": "随机商店槽位+3",
+      "category": "economy",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "modify_shop_refresh_count",
+          "value": 3,
+          "description": "随机商店槽位+3"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["economy", "shop", "test"]
+    },
+
+    "minimal_casualties": {
+      "id": "minimal_casualties",
+      "name": "低损战术",
+      "description": "战斗损失-2",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_random_loss",
+          "value": 2,
+          "description": "战斗损失-2"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["combat", "protection", "test"]
+    },
+
+    "naval_embargo": {
+      "id": "naval_embargo",
+      "name": "禁运令",
+      "description": "海军单位暂时无法在商店获得",
+      "category": "restriction",
+      "isBuff": false,
+      "effects": [
+        {
+          "type": "block_shop_card",
+          "cardIds": ["basic_destroyer", "cruiser", "basic_carrier", "basic_battleship"],
+          "description": "禁止海军单位在商店出现"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["restriction", "shop", "test"]
+    }
+  },
+
+  "categories": {
+    "tactical_advantage": "提供战术优势的BUFF",
+    "combat_bonus": "战斗加成",
+    "economy": "经济相关",
+    "restriction": "限制性效果"
+  },
+
+  "scopes": {
+    "phase_only": "仅在当前阶段有效",
+    "permanent": "永久有效（直到游戏结束或关联单位失效）",
+    "mission_only": "仅在当前任务中有效",
+    "turn_based": "基于回合数持续"
+  }
+}
