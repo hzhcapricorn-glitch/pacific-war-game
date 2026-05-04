@@ -38,28 +38,7 @@
     "reward": {
       "description": "胜利后获得战场优势：双鹤折翼，并获得3点额外回合",
       "extraTurns": 3,
-      "battlefieldBuff": {
-        "id": "damaged_carriers",
-        "name": "双鹤折翼",
-        "description": "日军两艘航母受损退出战场，本阶段所有任务：防空需求-2，制空需求-2，战斗损失-1",
-        "isBuff": true,
-        "effect": [
-          {
-            "type": "reduce_mission_requirement",
-            "stat": "airDefense",
-            "value": 2
-          },
-          {
-            "type": "reduce_mission_requirement",
-            "stat": "airSuperiority",
-            "value": 2
-          },
-          {
-            "type": "reduce_random_loss",
-            "value": 1
-          }
-        ]
-      }
+      "battlefieldBuffId": "damaged_carriers"
     },
     "loss": {
       "description": "随机损失1张参战卡牌",
@@ -123,15 +102,7 @@
     "requiredAirSuperiority": 3,
     "reward": {
       "description": "粉碎日军佯攻，获得战场优势：侦察增强",
-      "battlefieldBuff": {
-        "id": "enhanced_recon",
-        "name": "侦察增强",
-        "description": "每回合抽卡数+1",
-        "effect": {
-          "type": "modify_draw_count",
-          "value": 1
-        }
-      }
+      "battlefieldBuffId": "enhanced_recon"
     },
     "loss": {
       "description": "随机损失1张参战卡牌",
