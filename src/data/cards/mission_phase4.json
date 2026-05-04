@@ -61,17 +61,7 @@
     "requiredAirSuperiority": 10,
     "reward": {
       "description": "夺取硫磺岛，战斗机可护航轰炸日本，获得战场优势：战斗机护航",
-      "battlefieldBuff": {
-        "id": "fighter_escort",
-        "name": "战斗机护航",
-        "description": "空军对地火力+2，空军防空火力+3",
-        "isBuff": true,
-        "effect": {
-          "type": "add_combat_power",
-          "powerType": "air",
-          "value": 3
-        }
-      }
+      "battlefieldBuffId": "fighter_escort"
     },
     "loss": {
       "description": "随机损失3张参战卡牌",
@@ -94,17 +84,7 @@
     "requiredAirSuperiority": 15,
     "reward": {
       "description": "大规模战略轰炸摧毁日本工业，获得战场优势：东京大火",
-      "battlefieldBuff": {
-        "id": "fighter_escort",
-        "name": "东京大火",
-        "description": "空军对地火力+2，空军防空火力+3",
-        "isBuff": true,
-        "effect": {
-          "type": "add_combat_power",
-          "powerType": "air",
-          "value": 3
-        }
-      }
+      "battlefieldBuffId": "fighter_escort"
     },
     "loss": {
       "description": "随机损失2张参战卡牌",

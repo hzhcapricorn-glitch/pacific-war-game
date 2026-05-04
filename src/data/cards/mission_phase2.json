@@ -61,17 +61,7 @@
     "requiredAirSuperiority": 0,
     "reward": {
       "description": "夜战胜利，获得战场优势：夜战专家",
-      "battlefieldBuff": {
-        "id": "night_battle_expert",
-        "name": "夜战专家",
-        "description": "海军对海火力+2",
-        "isBuff": true,
-        "effect": {
-          "type": "add_combat_power",
-          "powerType": "sea",
-          "value": 2
-        }
-      }
+      "battlefieldBuffId": "night_battle_expert"
     },
     "loss": {
       "description": "随机损失2张参战卡牌",

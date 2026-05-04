@@ -74,9 +74,9 @@
     "difficulty": "easy",
     "image": "/pacific-war-game/img/Mission_easy.jpeg",
     "requiredGroundPower": 3,
-    "requiredSeaPower": 5,
-    "requiredAirDefense": 8,
-    "requiredAirSuperiority": 4,
+    "requiredSeaPower": 1,
+    "requiredAirDefense": 1,
+    "requiredAirSuperiority": 1,
     "reward": {
       "description": "保卫澳大利亚北部门户，获得1张F4F野猫战斗机",
       "card": "f4f_wildcat"
@@ -96,10 +96,10 @@
     "phase": 1,
     "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_normal.jpeg",
-    "requiredGroundPower": 5,
-    "requiredSeaPower": 10,
-    "requiredAirDefense": 5,
-    "requiredAirSuperiority": 3,
+    "requiredGroundPower": 0,
+    "requiredSeaPower": 2,
+    "requiredAirDefense": 2,
+    "requiredAirSuperiority": 2,
     "reward": {
       "description": "粉碎日军佯攻，获得战场优势：侦察增强",
       "battlefieldBuffId": "enhanced_recon"
