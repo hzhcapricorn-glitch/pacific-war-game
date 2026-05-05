@@ -19,12 +19,13 @@ function Shop({
   onDebugRefreshShop,
   onDebugDrawCard,
   onDebugUntapAll,
-  onDebugToggleBuffPanel
+  onDebugToggleBuffPanel,
+  onDebugSwitchMission
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
   // 补给变化动画状态
-  const [supplyIncreasing, setSupplyIncreasing] = useState(false);
+  const [supplyChangeType, setSupplyChangeType] = useState(null); // 'increase' | 'decrease' | null
   const [prevSupply, setPrevSupply] = useState(currentSupply);
 
   // 初始化时从所有卡牌中提取必要卡牌种类
@@ -43,9 +44,15 @@ function Shop({
   // 监听补给变化，触发动画
   useEffect(() => {
     if (currentSupply > prevSupply) {
-      setSupplyIncreasing(true);
+      setSupplyChangeType('increase');
       const timer = setTimeout(() => {
-        setSupplyIncreasing(false);
+        setSupplyChangeType(null);
+      }, 800);
+      return () => clearTimeout(timer);
+    } else if (currentSupply < prevSupply) {
+      setSupplyChangeType('decrease');
+      const timer = setTimeout(() => {
+        setSupplyChangeType(null);
       }, 800);
       return () => clearTimeout(timer);
     }
@@ -78,7 +85,7 @@ function Shop({
     <div className={`shop ${!isShopPhase ? 'shop-disabled' : ''}`}>
       <div className="shop-header">
         <h3>商店</h3>
-        {(onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll || onDebugToggleBuffPanel) && (
+        {(onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll || onDebugToggleBuffPanel || onDebugSwitchMission) && (
           <div className="debug-controls-inline">
             {onDebugAddSupply && (
               <button onClick={onDebugAddSupply} className="btn-debug-inline">
@@ -100,6 +107,11 @@ function Shop({
                 整备所有
               </button>
             )}
+            {onDebugSwitchMission && (
+              <button onClick={onDebugSwitchMission} className="btn-debug-inline">
+                更换任务
+              </button>
+            )}
             {onDebugToggleBuffPanel && (
               <button onClick={onDebugToggleBuffPanel} className="btn-debug-inline">
                 Buff面板
@@ -108,9 +120,10 @@ function Shop({
           </div>
         )}
         <div className="supply-display">
-          补给: <span className={`supply-value ${supplyIncreasing ? 'supply-increasing' : ''}`}>
+          补给: <span className={`supply-value ${supplyChangeType ? `supply-${supplyChangeType}` : ''}`}>
             {currentSupply}
-            {supplyIncreasing && <span className="supply-arrow">↑</span>}
+            {supplyChangeType === 'increase' && <span className="supply-arrow supply-arrow-up">↑</span>}
+            {supplyChangeType === 'decrease' && <span className="supply-arrow supply-arrow-down">↓</span>}
           </span> / {maxSupplyRetention}
         </div>
       </div>

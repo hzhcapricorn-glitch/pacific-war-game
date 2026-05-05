@@ -86,7 +86,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
       }
 
       // 领袖特殊能力：使用能力的 name 字段
-      if (ability.name && (ability.type === 'combat_boost' || ability.type === 'modify_draw_count')) {
+      if (ability.name && (ability.type === 'combat_boost' || ability.type === 'modify_draw_count' || ability.type === 'increase_scout_limit')) {
         names.push(ability.name);
         return;
       }
@@ -161,7 +161,7 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
       } else if (ability.type === 'quick_response') {
         descriptions.push(`快速整备：激活一张整备中的卡牌⚡`);
       } else if (ability.type === 'heavy_armor') {
-        descriptions.push(`重甲${ability.value}：战斗损失时需被选中${ability.value + 1}次才损失🛡️`);
+        descriptions.push(`重甲${ability.value}：战斗损失时被选中${ability.value + 1}次才损失🛡️`);
       }
       // 移除 else 分支，不再显示未知的 ability.type
     });

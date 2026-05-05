@@ -14,11 +14,15 @@ import MissionSelectionModal from './MissionSelectionModal';
 import LeaderSelectionModal from './LeaderSelectionModal';
 import BattlefieldConditions from './BattlefieldConditions';
 import DebugBuffPanel from './DebugBuffPanel';
+import DebugMissionSwitchModal from './DebugMissionSwitchModal';
 
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
 import missionCardsData from '../data/cards/mission.json';
 import missionPhase1Data from '../data/cards/mission_phase1.json';
+import missionPhase2Data from '../data/cards/mission_phase2.json';
+import missionPhase3Data from '../data/cards/mission_phase3.json';
+import missionPhase4Data from '../data/cards/mission_phase4.json';
 import leaderCardsData from '../data/cards/leader.json';
 import gameConfig from '../data/config.json';
 import { createCard } from '../models/Card';
@@ -53,6 +57,8 @@ function GameBoard() {
   const [availableLeaders, setAvailableLeaders] = useState([]);
   // Debug buff panel
   const [showDebugBuffPanel, setShowDebugBuffPanel] = useState(false);
+  // Debug mission switch
+  const [showDebugMissionSwitch, setShowDebugMissionSwitch] = useState(false);
 
   // 初始化游戏 - 显示领袖选择
   useEffect(() => {
@@ -307,7 +313,13 @@ function GameBoard() {
 
         if (activeAbility) {
           if (activeAbility.type === 'scout') {
-            // 使用侦查能力
+            // 使用侦查能力 - 检查侦查上限
+            const scoutUsed = state.scoutUsed || 0;
+            const scoutLimit = state.scoutLimit || 1;
+            if (scoutUsed >= scoutLimit) {
+              alert(`已达到侦查上限（${scoutUsed}/${scoutLimit}）！`);
+              return;
+            }
             actions.scoutAndTap(activeAbility.value, card.instanceId);
           } else if (activeAbility.type === 'draw') {
             // 使用抽卡能力
@@ -706,6 +718,7 @@ function GameBoard() {
                 });
               }}
               onDebugToggleBuffPanel={() => setShowDebugBuffPanel(prev => !prev)}
+              onDebugSwitchMission={() => setShowDebugMissionSwitch(true)}
             />
           </div>
 
@@ -715,7 +728,7 @@ function GameBoard() {
           }`}>
             <div className="card-zone deployed-zone">
               <div className="zone-header">
-                <h3>部署区 ({state.zones?.deployed.length || 0})</h3>
+                <h3>部署区 ({state.zones?.deployed.length || 0}) <span style={{marginLeft: '10px', fontSize: '0.85em', color: '#64b5f6'}}>侦查上限：{state.scoutUsed || 0}/{state.scoutLimit || 1}</span></h3>
                 <button
                   className="zone-action-button"
                   onClick={() => actions.sortDeployed()}
@@ -897,6 +910,23 @@ function GameBoard() {
           onAddBuff={(buffId) => actions.debugAddBuff(buffId)}
           onRemoveBuff={(buffIndex) => actions.debugRemoveBuff(buffIndex)}
           onClose={() => setShowDebugBuffPanel(false)}
+        />
+      )}
+
+      {/* Debug Mission Switch Modal */}
+      {showDebugMissionSwitch && (
+        <DebugMissionSwitchModal
+          onClose={() => setShowDebugMissionSwitch(false)}
+          onSelectMission={(mission) => {
+            actions.selectMission(mission.id);
+          }}
+          allMissions={[
+            ...missionPhase1Data,
+            ...missionPhase2Data,
+            ...missionPhase3Data,
+            ...missionPhase4Data
+          ]}
+          currentMissionId={state.currentMission?.id}
         />
       )}
     </div>

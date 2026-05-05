@@ -62,14 +62,11 @@
         }
       },
       {
-        "type": "modify_draw_count",
-        "trigger": "phase_start",
+        "type": "increase_scout_limit",
+        "trigger": "passive",
         "name": "战术家",
-        "description": "每回合准备阶段多摸一张手牌",
-        "effect": {
-          "phase": "draw",
-          "value": 1
-        }
+        "description": "侦查上限+1",
+        "value": 1
       }
     ],
     "flavor": "小泽治三郎，日本海军中将，航空战术专家"

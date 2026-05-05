@@ -2,6 +2,42 @@
   "version": "1.0.0",
   "description": "Centralized battlefield buff registry for Pacific War Game",
   "buffs": {
+    "debug_lower_reqeust": {
+      "id": "debug_lower_reqeust",
+      "name": "debug:降低难度",
+      "description": "降低任务需求",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airDefense",
+          "value": 99,
+          "description": "防空需求-99"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airSuperiority",
+          "value": 99,
+          "description": "制空需求-99"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 99,
+          "description": "对海需求-99"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "groundPower",
+          "value": 99,
+          "description": "陆军需求-99"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["debug"]
+    },
     "damaged_carriers": {
       "id": "damaged_carriers",
       "name": "双鹤折翼",
@@ -12,19 +48,50 @@
         {
           "type": "reduce_mission_requirement",
           "stat": "airDefense",
-          "value": 8,
-          "description": "防空需求-8"
+          "value": 6,
+          "description": "防空需求-6"
         },
         {
           "type": "reduce_mission_requirement",
           "stat": "airSuperiority",
-          "value": 6,
-          "description": "制空需求-6"
+          "value": 4,
+          "description": "制空需求-4"
         },
         {
           "type": "reduce_mission_requirement",
           "stat": "seaPower",
           "value": 4,
+          "description": "对海需求-4"
+        }
+      ],
+      "scope": "current_main_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "carrier", "pacific_war"]
+    },
+
+    "damaged_carriers_2": {
+      "id": "damaged_carriers_2",
+      "name": "黑云压城",
+      "description": "成功调离日军航母编队远离瓜岛，仅对主线任务生效：防空需求-6，制空需求-4，对海需求-3",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airDefense",
+          "value": 6,
+          "description": "防空需求-6"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airSuperiority",
+          "value": 4,
+          "description": "制空需求-"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 3,
           "description": "对海需求-3"
         }
       ],
@@ -33,21 +100,27 @@
       "tags": ["naval", "carrier", "pacific_war"]
     },
 
-    "night_battle_expert": {
-      "id": "night_battle_expert",
-      "name": "夜战专家",
-      "description": "海军对海火力+2",
-      "category": "combat_bonus",
+    "landing_raid": {
+      "id": "landing_raid",
+      "name": "登陆袭扰",
+      "description": "成功袭扰日军登陆舰队，削弱其护航能力，仅对主线任务生效：防空需求-8，制空需求-4",
+      "category": "tactical_advantage",
       "isBuff": true,
       "effects": [
         {
-          "type": "add_combat_power",
-          "powerType": "sea",
-          "value": 2,
-          "description": "海军对海火力+2"
+          "type": "reduce_mission_requirement",
+          "stat": "groundPower",
+          "value": 8,
+          "description": "对海需求-8"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 4,
+          "description": "对海需求-8"
         }
       ],
-      "scope": "phase_only",
+      "scope": "current_main_only",
       "duration": "until_phase_end",
       "tags": ["naval", "night_battle"]
     },
@@ -68,6 +141,24 @@
       "scope": "phase_only",
       "duration": "until_phase_end",
       "tags": ["economy", "card_draw"]
+    },
+
+    "fragile_supply_line": {
+      "id": "fragile_supply_line",
+      "name": "脆弱补给线",
+      "description": "每回合抽卡数-1",
+      "category": "economy",
+      "isBuff": false,
+      "effects": [
+        {
+          "type": "modify_draw_count",
+          "value": -1,
+          "description": "每回合抽卡数-1"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["economy", "card_draw", "debuff"]
     },
 
     "protect_the_land": {

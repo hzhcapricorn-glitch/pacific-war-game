@@ -74,6 +74,7 @@
       }
     ],
     "flavor": "胜利的象征，永恒的荣耀",
+    "image": "/pacific-war-game/img/ship_8.jpg",
     "appearInEssentialPhase": 3,
     "essentialShopCopies": 7,
     "appearInRandomPhase": 2,
@@ -316,6 +317,7 @@
       }
     ],
     "flavor": "四引擎轰炸机，太平洋的恶魔",
+    "image": "/pacific-war-game/img/sb2c_helldiver.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInRandomPhase": 3,
     "randomShopCopies": 6
@@ -371,6 +373,30 @@
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInRandomPhase": 1,
     "randomShopCopies": 3
+  },
+  {
+    "id": "b29_superfortress",
+    "type": "combat",
+    "name": "B-29轰炸机\n“超级堡垒”",
+    "cardCategory": "combat",
+    "rarity": "UR",
+    "retirePhase": null,
+    "unitType": "air",
+    "cost": 5,
+    "redeployCost": 2,
+    "groundPower": 10,
+    "seaPower": 0,
+    "airPower": 0,
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
+    "flavor": "点燃地狱的火种",
+    "image": "/pacific-war-game/img/b-29.jpg",
+    "appearInRandomPhase": 4,
+    "randomShopCopies": 0
   },
   {
     "id": "basic_destroyer",
@@ -478,7 +504,8 @@
         "trigger": "on_tap"
       }
     ],
-    "flavor": "太平洋战场的静默猎手",
+    "flavor": "战功赫赫的功勋潜艇",
+    "image": "/pacific-war-game/img/submarine_1.jpg",
     "appearInRandomPhase": 3,
     "randomShopCopies": 6
   },
@@ -518,7 +545,7 @@
     "airPower": 1,
     "abilities": [],
     "flavor": "亚特兰大级巡洋舰的改进型",
-    "image": "/pacific-war-game/img/basic_cruiser.png"
+    "image": "/pacific-war-game/img/ship_17.jpg"
   },
   {
     "id": "cruiser",
@@ -530,10 +557,16 @@
     "unitType": "navy",
     "cost": 4,
     "redeployCost": 2,
-    "groundPower": 3,
+    "groundPower": 2,
     "seaPower": 3,
-    "airPower": 2,
-    "abilities": [],
+    "airPower": 1,
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 1,
+        "trigger": "during_combat_loss"
+      }
+    ],
     "flavor": "海上的钢铁巨兽",
     "image": "/pacific-war-game/img/cruiser.jpg",
     "appearInRandomPhase": 1,
@@ -549,9 +582,9 @@
     "unitType": "navy",
     "cost": 5,
     "redeployCost": 2,
-    "groundPower": 4,
+    "groundPower": 3,
     "seaPower": 4,
-    "airPower": 3,
+    "airPower": 2,
     "abilities": [
       {
         "type": "heavy_armor",
@@ -560,7 +593,7 @@
       }
     ],
     "flavor": "航母的最佳保镖",
-    "image": "/pacific-war-game/img/basic_battleship.jpg",
+    "image": "/pacific-war-game/img/ship_11.jpg",
     "appearInRandomPhase": 2,
     "randomShopCopies": 5
   },
@@ -574,13 +607,13 @@
     "unitType": "navy",
     "cost": 6,
     "redeployCost": 2,
-    "groundPower": 6,
-    "seaPower": 6,
-    "airPower": 4,
+    "groundPower": 4,
+    "seaPower": 5,
+    "airPower": 2,
     "abilities": [
       {
         "type": "heavy_armor",
-        "value": 1,
+        "value": 2,
         "trigger": "during_combat_loss"
       }
     ],
@@ -621,9 +654,15 @@
     "redeployCost": 2,
     "groundPower": 0,
     "seaPower": 0,
-    "airPower": 2,
-    "airSlots": 3,
-    "abilities": [],
+    "airPower": 3,
+    "airSlots": 2,
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 1,
+        "trigger": "during_combat_loss"
+      }
+    ],
     "flavor": "战争后期的“饺子级”航母",
     "image": "/pacific-war-game/img/advanced_carrier.jpg",
     "appearInEssentialPhase": 4,
@@ -647,10 +686,16 @@
     "airSlots": 2,
     "image": "/pacific-war-game/img/yorktown.png",
     "backgroundImage": "/pacific-war-game/img/Background_sea.jpeg",
-    "abilities": [],
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 1,
+        "trigger": "during_combat_loss"
+      }
+    ],
     "flavor": "企业号的姐妹们",
     "appearInRandomPhase": 1,
-    "randomShopCopies": 2
+    "randomShopCopies": 3
   },
   {
     "id": "carrier_enterprise",
@@ -678,6 +723,32 @@
     "randomShopCopies": 1
   },
   {
+    "id": "carrier_kilsage",
+    "type": "combat",
+    "name": "奇尔沙治级\n航空战舰",
+    "cardCategory": "combat",
+    "rarity": "UR",
+    "retirePhase": null,
+    "unitType": "navy",
+    "cost": 5,
+    "redeployCost": 2,
+    "groundPower": 0,
+    "seaPower": 5,
+    "airPower": 4,
+    "airSlots": 2,
+    "image": "/pacific-war-game/img/aviation_battleship.png",
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 2,
+        "trigger": "during_combat_loss"
+      }
+    ],
+    "flavor": "仅存在与图纸上的存在",
+    "appearInRandomPhase": 4,
+    "randomShopCopies": 1
+  },
+  {
     "id": "marines",
     "type": "combat",
     "name": "海军陆战队",
@@ -692,7 +763,7 @@
     "airPower": 0,
     "abilities": [],
     "flavor": "First to Fight",
-    "image": "/pacific-war-game/img/marines.jpeg",
+    "image": "/pacific-war-game/img/army_2.jpg",
     "appearInRandomPhase": 1,
     "randomShopCopies": 8
   },
@@ -711,6 +782,7 @@
     "airPower": 0,
     "abilities": [],
     "flavor": "硫磺岛、瓜岛，他们战无不胜",
+    "image": "/pacific-war-game/img/marines.jpeg",
     "appearInRandomPhase": 3,
     "randomShopCopies": 6
   },
@@ -760,6 +832,7 @@
       }
     ],
     "flavor": "冲绳岛战役的传奇单位",
+    "image": "/pacific-war-game/img/army_4.jpg",
     "appearInRandomPhase": 4,
     "randomShopCopies": 4
   },
@@ -790,7 +863,8 @@
         }
       }
     ],
-    "flavor": "舰队的生命线",
+    "flavor": "战士们前线的家园",
+    "image": "/pacific-war-game/img/factory.jpg",
     "appearInRandomPhase": 1,
     "randomShopCopies": 6
   },

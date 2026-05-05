@@ -9,16 +9,25 @@
     "image": "/pacific-war-game/img/Mission_hard.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 12,
-    "requiredAirDefense": 24,
-    "requiredAirSuperiority": 18,
+    "requiredAirDefense": 15,
+    "requiredAirSuperiority": 10,
     "reward": {
       "description": "夺回太平洋主动权，进入下一个战略阶段"
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 4
+      "randomLoss": 5
     },
-    "missionConstraints": [],
+    "missionConstraints": [
+    {
+      "type": "restrict_unit_type",
+      "unitTypes": ["army"],
+      "shortName": "仅海战",
+      "name": "纯海战环境",
+      "message": "纯海战环境，不允许陆军参战",
+      "description": "该任务为纯海战，陆军单位无法参战"
+    }
+  ],
     "flavor": "决定太平洋战争走向的关键一战"
   },
   {
@@ -28,14 +37,14 @@
     "missionType": "side",
     "phase": 1,
     "difficulty": "normal",
-    "image": "/pacific-war-game/img/Mission_normal.jpeg",
+    "image": "/pacific-war-game/img/mission_sho_1.jpg",
     "requiredGroundPower": 0,
-    "requiredSeaPower": 6,
-    "requiredAirDefense": 8,
-    "requiredAirSuperiority": 6,
+    "requiredSeaPower": 4,
+    "requiredAirDefense": 6,
+    "requiredAirSuperiority": 4,
     "reward": {
-      "description": "击败翔鹤瑞鹤，战场优势：双鹤折翼，回合+2",
-      "extraTurns": 2,
+      "description": "击败翔鹤瑞鹤，战场优势：双鹤折翼，回合+3",
+      "extraTurns": 3,
       "battlefieldBuffId": "damaged_carriers"
     },
     "loss": {
@@ -71,13 +80,13 @@
     "phase": 1,
     "difficulty": "easy",
     "image": "/pacific-war-game/img/Mission_easy.jpeg",
-    "requiredGroundPower": 5,
+    "requiredGroundPower": 4,
     "requiredSeaPower": 3,
     "requiredAirDefense": 2,
     "requiredAirSuperiority": 1,
     "reward": {
-      "description": "保卫澳大利亚北部门户，回合+3",
-      "extraTurns": 3
+      "description": "保卫澳大利亚北部门户，回合+5",
+      "extraTurns": 4
     },
     "loss": {
       "description": "随机损失参战卡牌",
@@ -93,14 +102,14 @@
     "missionType": "side",
     "phase": 1,
     "difficulty": "normal",
-    "image": "/pacific-war-game/img/Mission_normal.jpeg",
+    "image": "/pacific-war-game/img/mission_takao_.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 10,
     "requiredAirDefense": 0,
     "requiredAirSuperiority": 0,
     "reward": {
-      "description": "击败佯攻舰队，战场优势：寸土必争，回合+1",
-      "extraTurns": 1,
+      "description": "击败佯攻舰队，战场优势：寸土必争，回合+3",
+      "extraTurns": 2,
       "battlefieldBuffId": "protect_the_land"
     },
     "loss": {

@@ -849,12 +849,17 @@
   position: relative;
 }
 
-.supply-value.supply-increasing {
-  animation: supplyPulse 0.8s ease;
+.supply-value.supply-increase {
+  animation: supplyPulseIncrease 0.8s ease;
   color: #10b981;
 }
 
-@keyframes supplyPulse {
+.supply-value.supply-decrease {
+  animation: supplyPulseDecrease 0.8s ease;
+  color: #ef4444;
+}
+
+@keyframes supplyPulseIncrease {
   0% {
     transform: scale(1);
   }
@@ -867,14 +872,36 @@
   }
 }
 
-.supply-arrow {
-  color: #10b981;
-  font-size: 18px;
-  margin-left: 4px;
-  animation: supplyArrowFloat 0.8s ease-out;
+@keyframes supplyPulseDecrease {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+    color: #f87171;
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-@keyframes supplyArrowFloat {
+.supply-arrow {
+  font-size: 18px;
+  margin-left: 4px;
+  font-weight: bold;
+}
+
+.supply-arrow-up {
+  color: #10b981;
+  animation: supplyArrowFloatUp 0.8s ease-out;
+}
+
+.supply-arrow-down {
+  color: #ef4444;
+  animation: supplyArrowFloatDown 0.8s ease-out;
+}
+
+@keyframes supplyArrowFloatUp {
   0% {
     opacity: 1;
     transform: translateY(0);
@@ -882,6 +909,17 @@
   100% {
     opacity: 0;
     transform: translateY(-15px);
+  }
+}
+
+@keyframes supplyArrowFloatDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px);
   }
 }
 

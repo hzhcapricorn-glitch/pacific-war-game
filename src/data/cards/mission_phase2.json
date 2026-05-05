@@ -6,19 +6,17 @@
     "missionType": "main",
     "phase": 2,
     "difficulty": "hell",
-    "image": "/pacific-war-game/img/Mission_hell.jpg",
-    "requiredGroundPower": 8,
-    "requiredSeaPower": 15,
+    "image": "/pacific-war-game/img/mission_2.jpg",
+    "requiredGroundPower": 20,
+    "requiredSeaPower": 20,
     "requiredAirDefense": 12,
-    "requiredAirSuperiority": 10,
+    "requiredAirSuperiority": 9,
     "reward": {
-      "description": "成功守住亨德森机场，夺取战略主动权，获得5点补给和3点最大补给保留",
-      "supply": 5,
-      "maxSupply": 3
+      "description": "成功守住亨德森机场，夺取战略主动权，进入下一个战略阶段"
     },
     "loss": {
-      "description": "随机损失3张参战卡牌",
-      "randomLoss": 3
+      "description": "随机损失参战卡牌",
+      "randomLoss": 4
     },
     "missionConstraints": [],
     "flavor": "太平洋战争的转折点，消耗战的地狱"
@@ -30,22 +28,23 @@
     "missionType": "side",
     "phase": 2,
     "difficulty": "hard",
-    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "image": "/pacific-war-game/img/mission_sho_1.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 10,
     "requiredAirDefense": 8,
     "requiredAirSuperiority": 8,
     "reward": {
-      "description": "击退日军增援舰队，获得3点补给和2点额外回合",
+      "description": "回合+3，获得战场优势：黑云压城",
+      "battlefieldBuffId": "damaged_carriers_2",
       "supply": 3,
-      "extraTurns": 2
+      "extraTurns": 3
     },
     "loss": {
       "description": "随机损失2张参战卡牌",
-      "randomLoss": 2
+      "randomLoss": 6
     },
     "missionConstraints": [],
-    "flavor": "阻断日军的海上运输线"
+    "flavor": "调离日军机动舰队，削弱其护航能力"
   },
   {
     "id": "mission_ironbottom_sound",
@@ -54,20 +53,29 @@
     "missionType": "side",
     "phase": 2,
     "difficulty": "hard",
-    "image": "/pacific-war-game/img/Mission_hard.jpg",
+    "image": "/pacific-war-game/img/night_fight.jpeg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 12,
-    "requiredAirDefense": 5,
+    "requiredAirDefense": 0,
     "requiredAirSuperiority": 0,
     "reward": {
-      "description": "夜战胜利，获得战场优势：夜战专家",
-      "battlefieldBuffId": "night_battle_expert"
+      "description": "回合+3，获得战场优势：登陆袭扰",
+      "battlefieldBuffId": "landing_raid",
+      "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失2张参战卡牌",
-      "randomLoss": 2
+      "description": "随机损失参战卡牌",
+      "randomLoss": 6
     },
     "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army"],
+        "shortName": "仅海战",
+        "name": "纯海战环境",
+        "message": "纯海战环境，不允许陆军参战",
+        "description": "该任务为纯海战，陆军单位无法参战"
+      },
       {
         "type": "restrict_unit_type",
         "unitTypes": ["air"],
@@ -85,21 +93,31 @@
     "type": "mission",
     "missionType": "side",
     "phase": 2,
-    "difficulty": "normal",
-    "image": "/pacific-war-game/img/Mission_normal.jpeg",
-    "requiredGroundPower": 3,
+    "difficulty": "easy",
+    "image": "/pacific-war-game/img/Mission_easy.jpeg",
+    "requiredGroundPower": 0,
     "requiredSeaPower": 8,
-    "requiredAirDefense": 10,
-    "requiredAirSuperiority": 6,
+    "requiredAirDefense": 4,
+    "requiredAirSuperiority": 2,
     "reward": {
-      "description": "拦截日军运输，获得1张SBD无畏轰炸机",
-      "card": "sbd_dauntless"
+      "description": "拦截日军运输，补给+10，回合+3",
+      "supply": 10,
+      "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失1张参战卡牌",
-      "randomLoss": 1
+      "description": "随机损失参战卡牌",
+      "randomLoss": 2
     },
-    "missionConstraints": [],
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army"],
+        "shortName": "仅海战",
+        "name": "纯海战环境",
+        "message": "纯海战环境，不允许陆军参战",
+        "description": "该任务为纯海战，陆军单位无法参战"
+      }
+    ],
     "flavor": "切断日军的生命线"
   }
 ]

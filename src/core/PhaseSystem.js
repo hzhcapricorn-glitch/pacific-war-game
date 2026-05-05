@@ -85,29 +85,31 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
     };
   }
 
-  // Return deployed logistics cards to shop first (before processing changes)
-  const logisticsCards = (newState.zones.deployed || []).filter(
-    card => card.cardCategory === 'logistics'
-  );
+  // 后勤卡不再随战略阶段改动而损失，保留在部署区
+  // 注释掉原来的后勤卡返回商店逻辑
 
-  logisticsCards.forEach(card => {
-    // Determine shop type for this card in new phase
-    const newShopType = getCardShopType(card, phaseNumber);
-
-    if (newShopType === 'essential') {
-      const existingInShop = (newState.zones.essentialShop || []).find(c => c.id === card.id);
-      if (!existingInShop) {
-        newState.zones.essentialShop = [...(newState.zones.essentialShop || []), { ...card, status: 'ready' }];
-      }
-    } else if (newShopType === 'random') {
-      newState.zones.randomShopDeck = [...(newState.zones.randomShopDeck || []), { ...card, status: 'ready' }];
-    }
-  });
-
-  // Remove logistics cards from deployed zone
-  newState.zones.deployed = (newState.zones.deployed || []).filter(
-    card => card.cardCategory !== 'logistics'
-  );
+  // const logisticsCards = (newState.zones.deployed || []).filter(
+  //   card => card.cardCategory === 'logistics'
+  // );
+  //
+  // logisticsCards.forEach(card => {
+  //   // Determine shop type for this card in new phase
+  //   const newShopType = getCardShopType(card, phaseNumber);
+  //
+  //   if (newShopType === 'essential') {
+  //     const existingInShop = (newState.zones.essentialShop || []).find(c => c.id === card.id);
+  //     if (!existingInShop) {
+  //       newState.zones.essentialShop = [...(newState.zones.essentialShop || []), { ...card, status: 'ready' }];
+  //     }
+  //   } else if (newShopType === 'random') {
+  //     newState.zones.randomShopDeck = [...(newState.zones.randomShopDeck || []), { ...card, status: 'ready' }];
+  //   }
+  // });
+  //
+  // // Remove logistics cards from deployed zone
+  // newState.zones.deployed = (newState.zones.deployed || []).filter(
+  //   card => card.cardCategory !== 'logistics'
+  // );
 
   // Skip shop rebuild during initial setup (oldPhase === 0)
   // INIT_GAME has already set up the shops correctly
@@ -269,9 +271,14 @@ export function getEffectiveDrawCount(state) {
   // Check battlefield conditions
   if (state.battlefieldConditions) {
     state.battlefieldConditions.forEach(condition => {
-      if (condition.effect && condition.effect.type === 'modify_draw_count') {
-        baseDrawCount += condition.effect.value;
-      }
+      // Support both single effect (old format) and effects array (registry format)
+      const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+      effects.forEach(effect => {
+        if (effect && effect.type === 'modify_draw_count') {
+          baseDrawCount += effect.value || 0;
+        }
+      });
     });
   }
 
@@ -305,13 +312,18 @@ export function getCombatPowerBonus(state, powerType) {
   }
 
   state.battlefieldConditions.forEach(condition => {
-    if (
-      condition.effect &&
-      condition.effect.type === 'add_combat_power' &&
-      condition.effect.powerType === powerType
-    ) {
-      bonus += condition.effect.value;
-    }
+    // Support both single effect and effects array
+    const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+    effects.forEach(effect => {
+      if (
+        effect &&
+        effect.type === 'add_combat_power' &&
+        effect.powerType === powerType
+      ) {
+        bonus += effect.value || 0;
+      }
+    });
   });
 
   return bonus;
@@ -329,13 +341,18 @@ export function isCardBlockedByConditions(card, state) {
   }
 
   for (const condition of state.battlefieldConditions) {
-    if (
-      condition.effect &&
-      condition.effect.type === 'block_shop_card' &&
-      condition.effect.cardIds &&
-      condition.effect.cardIds.includes(card.id)
-    ) {
-      return true;
+    // Support both single effect and effects array
+    const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+    for (const effect of effects) {
+      if (
+        effect &&
+        effect.type === 'block_shop_card' &&
+        effect.cardIds &&
+        effect.cardIds.includes(card.id)
+      ) {
+        return true;
+      }
     }
   }
 
@@ -364,9 +381,14 @@ export function getShopRefreshCount(state) {
   // Apply battlefield conditions
   if (state.battlefieldConditions) {
     state.battlefieldConditions.forEach(condition => {
-      if (condition.effect && condition.effect.type === 'modify_shop_refresh_count') {
-        baseCount += condition.effect.value;
-      }
+      // Support both single effect and effects array
+      const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+      effects.forEach(effect => {
+        if (effect && effect.type === 'modify_shop_refresh_count') {
+          baseCount += effect.value || 0;
+        }
+      });
     });
   }
 

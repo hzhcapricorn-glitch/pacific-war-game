@@ -1790,6 +1790,81 @@ button:disabled {
   cursor: pointer;
 }
 
+/* Debug Mission Switch Modal */
+.debug-mission-phase-group {
+  margin-bottom: 32px;
+  padding: 16px;
+  background: rgba(45, 55, 72, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.debug-phase-title {
+  font-size: 18px;
+  color: #4ade80;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.debug-mission-group {
+  margin-bottom: 16px;
+}
+
+.debug-mission-group:last-child {
+  margin-bottom: 0;
+}
+
+.debug-mission-group-title {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mission-cards-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mission-card-wrapper {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.mission-card-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3);
+}
+
+.mission-card-wrapper.current-mission {
+  outline: 3px solid #fbbf24;
+  outline-offset: 2px;
+}
+
+.current-mission-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #fbbf24;
+  color: #1a1a2e;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+  z-index: 10;
+}
+
+.mission-card-thumbnail {
+  pointer-events: none;
+}
+
 .buff-registry-list {
   flex: 1;
   overflow-y: auto;

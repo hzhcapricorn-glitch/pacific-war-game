@@ -5,7 +5,12 @@
   "turnLimit": 20,
   "mainMission": "mission_guadalcanal",
   "sideMissions": ["mission_eastern_solomons", "mission_ironbottom_sound", "mission_tokyo_express"],
-  "battlefieldConditions": [],
+  "battlefieldConditions": [
+    {
+      "id": "fragile_supply_line",
+      "source": "phase"
+    }
+  ],
   "cardsToRetire": [],
   "cardsToAdd": []
 }

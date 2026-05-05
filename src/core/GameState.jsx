@@ -45,6 +45,10 @@ const initialState = {
   retireUsedThisTurn: false, // 退役能力本回合是否已使用
   usedAbilitiesThisTurn: {}, // 追踪本回合已使用的能力（用于once_per_turn约束）
 
+  // Scout Limit System
+  scoutLimit: 1, // 侦查上限（初始为1）
+  scoutUsed: 0, // 本回合已使用的侦查次数
+
   // Strategic Phase System
   currentPhase: undefined, // Current strategic phase number (set by START_PHASE)
   phaseData: null, // Current phase definition
@@ -113,11 +117,24 @@ function buildBattlefieldConditions(phaseData, currentMission) {
 
   // 添加阶段全局buff/debuff
   if (phaseData && phaseData.battlefieldConditions) {
-    phaseData.battlefieldConditions.forEach(condition => {
-      conditions.push({
-        ...condition,
-        source: 'phase'
-      });
+    phaseData.battlefieldConditions.forEach(conditionRef => {
+      // 如果引用了buff注册表中的buff，从注册表加载
+      if (conditionRef.id) {
+        const buffCondition = createBattlefieldCondition(conditionRef.id, {
+          source: conditionRef.source || 'phase'
+        });
+        if (buffCondition) {
+          conditions.push(buffCondition);
+        } else {
+          console.warn(`[GameState] Failed to load battlefield condition: ${conditionRef.id}`);
+        }
+      } else {
+        // 向后兼容：直接使用内联定义的条件
+        conditions.push({
+          ...conditionRef,
+          source: 'phase'
+        });
+      }
     });
   }
 
@@ -192,6 +209,16 @@ function gameStateReducer(state, action) {
       // Leader card is deployed immediately and already ready (not tapped)
       const initialDeployed = leader ? [{ ...leader, status: 'ready' }] : [];
 
+      // Calculate initial scout limit (base 1 + leader abilities)
+      let initialScoutLimit = 1;
+      if (leader && leader.abilities) {
+        leader.abilities.forEach(ability => {
+          if (ability.type === 'increase_scout_limit') {
+            initialScoutLimit += ability.value || 0;
+          }
+        });
+      }
+
       const newState = {
         ...initialState,
         randomShopSlots: randomShopSlots || 6, // 保存随机商店槽位数
@@ -208,6 +235,8 @@ function gameStateReducer(state, action) {
         currentMission: missions[0] || null,
         retireUsedThisTurn: false,
         usedAbilitiesThisTurn: {},
+        scoutLimit: initialScoutLimit, // 设置初始侦查上限
+        scoutUsed: 0, // 初始化侦查使用次数
         leader: leader || null // Store leader reference
       };
 
@@ -231,7 +260,8 @@ function gameStateReducer(state, action) {
         turn: isNewTurn ? state.turn + 1 : state.turn,
         turnsRemaining: isNewTurn && state.turnsRemaining > 0 ? state.turnsRemaining - 1 : state.turnsRemaining,
         retireUsedThisTurn: isNewTurn ? false : state.retireUsedThisTurn,
-        usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn
+        usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn,
+        scoutUsed: isNewTurn ? 0 : state.scoutUsed // 准备阶段重置侦查次数
       };
 
       // Check for phase completion at start of new turn
@@ -679,6 +709,16 @@ function gameStateReducer(state, action) {
       if (victory && state.currentMission && state.currentMission.reward) {
         const reward = state.currentMission.reward;
 
+        // Supply reward
+        if (reward.supply) {
+          newState.supply = (newState.supply || 0) + reward.supply;
+          newState.battleLog = addLogEntry(
+            newState,
+            `💰 任务奖励：获得${reward.supply}点补给`,
+            'reward'
+          );
+        }
+
         // Extra turns reward
         if (reward.extraTurns) {
           newState.turnsRemaining += reward.extraTurns;
@@ -862,13 +902,14 @@ function gameStateReducer(state, action) {
           hand: [...state.zones.hand, ...result.drawnCards],
           discard: result.newDiscard,
           deployed: newDeployed
-        }
+        },
+        scoutUsed: (state.scoutUsed || 0) + 1 // 增加侦查使用次数
       };
 
       // 添加日志
       newState.battleLog = addLogEntry(
         newState,
-        `🔍 侦查：抽取了 ${result.drawnCards.length} 张卡牌`,
+        `🔍 侦查：抽取了 ${result.drawnCards.length} 张卡牌（${newState.scoutUsed}/${state.scoutLimit}）`,
         'action'
       );
 
@@ -970,6 +1011,20 @@ function gameStateReducer(state, action) {
       const initialMission = phaseMissions.find(m => m.id === phaseData.mainMission) || phaseMissions[0];
       const initialBattlefieldConditions = buildBattlefieldConditions(phaseData, initialMission);
 
+      // Calculate scout limit (base 1 + leader abilities)
+      let scoutLimit = 1; // 基础侦查上限
+      if (newState.zones && newState.zones.deployed) {
+        newState.zones.deployed.forEach(card => {
+          if (card.type === 'leader' && card.abilities) {
+            card.abilities.forEach(ability => {
+              if (ability.type === 'increase_scout_limit') {
+                scoutLimit += ability.value || 0;
+              }
+            });
+          }
+        });
+      }
+
       newState = {
         ...newState,
         currentPhase: phaseNumber,
@@ -978,6 +1033,8 @@ function gameStateReducer(state, action) {
         currentMission: initialMission,
         turnsRemaining: phaseData.turnLimit,
         battlefieldConditions: initialBattlefieldConditions,
+        scoutLimit: scoutLimit, // 设置侦查上限
+        scoutUsed: 0, // 重置侦查使用次数
         completedMissions: {
           ...state.completedMissions,
           [`phase_${phaseNumber}`]: { main: false, side: [] }

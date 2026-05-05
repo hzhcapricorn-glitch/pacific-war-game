@@ -145,8 +145,21 @@ function handleCannotParticipateInCombatAbility(ability, card, context) {
 /**
  * 侦查能力 - 点击部署区已就绪卡牌时抽取X张卡牌
  * 触发时机：on_tap（部署后点击已就绪单位）
+ * 受侦查上限限制
  */
 function handleScoutAbility(ability, card, context) {
+  // 检查侦查上限
+  const scoutUsed = context.state.scoutUsed || 0;
+  const scoutLimit = context.state.scoutLimit || 1;
+
+  if (scoutUsed >= scoutLimit) {
+    return {
+      type: 'blocked',
+      reason: `已达到侦查上限（${scoutUsed}/${scoutLimit}）`,
+      log: null
+    };
+  }
+
   return {
     type: 'action',
     action: 'SCOUT_AND_TAP',
