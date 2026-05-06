@@ -138,6 +138,17 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
       const changeType = getCardChangeType(cardDef, oldPhase, phaseNumber);
       const newShopType = getCardShopType(cardDef, phaseNumber);
 
+      // Debug logging for large_supply
+      if (cardDef.id === 'large_supply') {
+        console.log('[DEBUG] large_supply phase transition:', {
+          oldPhase,
+          phaseNumber,
+          changeType,
+          newShopType,
+          existingInstances: existingCards.get(cardDef.id)?.length || 0
+        });
+      }
+
       // Track changes
       if (changeType === 'retired') {
         if (!cardChanges.retired.find(c => c.id === cardDef.id)) {
@@ -195,6 +206,17 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
               status: 'ready'
             });
           }
+        }
+
+        // Debug logging for large_supply
+        if (cardDef.id === 'large_supply') {
+          console.log('[DEBUG] large_supply added to shop:', {
+            shopType: newShopType,
+            shopCopies,
+            reusedCount: Math.min(shopCopies, existingInstances.length),
+            createdCount: Math.max(0, shopCopies - existingInstances.length),
+            targetShopName: newShopType === 'essential' ? 'essentialShop' : 'randomShopDeck'
+          });
         }
       }
     });

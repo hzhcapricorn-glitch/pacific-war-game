@@ -201,7 +201,7 @@ function addLogEntry(state, message, type = 'info') {
 function gameStateReducer(state, action) {
   switch (action.type) {
     case ActionTypes.INIT_GAME: {
-      const { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader } = action.payload;
+      const { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader, allCombatCards } = action.payload;
 
       // 从随机商店堆中抽取初始卡牌
       const shuffledRandomDeck = shuffleDeck([...randomShopDeck]);
@@ -239,7 +239,8 @@ function gameStateReducer(state, action) {
         usedAbilitiesThisTurn: {},
         scoutLimit: initialScoutLimit, // 设置初始侦查上限
         scoutUsed: 0, // 初始化侦查使用次数
-        leader: leader || null // Store leader reference
+        leader: leader || null, // Store leader reference
+        allCombatCards: allCombatCards || [] // Store card definitions for snapshot updates
       };
 
       if (leader) {
@@ -1010,6 +1011,9 @@ function gameStateReducer(state, action) {
       // Apply phase transition (handle card lifecycle)
       let newState = applyPhaseTransition(state, phaseData, phaseNumber, allCombatCards);
 
+      // Store updated card definitions
+      newState.allCombatCards = allCombatCards || state.allCombatCards || [];
+
       // Set up new phase
       const initialMission = phaseMissions.find(m => m.id === phaseData.mainMission) || phaseMissions[0];
       const initialBattlefieldConditions = buildBattlefieldConditions(phaseData, initialMission);
@@ -1254,6 +1258,42 @@ function gameStateReducer(state, action) {
         return state;
       }
 
+      // Helper function: Update card with latest definitions from combat.json
+      const updateCardDefinition = (snapshotCard) => {
+        if (!state.allCombatCards || state.allCombatCards.length === 0) {
+          // No card definitions available, use snapshot data as-is
+          return snapshotCard;
+        }
+
+        // Find matching card definition by id
+        const latestDef = state.allCombatCards.find(def => def.id === snapshotCard.id);
+        if (!latestDef) {
+          // Card not found in current definitions (maybe removed/renamed), keep snapshot version
+          console.warn(`[DEBUG] Card ${snapshotCard.id} not found in current combat.json`);
+          return snapshotCard;
+        }
+
+        // Merge: take latest stats/abilities from combat.json, keep snapshot state (instanceId, status, tapped)
+        return {
+          ...latestDef, // Use latest card definition
+          instanceId: snapshotCard.instanceId, // Preserve instance identity
+          status: snapshotCard.status, // Preserve status (ready/tapped)
+          // Note: Leader cards and mission cards are handled separately, but this works for combat cards
+        };
+      };
+
+      // Update all card zones with latest definitions
+      const updatedDeck = snapshot.zones.deck.map(updateCardDefinition);
+      const updatedHand = snapshot.zones.hand.map(updateCardDefinition);
+      const updatedDeployed = snapshot.zones.deployed.map(card => {
+        // Leader cards might not be in allCombatCards, handle separately
+        if (card.type === 'leader') {
+          return card; // Keep leader as-is
+        }
+        return updateCardDefinition(card);
+      });
+      const updatedDiscard = snapshot.zones.discard.map(updateCardDefinition);
+
       // Restore selective state, keep current non-saved state
       const restoredState = {
         ...state, // Keep current state as base
@@ -1261,11 +1301,11 @@ function gameStateReducer(state, action) {
         phase: snapshot.metadata.phase,
         currentPhase: snapshot.metadata.currentPhase,
         zones: {
-          ...state.zones, // Keep current shop zones
-          deck: snapshot.zones.deck,
-          hand: snapshot.zones.hand,
-          deployed: snapshot.zones.deployed,
-          discard: snapshot.zones.discard
+          ...state.zones, // Keep current shop zones - BUT they may be mismatched!
+          deck: updatedDeck,
+          hand: updatedHand,
+          deployed: updatedDeployed,
+          discard: updatedDiscard
         },
         supply: snapshot.gameState.supply,
         maxSupplyRetention: snapshot.gameState.maxSupplyRetention,
@@ -1275,13 +1315,21 @@ function gameStateReducer(state, action) {
         // Clear transient state
         selectedForCombat: [],
         retireUsedThisTurn: false,
-        usedAbilitiesThisTurn: {}
+        usedAbilitiesThisTurn: {},
+        // Mark that shops need rebuild (will be handled by next phase transition or user can manually switch phase)
+        snapshotLoadedPhase: snapshot.metadata.currentPhase
       };
 
       // Add log entry
+      const reloadPhaseFlag = action.payload.reloadPhase;
+      let logMessage = `📂 调试快照已加载 (原回合 ${snapshot.metadata.turn})${isSelectiveSnapshot ? ' [仅卡牌区域]' : ''}`;
+      if (reloadPhaseFlag) {
+        logMessage += ' - 将重载阶段数据...';
+      }
+
       restoredState.battleLog = addLogEntry(
         restoredState,
-        `📂 调试快照已加载 (原回合 ${snapshot.metadata.turn})${isSelectiveSnapshot ? ' [仅卡牌区域]' : ''}`,
+        logMessage,
         'debug'
       );
 
@@ -1301,10 +1349,10 @@ export function GameStateProvider({ children }) {
 
   // Actions
   const actions = {
-    initGame: useCallback((starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader) => {
+    initGame: useCallback((starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader, allCombatCards) => {
       dispatch({
         type: ActionTypes.INIT_GAME,
-        payload: { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader }
+        payload: { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader, allCombatCards }
       });
     }, []),
 
@@ -1432,8 +1480,8 @@ export function GameStateProvider({ children }) {
       dispatch({ type: ActionTypes.DEBUG_SAVE_SNAPSHOT });
     }, []),
 
-    debugLoadSnapshot: useCallback((snapshot) => {
-      dispatch({ type: ActionTypes.DEBUG_LOAD_SNAPSHOT, payload: { snapshot } });
+    debugLoadSnapshot: useCallback((snapshot, reloadPhase = false) => {
+      dispatch({ type: ActionTypes.DEBUG_LOAD_SNAPSHOT, payload: { snapshot, reloadPhase } });
     }, [])
   };
 

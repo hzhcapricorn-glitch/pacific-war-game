@@ -129,7 +129,7 @@ function CardStack({
             onClick={onCardClick}
             onHover={onCardHover}
             onHoverEnd={onCardHoverEnd}
-            className={selectedCards.includes(card.instanceId) ? 'selected' : ''}
+            className={phase === GamePhase.COMBAT && selectedCards.includes(card.instanceId) ? 'selected' : ''}
           />
         </div>
       ))}

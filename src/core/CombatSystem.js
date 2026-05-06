@@ -261,11 +261,11 @@ export function applyReward(reward, gameState) {
  * @param {Array} participatingCards - 参战卡牌数组
  * @param {Object} loss - 损失对象 { randomLoss, description }
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
- * @returns {Object} { lostCardIds: Array, damageDetails: Array }
+ * @returns {Object} { lostCardIds: Array, damageDetails: Array, abilitiesDisabled: Object }
  */
 export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = [], airSuperiorityAchieved = true) {
   if (!loss || !loss.randomLoss || loss.randomLoss === 0 || participatingCards.length === 0) {
-    return { lostCardIds: [], damageDetails: [] };
+    return { lostCardIds: [], damageDetails: [], abilitiesDisabled: { heavyArmor: false, lucky: false } };
   }
 
   // 检查是否有禁用能力的效果（神风威胁）
@@ -375,7 +375,9 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
   participatingCards.forEach(card => {
     const hits = hitTracker.get(card.instanceId);
     if (hits > 0) {
-      const armorValue = getHeavyArmorValue(card);
+      const originalArmorValue = getHeavyArmorValue(card);
+      // 如果神风威胁禁用了重甲，则armorValue视为0
+      const armorValue = disableHeavyArmor ? 0 : originalArmorValue;
       const requiredHits = armorValue + 1;
       const isDestroyed = hits >= requiredHits;
 
@@ -383,13 +385,21 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
         card,
         hits,
         armorValue,
+        originalArmorValue, // 保存原始装甲值用于显示
         requiredHits,
         isDestroyed
       });
     }
   });
 
-  return { lostCardIds: lostCards, damageDetails };
+  return {
+    lostCardIds: lostCards,
+    damageDetails,
+    abilitiesDisabled: {
+      heavyArmor: disableHeavyArmor,
+      lucky: disableLucky
+    }
+  };
 }
 
 /**
@@ -397,7 +407,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
  * @param {Array} selectedCards - 选中参战的卡牌
  * @param {Object} mission - 当前任务
  * @param {Object} gameState - 当前游戏状态
- * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, damageDetails, airDefenseSufficient, airSuperiorityAchieved }
+ * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, damageDetails, airDefenseSufficient, airSuperiorityAchieved, abilitiesDisabled }
  */
 export function resolveCombat(selectedCards, mission, gameState) {
   // 计算己方火力（包括combat_boost能力和任务约束）
@@ -442,7 +452,8 @@ export function resolveCombat(selectedCards, mission, gameState) {
     lostCards,
     damageDetails: lossResult.damageDetails,
     airDefenseSufficient,
-    airSuperiorityAchieved
+    airSuperiorityAchieved,
+    abilitiesDisabled: lossResult.abilitiesDisabled
   };
 }
 
@@ -460,7 +471,8 @@ export function getCombatSummary(combatResult) {
     lostCards,
     damageDetails,
     airDefenseSufficient,
-    airSuperiorityAchieved
+    airSuperiorityAchieved,
+    abilitiesDisabled
   } = combatResult;
 
   let summary = victory ? '🎉 战斗胜利！\n\n' : '❌ 战斗失败...\n\n';
@@ -494,16 +506,28 @@ export function getCombatSummary(combatResult) {
   if (damageDetails && damageDetails.length > 0) {
     summary += '\n战损情况:\n';
     damageDetails.forEach(detail => {
-      const { card, hits, armorValue, isDestroyed } = detail;
+      const { card, hits, armorValue, originalArmorValue, isDestroyed } = detail;
       const cardName = card.name.replace(/\n/g, '');
 
       // 检查是否有返航能力
       const hasReturnAbility = hasReturnToBaseAbility(card);
 
-      if (armorValue > 0) {
-        // 有重甲的单位
+      // 检查是否有幸运能力（用于判断是否被神风击沉）
+      const hasLucky = hasProtectAbility(card);
+      const kamikazeActive = abilitiesDisabled && (abilitiesDisabled.heavyArmor || abilitiesDisabled.lucky);
+
+      // 使用originalArmorValue判断单位是否本来有重甲
+      const hadHeavyArmor = (originalArmorValue !== undefined ? originalArmorValue : armorValue) > 0;
+
+      if (hadHeavyArmor) {
+        // 本来有重甲的单位
         if (isDestroyed) {
-          summary += `  - ${cardName} 被重创${hits}次并击沉 🛡️💥\n`;
+          // 如果神风威胁禁用了重甲，使用特殊描述
+          if (kamikazeActive && abilitiesDisabled.heavyArmor) {
+            summary += `  - ${cardName} 被神风特攻击沉 🛡️💥☠️\n`;
+          } else {
+            summary += `  - ${cardName} 被重创${hits}次并击沉 🛡️💥\n`;
+          }
         } else {
           summary += `  - ${cardName} 被重创${hits}次但未被击沉 🛡️\n`;
         }
@@ -522,7 +546,13 @@ export function getCombatSummary(combatResult) {
         } else if (card.unitType === 'army') {
           lossText = '阵亡';
         }
-        summary += `  - ${cardName} ${lossText}\n`;
+
+        // 如果神风威胁禁用了幸运且该单位有幸运能力，使用特殊描述
+        if (kamikazeActive && abilitiesDisabled.lucky && hasLucky && isDestroyed) {
+          summary += `  - ${cardName} 被神风特攻击沉 ☠️\n`;
+        } else {
+          summary += `  - ${cardName} ${lossText}\n`;
+        }
       }
     });
   } else if (lostCards && lostCards.length > 0) {

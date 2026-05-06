@@ -234,7 +234,8 @@ function GameBoard() {
       essentialShopCards,
       randomShopDeck,
       gameConfig.game.randomShopSlots || 6,
-      leader  // Pass leader card
+      leader,  // Pass leader card
+      combatCardsData  // Pass all combat card definitions for snapshot updates
     );
 
       // Start phase 1 and show phase transition modal
@@ -732,7 +733,19 @@ function GameBoard() {
               onDebugToggleBuffPanel={() => setShowDebugBuffPanel(prev => !prev)}
               onDebugSwitchMission={() => setShowDebugMissionSwitch(true)}
               onDebugSaveSnapshot={() => actions.debugSaveSnapshot()}
-              onDebugLoadSnapshot={(snapshot) => actions.debugLoadSnapshot(snapshot)}
+              onDebugLoadSnapshot={(snapshot, reloadPhase) => {
+                if (reloadPhase && snapshot.metadata?.currentPhase) {
+                  // Load snapshot first
+                  actions.debugLoadSnapshot(snapshot, false);
+                  // Then reload phase to rebuild shops
+                  setTimeout(() => {
+                    actions.startPhase(snapshot.metadata.currentPhase, combatCardsData);
+                  }, 100);
+                } else {
+                  // Just load snapshot without phase reload
+                  actions.debugLoadSnapshot(snapshot, false);
+                }
+              }}
             />
           </div>
 
@@ -933,7 +946,20 @@ function GameBoard() {
         <DebugMissionSwitchModal
           onClose={() => setShowDebugMissionSwitch(false)}
           onSelectMission={(mission) => {
-            actions.selectMission(mission.id);
+            // Check if mission is from a different phase
+            if (mission.phase && mission.phase !== state.currentPhase) {
+              // Switch to the target phase first
+              console.log(`[DEBUG] Switching from Phase ${state.currentPhase} to Phase ${mission.phase}`);
+              actions.startPhase(mission.phase, combatCardsData);
+
+              // Wait for phase transition to complete, then select mission
+              setTimeout(() => {
+                actions.selectMission(mission.id);
+              }, 100);
+            } else {
+              // Same phase, just switch mission
+              actions.selectMission(mission.id);
+            }
           }}
           allMissions={[
             ...missionPhase1Data,

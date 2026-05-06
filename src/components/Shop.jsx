@@ -49,20 +49,21 @@ function Shop({
 
   // 监听补给变化，触发动画
   useEffect(() => {
-    if (currentSupply > prevSupply) {
-      setSupplyChangeType('increase');
+    if (currentSupply !== prevSupply) {
+      if (currentSupply > prevSupply) {
+        setSupplyChangeType('increase');
+      } else {
+        setSupplyChangeType('decrease');
+      }
+
+      setPrevSupply(currentSupply);
+
       const timer = setTimeout(() => {
         setSupplyChangeType(null);
       }, 800);
-      return () => clearTimeout(timer);
-    } else if (currentSupply < prevSupply) {
-      setSupplyChangeType('decrease');
-      const timer = setTimeout(() => {
-        setSupplyChangeType(null);
-      }, 800);
+
       return () => clearTimeout(timer);
     }
-    setPrevSupply(currentSupply);
   }, [currentSupply, prevSupply]);
 
   // 按卡牌种类分组必要卡牌
@@ -146,7 +147,15 @@ function Shop({
                       reader.onload = (event) => {
                         try {
                           const snapshot = JSON.parse(event.target.result);
-                          onDebugLoadSnapshot(snapshot);
+
+                          // Ask user if they want to reload phase data
+                          const reloadPhase = window.confirm(
+                            '是否重载阶段数据？\n\n' +
+                            '【是】- 重建商店和任务列表（推荐，修复商店不匹配问题）\n' +
+                            '【否】- 只恢复卡牌区域，保留当前商店'
+                          );
+
+                          onDebugLoadSnapshot(snapshot, reloadPhase);
                         } catch (error) {
                           alert('快照加载失败：文件格式错误\n' + error.message);
                         }
