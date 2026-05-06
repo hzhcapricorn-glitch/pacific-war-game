@@ -497,17 +497,17 @@ export function canParticipateInCombat(card, missionConstraints = []) {
     }
   }
 
-  // 检查任务约束：禁止某种单位类型
-  const unitTypeRestriction = missionConstraints.find(
+  // 检查任务约束：禁止某种单位类型（可能有多个约束）
+  const unitTypeRestrictions = missionConstraints.filter(
     constraint => constraint.type === 'restrict_unit_type'
   );
 
-  if (unitTypeRestriction) {
-    const restrictedTypes = unitTypeRestriction.unitTypes || [];
+  for (const restriction of unitTypeRestrictions) {
+    const restrictedTypes = restriction.unitTypes || [];
     if (restrictedTypes.includes(card.unitType)) {
       return {
         canParticipate: false,
-        reason: unitTypeRestriction.message || `该任务不允许${card.unitType === 'army' ? '陆军' : card.unitType === 'navy' ? '海军' : '空军'}参战`
+        reason: restriction.message || `该任务不允许${card.unitType === 'army' ? '陆军' : card.unitType === 'navy' ? '海军' : '空军'}参战`
       };
     }
   }

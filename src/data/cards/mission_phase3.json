@@ -16,7 +16,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 6
+      "randomLoss": 8
     },
     "missionConstraints": [],
     "flavor": "麦克阿瑟的承诺：I shall return"
@@ -29,7 +29,7 @@
     "phase": 3,
     "difficulty": "hard",
     "image": "/pacific-war-game/img/mission_3.jpg",
-    "requiredGroundPower": 10,
+    "requiredGroundPower": 20,
     "requiredSeaPower": 12,
     "requiredAirDefense": 10,
     "requiredAirSuperiority": 8,
@@ -41,7 +41,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 4
+      "randomLoss": 6
     },
     "missionConstraints": [],
     "flavor": "进攻日本本土的跳板"
@@ -56,15 +56,15 @@
     "image": "/pacific-war-game/img/mission_6.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 9,
-    "requiredAirDefense": 12,
-    "requiredAirSuperiority": 8,
+    "requiredAirDefense": 16,
+    "requiredAirSuperiority": 12,
     "reward": {
       "description": "回合+3，获得战场优势：绝对制空",
       "battlefieldBuffId": "air_supremacy",
       "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失3张参战卡牌",
+      "description": "随机损失参战卡牌",
       "randomLoss": 4
     },
     "missionConstraints": [
@@ -77,7 +77,7 @@
         "description": "该任务为纯海战，陆军单位无法参战"
       }
     ],
-    "flavor": "史上最大规模的航母决战"
+    "flavor": "彻底摧毁日本机动舰队"
   },
   {
     "id": "mission_leyte_gulf",

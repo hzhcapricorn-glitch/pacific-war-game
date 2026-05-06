@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 import { GamePhase, getNextPhase } from '../models/GamePhase';
 import { drawCards, moveCard, setCardStatus, shuffleDeck, createDeck } from './CardEngine';
 import { getCardAbilityEffects, isSupplyCard } from '../models/Card';
-import { processAbilities, getCardDestination, applyAbilityResults } from './AbilitySystem';
+import { processAbilities, getCardDestination, applyAbilityResults, hasReturnToBaseAbility } from './AbilitySystem';
 import { createBattlefieldCondition } from '../data/buffs/BuffRegistry';
 import {
   loadPhaseData,
@@ -77,6 +77,7 @@ const ActionTypes = {
   PLAY_CARD: 'PLAY_CARD',
   TAP_CARD: 'TAP_CARD',
   UNTAP_CARD: 'UNTAP_CARD',
+  UNTAP_ALL_DEPLOYED: 'UNTAP_ALL_DEPLOYED',
   ADD_SUPPLY: 'ADD_SUPPLY',
   SPEND_SUPPLY: 'SPEND_SUPPLY',
   PURCHASE_CARD: 'PURCHASE_CARD',
@@ -488,6 +489,20 @@ function gameStateReducer(state, action) {
       };
     }
 
+    case ActionTypes.UNTAP_ALL_DEPLOYED: {
+      // 批量整备所有部署区的整备中卡牌
+      const newDeployed = state.zones.deployed.map(card =>
+        card.status === 'tapped' ? { ...card, status: 'ready' } : card
+      );
+      return {
+        ...state,
+        zones: {
+          ...state.zones,
+          deployed: newDeployed
+        }
+      };
+    }
+
     case ActionTypes.ADD_SUPPLY:
       return { ...state, supply: state.supply + action.payload };
 
@@ -607,22 +622,36 @@ function gameStateReducer(state, action) {
           : card
       );
 
-      // 移除损失的卡牌，根据shopType返回到相应位置
+      // 移除损失的卡牌，根据返航能力和制空权决定去向
       let newEssentialShop = [...state.zones.essentialShop];
       let newRandomShopDeck = [...state.zones.randomShopDeck];
+      let newDiscard = [...state.zones.discard];
+
+      // 从 combatResult 获取制空权状态
+      const airSuperiorityAchieved = combatResult?.airSuperiorityAchieved ?? false;
 
       if (cardsLost.length > 0) {
         cardsLost.forEach(lostCardId => {
           const cardIndex = newDeployed.findIndex(c => c.instanceId === lostCardId);
           if (cardIndex !== -1) {
             const lostCard = { ...newDeployed[cardIndex], status: 'ready' };
-            // 根据shopType决定返回位置
-            if (lostCard.shopType === 'essential') {
-              newEssentialShop.push(lostCard);
-            } else if (lostCard.shopType === 'random') {
-              newRandomShopDeck.push(lostCard);
+
+            // 检查是否有返航能力且制空权满足
+            const canReturnToBase = hasReturnToBaseAbility(lostCard) && airSuperiorityAchieved;
+
+            if (canReturnToBase) {
+              // 返航成功：进入弃牌堆
+              newDiscard.push(lostCard);
+            } else {
+              // 正常损失：根据shopType返回商店
+              if (lostCard.shopType === 'essential') {
+                newEssentialShop.push(lostCard);
+              } else if (lostCard.shopType === 'random') {
+                newRandomShopDeck.push(lostCard);
+              }
+              // 如果没有shopType（如战术卡），则移除
             }
-            // 如果没有shopType（如战术卡），则移除
+
             newDeployed.splice(cardIndex, 1);
           }
         });
@@ -633,6 +662,7 @@ function gameStateReducer(state, action) {
         zones: {
           ...state.zones,
           deployed: newDeployed,
+          discard: newDiscard,
           essentialShop: newEssentialShop,
           randomShopDeck: newRandomShopDeck
         },
@@ -735,13 +765,30 @@ function gameStateReducer(state, action) {
 
         // Card reward (create new card instance)
         if (reward.card) {
-          // Note: Card creation would require importing card data
-          // For now, log it - implementation can be added later
-          newState.battleLog = addLogEntry(
-            newState,
-            `🎁 任务奖励：获得卡牌「${reward.card}」`,
-            'reward'
-          );
+          // Find card definition from allCombatCards
+          const cardDef = state.allCombatCards?.find(c => c.id === reward.card);
+          if (cardDef) {
+            // Create new card instance
+            const newCardInstance = {
+              ...cardDef,
+              instanceId: `${cardDef.id}_${Date.now()}_reward`,
+              status: 'ready'
+            };
+            // Add directly to hand
+            newState.zones.hand = [...newState.zones.hand, newCardInstance];
+            newState.battleLog = addLogEntry(
+              newState,
+              `🎁 任务奖励：获得卡牌「${cardDef.name.replace(/\n/g, '')}」`,
+              'reward'
+            );
+          } else {
+            console.error(`[GameState] Reward card not found: ${reward.card}`);
+            newState.battleLog = addLogEntry(
+              newState,
+              `⚠️ 任务奖励卡牌「${reward.card}」未找到`,
+              'error'
+            );
+          }
         }
 
         // Battlefield buff reward - support both inline and registry-based buffs
@@ -1378,6 +1425,10 @@ export function GameStateProvider({ children }) {
 
     untapCard: useCallback((cardId) => {
       dispatch({ type: ActionTypes.UNTAP_CARD, payload: { cardId } });
+    }, []),
+
+    untapAllDeployed: useCallback(() => {
+      dispatch({ type: ActionTypes.UNTAP_ALL_DEPLOYED });
     }, []),
 
     addSupply: useCallback((amount) => {

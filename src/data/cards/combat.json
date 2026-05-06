@@ -653,7 +653,7 @@
     "name": "独立级\n轻型航母",
     "cardCategory": "combat",
     "rarity": "N",
-    "retirePhase": null,
+    "retirePhase": 4,
     "unitType": "navy",
     "cost": 3,
     "redeployCost": 1,

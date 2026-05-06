@@ -59,6 +59,8 @@ function GameBoard() {
   const [showDebugBuffPanel, setShowDebugBuffPanel] = useState(false);
   // Debug mission switch
   const [showDebugMissionSwitch, setShowDebugMissionSwitch] = useState(false);
+  // Track if phase transition is in progress
+  const phaseTransitionInProgress = React.useRef(false);
 
   // 初始化游戏 - 显示领袖选择
   useEffect(() => {
@@ -94,9 +96,12 @@ function GameBoard() {
       }
       // 弃牌阶段：自动弃牌和清理
       else if (currentPhase === GamePhase.DISCARD) {
+        if (phaseTransitionInProgress.current) return;
+        phaseTransitionInProgress.current = true;
         setTimeout(() => {
           actions.endTurn();
           actions.nextPhase();
+          phaseTransitionInProgress.current = false;
         }, 500);
       }
     };
@@ -287,7 +292,11 @@ function GameBoard() {
       // 抽卡阶段：抽5张牌
       actions.drawCards(gameConfig.phases.drawCount);
     } else if (currentPhase === GamePhase.DISCARD) {
-      // 弃牌阶段：弃掉所有手牌，清除超限补给
+      // 弃牌阶段：防止重复执行（可能已经自动执行了）
+      if (phaseTransitionInProgress.current) {
+        return; // 正在自动执行，跳过手动触发
+      }
+      // 弃掉所有手牌，清除超限补给
       actions.endTurn();
     }
 
@@ -723,12 +732,8 @@ function GameBoard() {
               onDebugRefreshShop={() => actions.refreshRandomShop()}
               onDebugDrawCard={() => actions.drawCards(1)}
               onDebugUntapAll={() => {
-                // 整备所有部署区的整备中卡牌
-                (state.zones.deployed || []).forEach(card => {
-                  if (card.status === 'tapped') {
-                    actions.untapCard(card.instanceId);
-                  }
-                });
+                // 批量整备所有部署区的整备中卡牌
+                actions.untapAllDeployed();
               }}
               onDebugToggleBuffPanel={() => setShowDebugBuffPanel(prev => !prev)}
               onDebugSwitchMission={() => setShowDebugMissionSwitch(true)}
