@@ -15,11 +15,11 @@
       "description": "夺取菲律宾，建立前进基地，进入下一个战略阶段"
     },
     "loss": {
-      "description": "随机损失4张参战卡牌",
-      "randomLoss": 4
+      "description": "随机损失参战卡牌",
+      "randomLoss": 6
     },
     "missionConstraints": [],
-    "flavor": "麦克阿瑟的承诺：我将回来"
+    "flavor": "麦克阿瑟的承诺：I shall return"
   },
   {
     "id": "mission_saipan",
@@ -40,7 +40,7 @@
       "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失3张参战卡牌",
+      "description": "随机损失参战卡牌",
       "randomLoss": 4
     },
     "missionConstraints": [],
@@ -52,14 +52,14 @@
     "type": "mission",
     "missionType": "side",
     "phase": 3,
-    "difficulty": "hard",
+    "difficulty": "normal",
     "image": "/pacific-war-game/img/mission_6.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 9,
     "requiredAirDefense": 12,
-    "requiredAirSuperiority": 12,
+    "requiredAirSuperiority": 8,
     "reward": {
-      "description": "回合+3，获得战场优势：制空权",
+      "description": "回合+3，获得战场优势：绝对制空",
       "battlefieldBuffId": "air_supremacy",
       "extraTurns": 3
     },
@@ -67,7 +67,16 @@
       "description": "随机损失3张参战卡牌",
       "randomLoss": 4
     },
-    "missionConstraints": [],
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army"],
+        "shortName": "仅海战",
+        "name": "纯海战环境",
+        "message": "纯海战环境，不允许陆军参战",
+        "description": "该任务为纯海战，陆军单位无法参战"
+      }
+    ],
     "flavor": "史上最大规模的航母决战"
   },
   {
@@ -80,15 +89,15 @@
     "image": "/pacific-war-game/img/mission_10.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 24,
-    "requiredAirDefense": 0,
-    "requiredAirSuperiority": 0,
+    "requiredAirDefense": 8,
+    "requiredAirSuperiority": 6,
     "reward": {
       "description": "回合+3，获得战场优势：封锁莱特湾",
       "battlefieldBuffId": "block_leyte_gulf",
       "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失6张参战卡牌",
+      "description": "随机损失参战卡牌",
       "randomLoss": 6
     },
     "missionConstraints": [
@@ -105,7 +114,7 @@
         "unitTypes": ["air"],
         "shortName": "突袭",
         "name": "高速突袭",
-        "message": "高速战舰突入莱特湾，空军无法参战",
+        "message": "航空母舰被调离莱特湾，空军无法提供掩护",
         "description": "航空母舰被调离莱特湾，空军无法提供掩护"
       }
     ],

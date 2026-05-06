@@ -29,6 +29,7 @@ function Shop({
   // 补给变化动画状态
   const [supplyChangeType, setSupplyChangeType] = useState(null); // 'increase' | 'decrease' | null
   const [prevSupply, setPrevSupply] = useState(currentSupply);
+  const [animationKey, setAnimationKey] = useState(0); // Force re-render for animation
   // 文件上传ref
   const fileInputRef = React.createRef();
   // 防止快照双击保存
@@ -50,11 +51,18 @@ function Shop({
   // 监听补给变化，触发动画
   useEffect(() => {
     if (currentSupply !== prevSupply) {
-      if (currentSupply > prevSupply) {
-        setSupplyChangeType('increase');
-      } else {
-        setSupplyChangeType('decrease');
-      }
+      // 先清除动画状态，确保可以重新触发
+      setSupplyChangeType(null);
+      setAnimationKey(prev => prev + 1);
+
+      // 下一帧设置新的动画类型
+      requestAnimationFrame(() => {
+        if (currentSupply > prevSupply) {
+          setSupplyChangeType('increase');
+        } else {
+          setSupplyChangeType('decrease');
+        }
+      });
 
       setPrevSupply(currentSupply);
 
@@ -184,8 +192,10 @@ function Shop({
           </div>
         )}
         <div className="supply-display">
-          补给: <span className={`supply-value ${supplyChangeType ? `supply-${supplyChangeType}` : ''}`}>
-            {currentSupply}
+          补给: <span className="supply-container" key={animationKey}>
+            <span className={`supply-value ${supplyChangeType ? `supply-${supplyChangeType}` : ''}`}>
+              {currentSupply}
+            </span>
             {supplyChangeType === 'increase' && <span className="supply-arrow supply-arrow-up">↑</span>}
             {supplyChangeType === 'decrease' && <span className="supply-arrow supply-arrow-down">↓</span>}
           </span> / {maxSupplyRetention}

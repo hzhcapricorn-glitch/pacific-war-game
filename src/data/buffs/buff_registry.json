@@ -145,8 +145,8 @@
 
     "fragile_supply_line": {
       "id": "fragile_supply_line",
-      "name": "脆弱补给线",
-      "description": "每回合抽卡数-1",
+      "name": "过长补给线",
+      "description": "补给线远离本土，每回合抽卡数-1",
       "category": "economy",
       "isBuff": false,
       "effects": [

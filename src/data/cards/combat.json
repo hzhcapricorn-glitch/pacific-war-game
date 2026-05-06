@@ -237,10 +237,10 @@
     "type": "combat",
     "name": "F6F战斗机\n”地狱猫“",
     "cardCategory": "combat",
-    "rarity": "R",
+    "rarity": "SR",
     "retirePhase": null,
     "unitType": "air",
-    "cost": 3,
+    "cost": 4,
     "redeployCost": 1,
     "groundPower": 1,
     "seaPower": 0,
@@ -300,7 +300,7 @@
     "rarity": "SR",
     "retirePhase": null,
     "unitType": "air",
-    "cost": 3,
+    "cost": 4,
     "redeployCost": 1,
     "groundPower": 2,
     "seaPower": 3,
@@ -323,6 +323,31 @@
     "randomShopCopies": 6
   },
   {
+    "id": "basic_navy_airforce",
+    "type": "combat",
+    "name": "TBD鱼雷机\n“破坏者”",
+    "cardCategory": "combat",
+    "rarity": "N",
+    "retirePhase": 4,
+    "unitType": "air",
+    "cost": 2,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 1,
+    "airPower": 1,
+    "abilities": [
+      {
+        "type": "return_to_base",
+        "trigger": "on_combat_loss"
+      }
+    ],
+    "flavor": "飞行的棺材",
+    "image": "/pacific-war-game/img/basic_navy_airforce.png",
+    "backgroundImage": "/pacific-war-game/img/background_air.jpg",
+    "appearInEssentialPhase": 1,
+    "essentialShopCopies": 10
+  },
+  {
     "id": "tbm_avenger",
     "type": "combat",
     "name": "TBM鱼雷机\n“复仇者”",
@@ -332,8 +357,8 @@
     "unitType": "air",
     "cost": 3,
     "redeployCost": 1,
-    "groundPower": 2,
-    "seaPower": 3,
+    "groundPower": 0,
+    "seaPower": 4,
     "airPower": 0,
     "abilities": [
       {
@@ -344,7 +369,7 @@
     "flavor": "日本航母的噩梦",
     "image": "/pacific-war-game/img/tbm_avenger.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
-    "appearInEssentialPhase": 3,
+    "appearInEssentialPhase": 4,
     "essentialShopCopies": 6,
     "appearInRandomPhase": 2,
     "randomShopCopies": 4
@@ -630,7 +655,7 @@
     "rarity": "N",
     "retirePhase": null,
     "unitType": "navy",
-    "cost": 4,
+    "cost": 3,
     "redeployCost": 1,
     "groundPower": 0,
     "seaPower": 0,
@@ -650,12 +675,12 @@
     "rarity": "SR",
     "retirePhase": null,
     "unitType": "navy",
-    "cost": 4,
+    "cost": 6,
     "redeployCost": 2,
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 3,
-    "airSlots": 2,
+    "airSlots": 3,
     "abilities": [
       {
         "type": "heavy_armor",
@@ -676,7 +701,7 @@
     "name": "约克城级\n航空母舰",
     "cardCategory": "combat",
     "rarity": "SR",
-    "retirePhase": null,
+    "retirePhase": 3,
     "unitType": "navy",
     "cost": 4,
     "redeployCost": 2,
@@ -686,13 +711,7 @@
     "airSlots": 2,
     "image": "/pacific-war-game/img/yorktown.png",
     "backgroundImage": "/pacific-war-game/img/Background_sea.jpeg",
-    "abilities": [
-      {
-        "type": "heavy_armor",
-        "value": 1,
-        "trigger": "during_combat_loss"
-      }
-    ],
+    "abilities": [],
     "flavor": "企业号的姐妹们",
     "appearInRandomPhase": 1,
     "randomShopCopies": 3
@@ -710,7 +729,7 @@
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 2,
-    "airSlots": 3,
+    "airSlots": 2,
     "image": "/pacific-war-game/img/carrier_enterprise.jpg",
     "abilities": [
       {
