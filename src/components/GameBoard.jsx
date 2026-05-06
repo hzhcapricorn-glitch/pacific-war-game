@@ -631,6 +631,18 @@ function GameBoard() {
               <span className="label">已选择:</span>
               <span className="value">{state.selectedForCombat.length}张</span>
             </div>
+            <div className="combat-stat">
+              <span className="label">总整备消耗:</span>
+              <span className="value">
+                {(() => {
+                  const selectedCards = state.zones.deployed.filter(card =>
+                    state.selectedForCombat.includes(card.instanceId)
+                  );
+                  // 计算所有被选中卡牌的整备成本（参战后都会变成tapped）
+                  return selectedCards.reduce((sum, c) => sum + (c.redeployCost || 0), 0);
+                })()}
+              </span>
+            </div>
           </div>
           <div className="combat-buttons">
             <button onClick={handleStartCombat} className="btn-start-combat">
@@ -719,6 +731,8 @@ function GameBoard() {
               }}
               onDebugToggleBuffPanel={() => setShowDebugBuffPanel(prev => !prev)}
               onDebugSwitchMission={() => setShowDebugMissionSwitch(true)}
+              onDebugSaveSnapshot={() => actions.debugSaveSnapshot()}
+              onDebugLoadSnapshot={(snapshot) => actions.debugLoadSnapshot(snapshot)}
             />
           </div>
 
@@ -760,6 +774,7 @@ function GameBoard() {
                       onCardHover={setHoveredCard}
                       onCardHoverEnd={() => setHoveredCard(null)}
                       selectedCards={state.selectedForCombat}
+                      selectedForCombat={state.selectedForCombat}
                     />
                   ))
                 )}

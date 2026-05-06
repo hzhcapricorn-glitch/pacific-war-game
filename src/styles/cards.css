@@ -652,6 +652,11 @@
   position: relative;
 }
 
+/* 手牌区缩小卡牌间距 */
+.hand-zone .zone-content {
+  gap: 6px;
+}
+
 /* 手牌区背景 */
 .hand-zone::before {
   content: '';
@@ -691,6 +696,11 @@
 
 .hand-zone .zone-content {
   justify-content: center;
+}
+
+/* 部署区缩小卡牌间距 */
+.deployed-zone .zone-content {
+  gap: 6px;
 }
 
 .deployed-zone {
@@ -937,7 +947,7 @@
 .shop-cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
 }
 
 /* Shop Card Stack */

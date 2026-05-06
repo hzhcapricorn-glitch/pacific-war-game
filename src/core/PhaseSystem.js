@@ -167,6 +167,14 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
 
       // Add cards to appropriate shop
       if (newShopType) {
+        // Check if this card is unique and already deployed/in hand/in deck
+        const isUniqueCardInUse = cardDef.unique && (
+          newState.zones.deployed.some(c => c.id === cardDef.id) ||
+          newState.zones.hand.some(c => c.id === cardDef.id) ||
+          newState.zones.deck.some(c => c.id === cardDef.id) ||
+          newState.zones.discard.some(c => c.id === cardDef.id)
+        );
+
         const existingInstances = existingCards.get(cardDef.id) || [];
         const shopCopies = getCardShopCopies(cardDef, newShopType);
         const targetShop = newShopType === 'essential' ? newEssentialShop : newRandomShopDeck;
@@ -176,6 +184,10 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
           if (i < existingInstances.length) {
             targetShop.push({ ...existingInstances[i], status: 'ready' });
           } else {
+            // Don't create new instances of unique cards already in use
+            if (isUniqueCardInUse) {
+              continue;
+            }
             // Create new instance
             targetShop.push({
               ...cardDef,

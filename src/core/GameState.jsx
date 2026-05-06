@@ -101,7 +101,9 @@ const ActionTypes = {
   COMPLETE_MISSION: 'COMPLETE_MISSION',
   // Debug Actions
   DEBUG_ADD_BUFF: 'DEBUG_ADD_BUFF',
-  DEBUG_REMOVE_BUFF: 'DEBUG_REMOVE_BUFF'
+  DEBUG_REMOVE_BUFF: 'DEBUG_REMOVE_BUFF',
+  DEBUG_SAVE_SNAPSHOT: 'DEBUG_SAVE_SNAPSHOT',
+  DEBUG_LOAD_SNAPSHOT: 'DEBUG_LOAD_SNAPSHOT'
 };
 
 /**
@@ -261,7 +263,8 @@ function gameStateReducer(state, action) {
         turnsRemaining: isNewTurn && state.turnsRemaining > 0 ? state.turnsRemaining - 1 : state.turnsRemaining,
         retireUsedThisTurn: isNewTurn ? false : state.retireUsedThisTurn,
         usedAbilitiesThisTurn: isNewTurn ? {} : state.usedAbilitiesThisTurn,
-        scoutUsed: isNewTurn ? 0 : state.scoutUsed // 准备阶段重置侦查次数
+        scoutUsed: isNewTurn ? 0 : state.scoutUsed, // 准备阶段重置侦查次数
+        selectedForCombat: [] // 清除战斗选择状态
       };
 
       // Check for phase completion at start of new turn
@@ -1168,6 +1171,123 @@ function gameStateReducer(state, action) {
       return newState;
     }
 
+    case ActionTypes.DEBUG_SAVE_SNAPSHOT: {
+      // Serialize SELECTIVE state for debug purposes
+      const snapshot = {
+        version: "2.0.0-selective",
+        snapshotType: "debug-minimal",
+        timestamp: new Date().toISOString(),
+        warning: "此快照仅用于调试卡牌组合，不适合完整游戏恢复",
+        metadata: {
+          turn: state.turn,
+          phase: state.phase,
+          currentPhase: state.currentPhase
+        },
+        zones: {
+          deck: state.zones.deck,
+          hand: state.zones.hand,
+          deployed: state.zones.deployed,
+          discard: state.zones.discard
+        },
+        gameState: {
+          supply: state.supply,
+          maxSupplyRetention: state.maxSupplyRetention,
+          scoutLimit: state.scoutLimit,
+          scoutUsed: state.scoutUsed
+        },
+        leader: state.leader
+      };
+
+      // Trigger file download with "debug" prefix
+      const jsonStr = JSON.stringify(snapshot, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `snapshot-debug-turn${state.turn}-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Add log entry with clarification
+      const newState = { ...state };
+      newState.battleLog = addLogEntry(
+        newState,
+        `💾 调试快照已保存 (回合 ${state.turn}, 仅卡牌区域)`,
+        'debug'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.DEBUG_LOAD_SNAPSHOT: {
+      const { snapshot } = action.payload;
+
+      // Enhanced validation for selective snapshot
+      if (!snapshot.version || !snapshot.zones || !snapshot.gameState) {
+        alert('快照加载失败：缺少必需字段 (version, zones, gameState)');
+        console.error('[DEBUG] Invalid snapshot format', snapshot);
+        return state;
+      }
+
+      // Check if this is a selective (debug) snapshot
+      const isSelectiveSnapshot = snapshot.version.includes('selective') || snapshot.snapshotType === 'debug-minimal';
+
+      // Version validation
+      if (!snapshot.version.startsWith('2.0')) {
+        const proceed = window.confirm(
+          `快照版本不匹配：${snapshot.version}\n` +
+          '这是旧版本快照，可能无法正常加载。是否继续？'
+        );
+        if (!proceed) {
+          return state;
+        }
+      }
+
+      // Validate essential fields exist
+      const requiredFields = ['deck', 'hand', 'deployed', 'discard'];
+      const missingZones = requiredFields.filter(zone => !snapshot.zones[zone]);
+      if (missingZones.length > 0) {
+        alert(`快照加载失败：缺少卡牌区域 - ${missingZones.join(', ')}`);
+        console.error('[DEBUG] Missing zones:', missingZones);
+        return state;
+      }
+
+      // Restore selective state, keep current non-saved state
+      const restoredState = {
+        ...state, // Keep current state as base
+        turn: snapshot.metadata.turn,
+        phase: snapshot.metadata.phase,
+        currentPhase: snapshot.metadata.currentPhase,
+        zones: {
+          ...state.zones, // Keep current shop zones
+          deck: snapshot.zones.deck,
+          hand: snapshot.zones.hand,
+          deployed: snapshot.zones.deployed,
+          discard: snapshot.zones.discard
+        },
+        supply: snapshot.gameState.supply,
+        maxSupplyRetention: snapshot.gameState.maxSupplyRetention,
+        scoutLimit: snapshot.gameState.scoutLimit || 1, // Default if missing
+        scoutUsed: snapshot.gameState.scoutUsed || 0,
+        leader: snapshot.leader || state.leader, // Keep current leader if missing
+        // Clear transient state
+        selectedForCombat: [],
+        retireUsedThisTurn: false,
+        usedAbilitiesThisTurn: {}
+      };
+
+      // Add log entry
+      restoredState.battleLog = addLogEntry(
+        restoredState,
+        `📂 调试快照已加载 (原回合 ${snapshot.metadata.turn})${isSelectiveSnapshot ? ' [仅卡牌区域]' : ''}`,
+        'debug'
+      );
+
+      return restoredState;
+    }
+
     default:
       return state;
   }
@@ -1306,6 +1426,14 @@ export function GameStateProvider({ children }) {
 
     debugRemoveBuff: useCallback((buffIndex) => {
       dispatch({ type: ActionTypes.DEBUG_REMOVE_BUFF, payload: { buffIndex } });
+    }, []),
+
+    debugSaveSnapshot: useCallback(() => {
+      dispatch({ type: ActionTypes.DEBUG_SAVE_SNAPSHOT });
+    }, []),
+
+    debugLoadSnapshot: useCallback((snapshot) => {
+      dispatch({ type: ActionTypes.DEBUG_LOAD_SNAPSHOT, payload: { snapshot } });
     }, [])
   };
 

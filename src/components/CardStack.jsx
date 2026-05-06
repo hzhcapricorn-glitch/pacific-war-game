@@ -19,7 +19,8 @@ function CardStack({
   onCardClick,        // 点击回调
   onCardHover,        // Hover回调
   onCardHoverEnd,     // Hover结束回调
-  selectedCards = []  // 已选中的卡牌ID数组
+  selectedCards = [], // 已选中的卡牌ID数组
+  selectedForCombat = [] // 战斗阶段选中的卡牌ID数组
 }) {
   // 根据阶段智能排序
   const sortedCards = useMemo(() => {
@@ -34,11 +35,22 @@ function CardStack({
         return 0;
       });
     } else if (phase === GamePhase.COMBAT) {
-      // 战斗阶段：ready在上（方便选择）
-      // 注意：数组最后的元素显示在视觉最上方，所以tapped在前，ready在后
+      // 战斗阶段：被选中的在上，ready未选中的在中，tapped的在下
+      // 注意：数组最后的元素显示在视觉最上方
       sorted.sort((a, b) => {
-        if (a.status === 'tapped' && b.status === 'ready') return -1;
-        if (a.status === 'ready' && b.status === 'tapped') return 1;
+        const aSelected = selectedForCombat?.includes(a.instanceId);
+        const bSelected = selectedForCombat?.includes(b.instanceId);
+
+        // 两者都被选中或都未选中，按status排序
+        if (aSelected === bSelected) {
+          if (a.status === 'tapped' && b.status === 'ready') return -1;
+          if (a.status === 'ready' && b.status === 'tapped') return 1;
+          return 0;
+        }
+
+        // 被选中的排在后面（显示在上方）
+        if (aSelected && !bSelected) return 1;
+        if (!aSelected && bSelected) return -1;
         return 0;
       });
     } else {
@@ -52,7 +64,7 @@ function CardStack({
     }
 
     return sorted;
-  }, [cards, phase]);
+  }, [cards, phase, selectedForCombat]);
 
   // 计算ready数量
   const readyCount = cards.filter(c => c.status === 'ready').length;

@@ -20,13 +20,19 @@ function Shop({
   onDebugDrawCard,
   onDebugUntapAll,
   onDebugToggleBuffPanel,
-  onDebugSwitchMission
+  onDebugSwitchMission,
+  onDebugSaveSnapshot,
+  onDebugLoadSnapshot
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
   // 补给变化动画状态
   const [supplyChangeType, setSupplyChangeType] = useState(null); // 'increase' | 'decrease' | null
   const [prevSupply, setPrevSupply] = useState(currentSupply);
+  // 文件上传ref
+  const fileInputRef = React.createRef();
+  // 防止快照双击保存
+  const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
 
   // 初始化时从所有卡牌中提取必要卡牌种类
   useEffect(() => {
@@ -111,6 +117,55 @@ function Shop({
               <button onClick={onDebugSwitchMission} className="btn-debug-inline">
                 更换任务
               </button>
+            )}
+            {onDebugSaveSnapshot && (
+              <button
+                onClick={() => {
+                  if (isSavingSnapshot) return;
+                  setIsSavingSnapshot(true);
+                  onDebugSaveSnapshot();
+                  setTimeout(() => setIsSavingSnapshot(false), 1000);
+                }}
+                className="btn-debug-inline"
+                disabled={isSavingSnapshot}
+              >
+                💾 保存快照
+              </button>
+            )}
+            {onDebugLoadSnapshot && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        try {
+                          const snapshot = JSON.parse(event.target.result);
+                          onDebugLoadSnapshot(snapshot);
+                        } catch (error) {
+                          alert('快照加载失败：文件格式错误\n' + error.message);
+                        }
+                      };
+                      reader.onerror = () => {
+                        alert('快照加载失败：文件读取错误');
+                      };
+                      reader.readAsText(file);
+                    }
+                    e.target.value = '';
+                  }}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-debug-inline"
+                >
+                  📂 加载快照
+                </button>
+              </>
             )}
             {onDebugToggleBuffPanel && (
               <button onClick={onDebugToggleBuffPanel} className="btn-debug-inline">

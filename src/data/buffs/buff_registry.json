@@ -180,23 +180,48 @@
       "tags": ["naval", "tactical"]
     },
 
-    "air_supremacy": {
-      "id": "air_supremacy",
-      "name": "绝对制空权",
-      "description": "空军对空火力+3",
-      "category": "combat_bonus",
+    "ground_bombarment": {
+      "id": "ground_bombarment",
+      "name": "寸土必争",
+      "description": "从塞班岛起飞的B29轰炸机可以直接轰炸菲律宾，当前战略阶段对陆地需求-10",
+      "category": "tactical_advantage",
       "isBuff": true,
       "effects": [
         {
-          "type": "add_combat_power",
-          "powerType": "air",
-          "value": 3,
-          "description": "空军对空火力+3"
+          "type": "reduce_mission_requirement",
+          "stat": "groundPower",
+          "value": 10,
+          "description": "对陆地需求-10"
         }
       ],
       "scope": "phase_only",
       "duration": "until_phase_end",
-      "tags": ["air", "aerial_combat", "pacific_war"]
+      "tags": ["naval", "tactical"]
+    },
+
+    "air_supremacy": {
+      "id": "air_supremacy",
+      "name": "绝对制空",
+      "description": "基本消灭日本机动舰队，本阶段对空需求-8，制空需求-6",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airDefense",
+          "value": 8,
+          "description": "防空需求-8"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "airSuperiority",
+          "value": 6,
+          "description": "制空需求-6"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "carrier", "pacific_war"]
     },
 
     "fighter_escort": {
@@ -267,6 +292,32 @@
       "tags": ["combat", "multi_effect", "test"]
     },
 
+    "block_leyte_gulf": {
+      "id": "block_leyte_gulf",
+      "name": "封锁莱特湾",
+      "description": "成功封锁莱特湾，仅对主线任务生效：陆军对地火力+1，对海需求-12",
+      "category": "combat_bonus",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "add_combat_power",
+          "powerType": "ground",
+          "unitTypes": ["ground"],
+          "value": 1,
+          "description": "陆军对地火力+1"
+        },
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 12,
+          "description": "对海需求-12"
+        }
+      ],
+      "scope": "main_mission_only",
+      "duration": "until_phase_end",
+      "tags": ["combat", "multi_effect", "test"]
+    },
+
     "expanded_market": {
       "id": "expanded_market",
       "name": "商店扩容",
@@ -319,6 +370,24 @@
       "scope": "phase_only",
       "duration": "until_phase_end",
       "tags": ["restriction", "shop", "test"]
+    },
+
+    "kamikaze_threat": {
+      "id": "kamikaze_threat",
+      "name": "神风威胁",
+      "description": "日军神风特攻队威胁巨大，在制空权不足时，重甲和幸运能力失效",
+      "category": "restriction",
+      "isBuff": false,
+      "effects": [
+        {
+          "type": "disable_abilities_when_no_air_superiority",
+          "disabledAbilities": ["heavy_armor", "lucky"],
+          "description": "制空权不足时，重甲和幸运能力失效"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["combat", "debuff", "kamikaze", "phase3"]
     }
   },
 

@@ -151,6 +151,43 @@ export function calculateAllFirePowers(cards, context = null) {
     }
   });
 
+  // 应用战场buff的add_combat_power效果
+  const battlefieldConditions = context.state?.battlefieldConditions || [];
+  battlefieldConditions.forEach(condition => {
+    const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+    effects.forEach(effect => {
+      if (effect && effect.type === 'add_combat_power') {
+        const { powerType, value, unitTypes } = effect;
+
+        // 如果指定了unitTypes，只对特定单位类型生效
+        let affectedCards = cards;
+        if (unitTypes && unitTypes.length > 0) {
+          affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
+        }
+
+        // 计算加成（每张受影响的卡牌获得value加成）
+        const boost = value * affectedCards.length;
+
+        if (powerType === 'all') {
+          basePowers.groundPower += boost;
+          basePowers.seaPower += boost;
+          basePowers.airPower += boost;
+          basePowers.airDefense += boost;
+          basePowers.airSuperiority += boost;
+        } else if (powerType === 'ground') {
+          basePowers.groundPower += boost;
+        } else if (powerType === 'sea') {
+          basePowers.seaPower += boost;
+        } else if (powerType === 'air') {
+          basePowers.airPower += boost;
+          basePowers.airDefense += boost;
+          basePowers.airSuperiority += boost;
+        }
+      }
+    });
+  });
+
   return basePowers;
 }
 
@@ -226,10 +263,30 @@ export function applyReward(reward, gameState) {
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
  * @returns {Object} { lostCardIds: Array, damageDetails: Array }
  */
-export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = []) {
+export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = [], airSuperiorityAchieved = true) {
   if (!loss || !loss.randomLoss || loss.randomLoss === 0 || participatingCards.length === 0) {
     return { lostCardIds: [], damageDetails: [] };
   }
+
+  // 检查是否有禁用能力的效果（神风威胁）
+  let disableHeavyArmor = false;
+  let disableLucky = false;
+
+  battlefieldConditions.forEach(condition => {
+    const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+    effects.forEach(effect => {
+      if (effect && effect.type === 'disable_abilities_when_no_air_superiority' && !airSuperiorityAchieved) {
+        const disabledAbilities = effect.disabledAbilities || [];
+        if (disabledAbilities.includes('heavy_armor')) {
+          disableHeavyArmor = true;
+        }
+        if (disabledAbilities.includes('lucky')) {
+          disableLucky = true;
+        }
+      }
+    });
+  });
 
   // 应用战场buff修改损失数量
   let baseLoss = applyBuffsToLossCount(loss.randomLoss, battlefieldConditions);
@@ -240,15 +297,15 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
     lossCount *= 2;
   }
 
-  // 构建卡牌池：重甲X的卡牌算作X+1个单位
+  // 构建卡牌池：重甲X的卡牌算作X+1个单位（除非被禁用）
   const cardPool = [];
   participatingCards.forEach(card => {
-    const armorValue = getHeavyArmorValue(card);
+    const armorValue = disableHeavyArmor ? 0 : getHeavyArmorValue(card);
     const copies = armorValue + 1; // 重甲X需要被选中X+1次
     for (let i = 0; i < copies; i++) {
       cardPool.push({
         card,
-        isLucky: hasProtectAbility(card),
+        isLucky: disableLucky ? false : hasProtectAbility(card),
         hitCount: 0 // 记录该卡已被选中的次数
       });
     }
@@ -277,7 +334,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
     const currentHits = hitTracker.get(cardId) + 1;
     hitTracker.set(cardId, currentHits);
 
-    const armorValue = getHeavyArmorValue(selected.card);
+    const armorValue = disableHeavyArmor ? 0 : getHeavyArmorValue(selected.card);
     const requiredHits = armorValue + 1;
 
     // 检查是否达到损失条件
@@ -301,7 +358,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
     const currentHits = hitTracker.get(cardId) + 1;
     hitTracker.set(cardId, currentHits);
 
-    const armorValue = getHeavyArmorValue(selected.card);
+    const armorValue = disableHeavyArmor ? 0 : getHeavyArmorValue(selected.card);
     const requiredHits = armorValue + 1;
 
     if (currentHits >= requiredHits) {
@@ -369,7 +426,8 @@ export function resolveCombat(selectedCards, mission, gameState) {
     selectedCards,
     mission.loss,
     airDefenseSufficient,
-    gameState.battlefieldConditions || []
+    gameState.battlefieldConditions || [],
+    airSuperiorityAchieved
   );
 
   // 获取损失的卡牌对象（用于显示具体卡牌名称）
