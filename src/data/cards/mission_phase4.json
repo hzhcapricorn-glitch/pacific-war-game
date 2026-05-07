@@ -7,7 +7,7 @@
     "phase": 4,
     "difficulty": "hell",
     "image": "/pacific-war-game/img/Mission_hell.jpg",
-    "requiredGroundPower": 15,
+    "requiredGroundPower": 60,
     "requiredSeaPower": 20,
     "requiredAirDefense": 18,
     "requiredAirSuperiority": 20,
@@ -65,7 +65,7 @@
     },
     "loss": {
       "description": "随机损失3张参战卡牌",
-      "randomLoss": 3
+      "randomLoss": 8
     },
     "missionConstraints": [],
     "flavor": "太平洋的绞肉机，星条旗插上折钵山"
@@ -78,35 +78,26 @@
     "phase": 4,
     "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_normal.jpeg",
-    "requiredGroundPower": 0,
+    "requiredGroundPower": 30,
     "requiredSeaPower": 0,
-    "requiredAirDefense": 8,
-    "requiredAirSuperiority": 15,
+    "requiredAirDefense": 16,
+    "requiredAirSuperiority": 16,
     "reward": {
       "description": "大规模战略轰炸摧毁日本工业，获得战场优势：东京大火",
-      "battlefieldBuffId": "fighter_escort"
+      "battlefieldBuffId": "tokyo_bbq"
     },
     "loss": {
-      "description": "随机损失2张参战卡牌",
-      "randomLoss": 2
+      "description": "随机损失参战卡牌",
+      "randomLoss": 4
     },
     "missionConstraints": [
       {
         "type": "restrict_unit_type",
-        "unitTypes": ["army"],
+        "unitTypes": ["army", "navy"],
         "shortName": "战略轰炸",
         "name": "战略轰炸任务",
-        "message": "战略轰炸任务，陆军无法参战",
-        "description": "这是纯空军战略轰炸任务，陆军无法参与"
-      },
-      {
-        "type": "modify_unit_power",
-        "unitTypes": ["navy"],
-        "powerType": "ground",
-        "multiplier": 0,
-        "shortName": "海军对地=0",
-        "name": "海军对地火力归零",
-        "description": "这是纯空军战略轰炸任务，海军舰炮无法参与战斗"
+        "message": "战略轰炸任务，陆军和海军无法参战",
+        "description": "这是纯空军战略轰炸任务，陆军和海军无法参与"
       }
     ],
     "flavor": "一夜之间，东京化为火海"

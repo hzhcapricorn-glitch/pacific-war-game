@@ -186,6 +186,46 @@ export function calculateAllFirePowers(cards, context = null) {
           basePowers.airSuperiority += modification;
         }
       }
+
+      // 处理 multiply_combat_power 效果（倍增）
+      if (effect && effect.type === 'multiply_combat_power') {
+        const { powerType, multiplier, unitTypes } = effect;
+
+        // 筛选受影响的单位
+        let affectedCards = cards;
+        if (unitTypes && unitTypes.length > 0) {
+          affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
+        }
+
+        // 对每张卡牌计算倍增效果（仅对原本有火力的卡牌生效）
+        if (powerType === 'air') {
+          // 防空和制空能力加倍
+          affectedCards.forEach(card => {
+            const cardAirPower = getCardFirePower(card, 'air');
+            if (cardAirPower > 0) {
+              // 加成 = 原值 * (multiplier - 1)
+              const boost = cardAirPower * (multiplier - 1);
+              basePowers.airPower += boost;
+              basePowers.airDefense += boost;
+              basePowers.airSuperiority += boost;
+            }
+          });
+        } else if (powerType === 'ground') {
+          affectedCards.forEach(card => {
+            const cardGroundPower = getCardFirePower(card, 'ground');
+            if (cardGroundPower > 0) {
+              basePowers.groundPower += cardGroundPower * (multiplier - 1);
+            }
+          });
+        } else if (powerType === 'sea') {
+          affectedCards.forEach(card => {
+            const cardSeaPower = getCardFirePower(card, 'sea');
+            if (cardSeaPower > 0) {
+              basePowers.seaPower += cardSeaPower * (multiplier - 1);
+            }
+          });
+        }
+      }
     });
   });
 

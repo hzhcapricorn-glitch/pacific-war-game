@@ -199,6 +199,25 @@
       "tags": ["naval", "tactical"]
     },
 
+    "tokyo_bbq": {
+      "id": "tokyo_bbq",
+      "name": "东京大火",
+      "description": "大规模战略轰炸摧毁日本工业，仅对主线任务生效：对陆地需求-20",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "groundPower",
+          "value": 20,
+          "description": "对陆地需求-20"
+        }
+      ],
+      "scope": "main_mission_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "tactical"]
+    },
+
     "air_supremacy": {
       "id": "air_supremacy",
       "name": "绝对制空",
@@ -227,20 +246,21 @@
     "fighter_escort": {
       "id": "fighter_escort",
       "name": "战斗机护航",
-      "description": "空军对地火力+2，空军防空火力+3",
+      "description": "空军单位的防空和制空能力加倍（对空为0的单位不变）",
       "category": "combat_bonus",
       "isBuff": true,
       "effects": [
         {
-          "type": "add_combat_power",
+          "type": "multiply_combat_power",
           "powerType": "air",
-          "value": 3,
-          "description": "空军防空火力+3"
+          "unitTypes": ["air"],
+          "multiplier": 2,
+          "description": "空军对空能力加倍"
         }
       ],
       "scope": "phase_only",
       "duration": "until_phase_end",
-      "tags": ["air", "fighter", "escort"]
+      "tags": ["air", "fighter", "escort", "multiplier"]
     },
 
     "double_supply": {
