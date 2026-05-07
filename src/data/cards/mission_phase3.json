@@ -92,7 +92,7 @@
     "requiredAirDefense": 8,
     "requiredAirSuperiority": 6,
     "reward": {
-      "description": "回合+3，获得战场优势：封锁莱特湾",
+      "description": "回合+3，获得武藏号，战场优势：封锁莱特湾",
       "battlefieldBuffId": "block_leyte_gulf",
       "extraTurns": 3
     },
