@@ -1516,17 +1516,19 @@ button:disabled {
 
 .mission-detail-panel {
   width: 350px;
-  height: 500px;
+  height: 600px;
   flex-shrink: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
 }
 
 .mission-detail-panel .card {
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: unset;
 }
 
