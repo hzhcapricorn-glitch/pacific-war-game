@@ -649,12 +649,12 @@ function GameBoard() {
 
         {/* 中央：游戏区域 */}
         <div className="game-center">
-          {/* 商店区 / 战斗统计区 */}
-          <div className="top-zone">
-            {/* 战斗阶段：显示战斗统计 */}
+          {/* 商店区 */}
+          <div className="top-zone" style={{ position: 'relative' }}>
+            {/* 战斗阶段：战斗统计覆盖层 */}
             {state.phase === GamePhase.COMBAT && state.currentMission && (
-              <div className="combat-controls">
-                <div className="combat-info">
+              <div className="combat-overlay">
+                <div className="combat-stats-grid">
                   <div className="combat-stat">
                     <span className="label">对地火力:</span>
                     <span className="value" style={{color: selectedFirePowers().groundPower >= getAdjustedMissionRequirements().groundPower ? '#34d399' : '#ef4444'}}>
@@ -696,7 +696,6 @@ function GameBoard() {
                         const selectedCards = state.zones.deployed.filter(card =>
                           state.selectedForCombat.includes(card.instanceId)
                         );
-                        // 计算所有被选中卡牌的整备成本（参战后都会变成tapped）
                         return selectedCards.reduce((sum, c) => sum + (c.redeployCost || 0), 0);
                       })()}
                     </span>
@@ -713,9 +712,8 @@ function GameBoard() {
               </div>
             )}
 
-            {/* 非战斗阶段：显示商店 */}
-            {state.phase !== GamePhase.COMBAT && (
-              <Shop
+            {/* 商店 - 始终显示 */}
+            <Shop
               essentialShopCards={(state.zones.essentialShop || []).filter(
                 card => !isCardBlockedByConditions(card, state)
               )}
@@ -755,8 +753,7 @@ function GameBoard() {
                   actions.debugLoadSnapshot(snapshot, false);
                 }
               }}
-              />
-            )}
+            />
           </div>
 
           {/* 部署区 */}
