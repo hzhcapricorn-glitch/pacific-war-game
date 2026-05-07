@@ -2067,7 +2067,6 @@ button:disabled {
 .btn-manual:hover,
 .btn-manual-inline:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
