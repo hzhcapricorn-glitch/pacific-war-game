@@ -648,6 +648,56 @@
     "randomShopCopies": 2
   },
   {
+    "id": "musashi_battleship",
+    "type": "combat",
+    "name": "武藏号\n战列舰",
+    "cardCategory": "combat",
+    "rarity": "UR",
+    "retirePhase": null,
+    "unitType": "navy",
+    "cost": 10,
+    "redeployCost": 3,
+    "groundPower": 5,
+    "seaPower": 7,
+    "airPower": 2,
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 3,
+        "trigger": "during_combat_loss"
+      }
+    ],
+    "flavor": "旧时代大炮巨舰最后的顽抗，在锡布延海的雷鸣中沉入永恒的静默。",
+    "image": "/pacific-war-game/img/Musashi.jpeg",
+    "appearInRandomPhase": 4,
+    "randomShopCopies": 0
+  },
+  {
+    "id": "yamato_battleship",
+    "type": "combat",
+    "name": "大和号\n战列舰",
+    "cardCategory": "combat",
+    "rarity": "UR",
+    "retirePhase": null,
+    "unitType": "navy",
+    "cost": 10,
+    "redeployCost": 3,
+    "groundPower": 5,
+    "seaPower": 7,
+    "airPower": 2,
+    "abilities": [
+      {
+        "type": "heavy_armor",
+        "value": 3,
+        "trigger": "during_combat_loss"
+      }
+    ],
+    "flavor": "樱花凋落前的绝望余晖，帝国海军最后的自杀式挽歌。",
+    "image": "/pacific-war-game/img/yamato.jpeg",
+    "appearInRandomPhase": 4,
+    "randomShopCopies": 0
+  },
+  {
     "id": "basic_carrier",
     "type": "combat",
     "name": "独立级\n轻型航母",

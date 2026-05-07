@@ -13,6 +13,10 @@
     {
       "id": "kamikaze_threat",
       "source": "phase"
+    },
+    {
+      "id": "fortified_positions",
+      "source": "phase"
     }
   ],
   "cardsToRetire": [],

@@ -151,14 +151,15 @@ export function calculateAllFirePowers(cards, context = null) {
     }
   });
 
-  // 应用战场buff的add_combat_power效果
+  // 应用战场buff的add_combat_power和reduce_combat_power效果
   const battlefieldConditions = context.state?.battlefieldConditions || [];
   battlefieldConditions.forEach(condition => {
     const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
 
     effects.forEach(effect => {
-      if (effect && effect.type === 'add_combat_power') {
+      if (effect && (effect.type === 'add_combat_power' || effect.type === 'reduce_combat_power')) {
         const { powerType, value, unitTypes } = effect;
+        const isReduction = effect.type === 'reduce_combat_power';
 
         // 如果指定了unitTypes，只对特定单位类型生效
         let affectedCards = cards;
@@ -166,23 +167,23 @@ export function calculateAllFirePowers(cards, context = null) {
           affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
         }
 
-        // 计算加成（每张受影响的卡牌获得value加成）
-        const boost = value * affectedCards.length;
+        // 计算加成或减益（每张受影响的卡牌获得value加成/减益）
+        const modification = value * affectedCards.length * (isReduction ? -1 : 1);
 
         if (powerType === 'all') {
-          basePowers.groundPower += boost;
-          basePowers.seaPower += boost;
-          basePowers.airPower += boost;
-          basePowers.airDefense += boost;
-          basePowers.airSuperiority += boost;
+          basePowers.groundPower += modification;
+          basePowers.seaPower += modification;
+          basePowers.airPower += modification;
+          basePowers.airDefense += modification;
+          basePowers.airSuperiority += modification;
         } else if (powerType === 'ground') {
-          basePowers.groundPower += boost;
+          basePowers.groundPower += modification;
         } else if (powerType === 'sea') {
-          basePowers.seaPower += boost;
+          basePowers.seaPower += modification;
         } else if (powerType === 'air') {
-          basePowers.airPower += boost;
-          basePowers.airDefense += boost;
-          basePowers.airSuperiority += boost;
+          basePowers.airPower += modification;
+          basePowers.airDefense += modification;
+          basePowers.airSuperiority += modification;
         }
       }
     });

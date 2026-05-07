@@ -354,6 +354,25 @@
       "tags": ["combat", "protection", "test"]
     },
 
+    "fortified_positions": {
+      "id": "fortified_positions",
+      "name": "坚固工事",
+      "description": "日军构筑了坚固的防御工事，所有单位对地火力-1",
+      "category": "combat_debuff",
+      "isBuff": false,
+      "effects": [
+        {
+          "type": "reduce_combat_power",
+          "powerType": "ground",
+          "value": 1,
+          "description": "所有单位对地火力-1"
+        }
+      ],
+      "scope": "phase_only",
+      "duration": "until_phase_end",
+      "tags": ["combat", "debuff", "phase4"]
+    },
+
     "naval_embargo": {
       "id": "naval_embargo",
       "name": "禁运令",
