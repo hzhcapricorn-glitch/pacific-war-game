@@ -604,66 +604,6 @@ function GameBoard() {
     <div className="game-board">
 
       {/* 战斗控制面板 */}
-      {state.phase === GamePhase.COMBAT && state.currentMission && (
-        <div className="combat-controls">
-          <div className="combat-info">
-            <div className="combat-stat">
-              <span className="label">对地火力:</span>
-              <span className="value" style={{color: selectedFirePowers().groundPower >= getAdjustedMissionRequirements().groundPower ? '#34d399' : '#ef4444'}}>
-                {selectedFirePowers().groundPower} / {getAdjustedMissionRequirements().groundPower}
-              </span>
-            </div>
-            <div className="combat-stat">
-              <span className="label">对海火力:</span>
-              <span className="value" style={{color: selectedFirePowers().seaPower >= getAdjustedMissionRequirements().seaPower ? '#34d399' : '#ef4444'}}>
-                {selectedFirePowers().seaPower} / {getAdjustedMissionRequirements().seaPower}
-              </span>
-            </div>
-            <div className="combat-stat">
-              <span className="label">防空火力:</span>
-              <span className="value" style={{color: selectedFirePowers().airDefense >= getAdjustedMissionRequirements().airDefense ? '#34d399' : '#f59e0b'}}>
-                {selectedFirePowers().airDefense} / {getAdjustedMissionRequirements().airDefense}
-              </span>
-            </div>
-            <div className="combat-stat">
-              <span className="label">制空火力:</span>
-              <span className="value" style={{color: selectedFirePowers().airSuperiority >= getAdjustedMissionRequirements().airSuperiority ? '#34d399' : '#f59e0b'}}>
-                {selectedFirePowers().airSuperiority} / {getAdjustedMissionRequirements().airSuperiority}
-              </span>
-            </div>
-            <div className="combat-stat">
-              <span className="label">航空槽位:</span>
-              <span className={`value ${getAirSlotInfo().isValid ? '' : 'air-slot-insufficient'}`} style={{color: getAirSlotInfo().isValid ? '#34d399' : '#ef4444'}}>
-                {getAirSlotInfo().airUnitsCount} / {getAirSlotInfo().totalAirSlots}
-              </span>
-            </div>
-            <div className="combat-stat">
-              <span className="label">已选择:</span>
-              <span className="value">{state.selectedForCombat.length}张</span>
-            </div>
-            <div className="combat-stat">
-              <span className="label">总整备消耗:</span>
-              <span className="value">
-                {(() => {
-                  const selectedCards = state.zones.deployed.filter(card =>
-                    state.selectedForCombat.includes(card.instanceId)
-                  );
-                  // 计算所有被选中卡牌的整备成本（参战后都会变成tapped）
-                  return selectedCards.reduce((sum, c) => sum + (c.redeployCost || 0), 0);
-                })()}
-              </span>
-            </div>
-          </div>
-          <div className="combat-buttons">
-            <button onClick={handleStartCombat} className="btn-start-combat">
-              开始战斗
-            </button>
-            <button onClick={handleSkipCombat} className="btn-skip-combat">
-              跳过战斗
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 主游戏区域 */}
       <div className="game-main">
@@ -709,9 +649,73 @@ function GameBoard() {
 
         {/* 中央：游戏区域 */}
         <div className="game-center">
-          {/* 商店区 */}
+          {/* 商店区 / 战斗统计区 */}
           <div className="top-zone">
-            <Shop
+            {/* 战斗阶段：显示战斗统计 */}
+            {state.phase === GamePhase.COMBAT && state.currentMission && (
+              <div className="combat-controls">
+                <div className="combat-info">
+                  <div className="combat-stat">
+                    <span className="label">对地火力:</span>
+                    <span className="value" style={{color: selectedFirePowers().groundPower >= getAdjustedMissionRequirements().groundPower ? '#34d399' : '#ef4444'}}>
+                      {selectedFirePowers().groundPower} / {getAdjustedMissionRequirements().groundPower}
+                    </span>
+                  </div>
+                  <div className="combat-stat">
+                    <span className="label">对海火力:</span>
+                    <span className="value" style={{color: selectedFirePowers().seaPower >= getAdjustedMissionRequirements().seaPower ? '#34d399' : '#ef4444'}}>
+                      {selectedFirePowers().seaPower} / {getAdjustedMissionRequirements().seaPower}
+                    </span>
+                  </div>
+                  <div className="combat-stat">
+                    <span className="label">防空火力:</span>
+                    <span className="value" style={{color: selectedFirePowers().airDefense >= getAdjustedMissionRequirements().airDefense ? '#34d399' : '#f59e0b'}}>
+                      {selectedFirePowers().airDefense} / {getAdjustedMissionRequirements().airDefense}
+                    </span>
+                  </div>
+                  <div className="combat-stat">
+                    <span className="label">制空火力:</span>
+                    <span className="value" style={{color: selectedFirePowers().airSuperiority >= getAdjustedMissionRequirements().airSuperiority ? '#34d399' : '#f59e0b'}}>
+                      {selectedFirePowers().airSuperiority} / {getAdjustedMissionRequirements().airSuperiority}
+                    </span>
+                  </div>
+                  <div className="combat-stat">
+                    <span className="label">航空槽位:</span>
+                    <span className={`value ${getAirSlotInfo().isValid ? '' : 'air-slot-insufficient'}`} style={{color: getAirSlotInfo().isValid ? '#34d399' : '#ef4444'}}>
+                      {getAirSlotInfo().airUnitsCount} / {getAirSlotInfo().totalAirSlots}
+                    </span>
+                  </div>
+                  <div className="combat-stat">
+                    <span className="label">已选择:</span>
+                    <span className="value">{state.selectedForCombat.length}张</span>
+                  </div>
+                  <div className="combat-stat">
+                    <span className="label">总整备消耗:</span>
+                    <span className="value">
+                      {(() => {
+                        const selectedCards = state.zones.deployed.filter(card =>
+                          state.selectedForCombat.includes(card.instanceId)
+                        );
+                        // 计算所有被选中卡牌的整备成本（参战后都会变成tapped）
+                        return selectedCards.reduce((sum, c) => sum + (c.redeployCost || 0), 0);
+                      })()}
+                    </span>
+                  </div>
+                </div>
+                <div className="combat-buttons">
+                  <button onClick={handleStartCombat} className="btn-start-combat">
+                    开始战斗
+                  </button>
+                  <button onClick={handleSkipCombat} className="btn-skip-combat">
+                    跳过战斗
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 非战斗阶段：显示商店 */}
+            {state.phase !== GamePhase.COMBAT && (
+              <Shop
               essentialShopCards={(state.zones.essentialShop || []).filter(
                 card => !isCardBlockedByConditions(card, state)
               )}
@@ -751,7 +755,8 @@ function GameBoard() {
                   actions.debugLoadSnapshot(snapshot, false);
                 }
               }}
-            />
+              />
+            )}
           </div>
 
           {/* 部署区 */}
