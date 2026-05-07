@@ -10,7 +10,8 @@ function LeaderSelectionModal({
   leaders,
   onSelectLeader,
   onCardHover,
-  onCardHoverEnd
+  onCardHoverEnd,
+  onOpenManual
 }) {
   const [selectedLeaderId, setSelectedLeaderId] = useState(null);
   const [hoveredLeaderId, setHoveredLeaderId] = useState(null);
@@ -40,6 +41,13 @@ function LeaderSelectionModal({
         <div className="leader-selection-header">
           <h2>选择你的领袖</h2>
           <p className="leader-selection-subtitle">领袖将为你的舰队提供独特的战术优势</p>
+          <button
+            className="btn-manual"
+            onClick={onOpenManual}
+            title="游戏手册"
+          >
+            📖 游戏手册
+          </button>
         </div>
 
         {/* 选择和详情区域 */}

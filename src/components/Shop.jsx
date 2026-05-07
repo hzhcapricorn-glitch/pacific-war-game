@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Card from './Card';
+import gameConfig from '../data/config.json';
 
 /**
  * Shop Component - 显示商店（分为必要卡牌和随机卡牌）
@@ -22,7 +23,8 @@ function Shop({
   onDebugToggleBuffPanel,
   onDebugSwitchMission,
   onDebugSaveSnapshot,
-  onDebugLoadSnapshot
+  onDebugLoadSnapshot,
+  onOpenManual
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
@@ -96,12 +98,20 @@ function Shop({
 
   const essentialStacks = Object.values(groupedEssentialCards);
 
+  const isDebugEnabled = gameConfig.debug?.enabled || false;
+
   return (
     <div className={`shop ${!isShopPhase ? 'shop-disabled' : ''}`}>
       <div className="shop-header">
         <h3>商店</h3>
-        {(onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll || onDebugToggleBuffPanel || onDebugSwitchMission) && (
-          <div className="debug-controls-inline">
+        <div className="shop-header-buttons">
+          {onOpenManual && (
+            <button onClick={onOpenManual} className="btn-manual-inline" title="游戏手册">
+              📖
+            </button>
+          )}
+          {isDebugEnabled && (onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll || onDebugToggleBuffPanel || onDebugSwitchMission) && (
+            <div className="debug-controls-inline">
             {onDebugAddSupply && (
               <button onClick={onDebugAddSupply} className="btn-debug-inline">
                 补给+10
@@ -190,7 +200,8 @@ function Shop({
               </button>
             )}
           </div>
-        )}
+          )}
+        </div>
         <div className="supply-display">
           补给: <span className="supply-container" key={animationKey}>
             <span className={`supply-value ${supplyChangeType ? `supply-${supplyChangeType}` : ''}`}>

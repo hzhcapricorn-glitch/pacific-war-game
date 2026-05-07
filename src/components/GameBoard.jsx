@@ -15,6 +15,7 @@ import LeaderSelectionModal from './LeaderSelectionModal';
 import BattlefieldConditions from './BattlefieldConditions';
 import DebugBuffPanel from './DebugBuffPanel';
 import DebugMissionSwitchModal from './DebugMissionSwitchModal';
+import Manual from './Manual';
 
 // 导入卡牌数据
 import combatCardsData from '../data/cards/combat.json';
@@ -59,6 +60,8 @@ function GameBoard() {
   const [showDebugBuffPanel, setShowDebugBuffPanel] = useState(false);
   // Debug mission switch
   const [showDebugMissionSwitch, setShowDebugMissionSwitch] = useState(false);
+  // Manual
+  const [showManual, setShowManual] = useState(false);
   // Track if phase transition is in progress
   const phaseTransitionInProgress = React.useRef(false);
 
@@ -772,6 +775,7 @@ function GameBoard() {
                   actions.debugLoadSnapshot(snapshot, false);
                 }
               }}
+              onOpenManual={() => setShowManual(true)}
             />
           </div>
 
@@ -926,8 +930,15 @@ function GameBoard() {
           onSelectLeader={handleLeaderSelected}
           onCardHover={setHoveredCard}
           onCardHoverEnd={() => setHoveredCard(null)}
+          onOpenManual={() => setShowManual(true)}
         />
       )}
+
+      {/* 游戏手册 */}
+      <Manual
+        isOpen={showManual}
+        onClose={() => setShowManual(false)}
+      />
 
       {/* 战略阶段过渡弹窗 */}
       {showPhaseTransitionModal && state.phaseData && state.availableMissions && (
