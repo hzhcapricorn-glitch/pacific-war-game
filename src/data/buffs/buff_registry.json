@@ -182,7 +182,7 @@
 
     "ground_bombarment": {
       "id": "ground_bombarment",
-      "name": "寸土必争",
+      "name": "陆航轰炸",
       "description": "从塞班岛起飞的B29轰炸机可以直接轰炸菲律宾，当前战略阶段对陆地需求-10",
       "category": "tactical_advantage",
       "isBuff": true,
@@ -302,7 +302,7 @@
         {
           "type": "add_combat_power",
           "powerType": "ground",
-          "unitTypes": ["ground"],
+          "unitTypes": ["army"],
           "value": 1,
           "description": "陆军对地火力+1"
         },
