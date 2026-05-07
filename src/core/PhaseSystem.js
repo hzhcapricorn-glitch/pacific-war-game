@@ -129,10 +129,32 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
       existingCards.get(card.id).push(card);
     });
 
+    // Collect all existing instanceIds to avoid conflicts
+    const existingInstanceIds = new Set();
+    Object.values(newState.zones).forEach(zone => {
+      if (Array.isArray(zone)) {
+        zone.forEach(card => {
+          if (card.instanceId) {
+            existingInstanceIds.add(card.instanceId);
+          }
+        });
+      }
+    });
+
+    // Helper function to generate unique instanceId
+    const generateUniqueInstanceId = (cardId) => {
+      let counter = 0;
+      let candidateId;
+      do {
+        candidateId = `${cardId}_phase${phaseNumber}_${Date.now()}_${counter++}`;
+      } while (existingInstanceIds.has(candidateId));
+      existingInstanceIds.add(candidateId);
+      return candidateId;
+    };
+
     // Rebuild shops based on new phase
     const newEssentialShop = [];
     const newRandomShopDeck = [];
-    let cardInstanceId = Date.now();
 
     allCombatCards.forEach(cardDef => {
       const changeType = getCardChangeType(cardDef, oldPhase, phaseNumber);
@@ -178,16 +200,21 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
 
       // Add cards to appropriate shop
       if (newShopType) {
+        // Count how many copies are already owned (in hand/deck/deployed/discard)
+        const ownedCopies = [
+          ...newState.zones.hand,
+          ...newState.zones.deck,
+          ...newState.zones.deployed,
+          ...newState.zones.discard
+        ].filter(c => c.id === cardDef.id).length;
+
         // Check if this card is unique and already deployed/in hand/in deck
-        const isUniqueCardInUse = cardDef.unique && (
-          newState.zones.deployed.some(c => c.id === cardDef.id) ||
-          newState.zones.hand.some(c => c.id === cardDef.id) ||
-          newState.zones.deck.some(c => c.id === cardDef.id) ||
-          newState.zones.discard.some(c => c.id === cardDef.id)
-        );
+        const isUniqueCardInUse = cardDef.unique && ownedCopies > 0;
 
         const existingInstances = existingCards.get(cardDef.id) || [];
-        const shopCopies = getCardShopCopies(cardDef, newShopType);
+        const totalShopCopies = getCardShopCopies(cardDef, newShopType);
+        // Subtract owned copies from shop quota
+        const shopCopies = Math.max(0, totalShopCopies - ownedCopies);
         const targetShop = newShopType === 'essential' ? newEssentialShop : newRandomShopDeck;
 
         // Reuse existing instances first
@@ -199,10 +226,10 @@ export function applyPhaseTransition(state, newPhase, phaseNumber, allCombatCard
             if (isUniqueCardInUse) {
               continue;
             }
-            // Create new instance
+            // Create new instance with unique ID
             targetShop.push({
               ...cardDef,
-              instanceId: `${cardDef.id}_${cardInstanceId++}`,
+              instanceId: generateUniqueInstanceId(cardDef.id),
               status: 'ready'
             });
           }

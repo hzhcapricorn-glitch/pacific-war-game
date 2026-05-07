@@ -196,9 +196,13 @@ export function getCardShopType(cardDef, phaseNumber) {
  */
 export function getCardShopCopies(cardDef, shopType) {
   if (shopType === 'essential') {
-    return cardDef.essentialShopCopies || cardDef.shopCopies || 10;
+    return cardDef.essentialShopCopies !== undefined
+      ? cardDef.essentialShopCopies
+      : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 10);
   } else if (shopType === 'random') {
-    return cardDef.randomShopCopies || cardDef.shopCopies || 10;
+    return cardDef.randomShopCopies !== undefined
+      ? cardDef.randomShopCopies
+      : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 10);
   }
   return 0;
 }

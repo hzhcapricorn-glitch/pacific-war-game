@@ -121,18 +121,26 @@ function buildBattlefieldConditions(phaseData, currentMission) {
   // 添加阶段全局buff/debuff
   if (phaseData && phaseData.battlefieldConditions) {
     phaseData.battlefieldConditions.forEach(conditionRef => {
-      // 如果引用了buff注册表中的buff，从注册表加载
+      // 尝试从buff注册表加载
       if (conditionRef.id) {
         const buffCondition = createBattlefieldCondition(conditionRef.id, {
           source: conditionRef.source || 'phase'
         });
         if (buffCondition) {
+          // 成功从registry加载
           conditions.push(buffCondition);
+        } else if (conditionRef.name && conditionRef.description) {
+          // Registry中没有，但有完整的inline定义，使用inline定义
+          conditions.push({
+            ...conditionRef,
+            source: conditionRef.source || 'phase'
+          });
         } else {
+          // 既没有registry定义，也没有完整inline定义
           console.warn(`[GameState] Failed to load battlefield condition: ${conditionRef.id}`);
         }
       } else {
-        // 向后兼容：直接使用内联定义的条件
+        // 没有id，直接使用内联定义的条件
         conditions.push({
           ...conditionRef,
           source: 'phase'

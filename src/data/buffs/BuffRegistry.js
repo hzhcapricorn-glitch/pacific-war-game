@@ -14,7 +14,7 @@ import buffRegistryData from './buff_registry.json';
 export function getBuffById(buffId) {
   const buff = buffRegistryData.buffs[buffId];
   if (!buff) {
-    console.warn(`[BuffRegistry] Buff ID not found: ${buffId}`);
+    // Silently return null - caller will handle fallback to inline definitions
     return null;
   }
   return buff;

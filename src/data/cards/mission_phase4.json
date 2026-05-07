@@ -7,9 +7,9 @@
     "phase": 4,
     "difficulty": "hell",
     "image": "/pacific-war-game/img/Mission_hell.jpg",
-    "requiredGroundPower": 60,
-    "requiredSeaPower": 20,
-    "requiredAirDefense": 18,
+    "requiredGroundPower": 80,
+    "requiredSeaPower": 80,
+    "requiredAirDefense": 40,
     "requiredAirSuperiority": 20,
     "reward": {
       "description": "攻占东京，日本无条件投降，太平洋战争胜利！",
@@ -17,8 +17,8 @@
       "maxSupply": 5
     },
     "loss": {
-      "description": "随机损失5张参战卡牌",
-      "randomLoss": 5
+      "description": "随机损失参战卡牌",
+      "randomLoss": 10
     },
     "missionConstraints": [],
     "flavor": "战争的终结，和平的开始"
@@ -30,19 +30,20 @@
     "missionType": "side",
     "phase": 4,
     "difficulty": "hell",
-    "image": "/pacific-war-game/img/Mission_hell.jpg",
-    "requiredGroundPower": 15,
-    "requiredSeaPower": 15,
-    "requiredAirDefense": 20,
-    "requiredAirSuperiority": 12,
+    "image": "/pacific-war-game/img/mission_yamato_1.jpg",
+    "requiredGroundPower": 20,
+    "requiredSeaPower": 30,
+    "requiredAirDefense": 16,
+    "requiredAirSuperiority": 16,
     "reward": {
-      "description": "突破日本本土防线最后屏障，获得5点补给和4点额外回合",
-      "supply": 5,
-      "extraTurns": 4
+      "description": "全歼日本海军，回合+5，获得大和号战列舰，战场优势：封锁日本岛",
+      "card": "yamato_battleship",
+      "battlefieldBuffId": "block_japan_islands",
+      "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失4张参战卡牌",
-      "randomLoss": 4
+      "description": "随机损失参战卡牌",
+      "randomLoss": 10
     },
     "missionConstraints": [],
     "flavor": "神风特攻队的疯狂反扑，太平洋战争中最血腥的战役"
@@ -54,18 +55,19 @@
     "missionType": "side",
     "phase": 4,
     "difficulty": "hard",
-    "image": "/pacific-war-game/img/Mission_hard.jpg",
-    "requiredGroundPower": 12,
-    "requiredSeaPower": 10,
-    "requiredAirDefense": 8,
-    "requiredAirSuperiority": 10,
+    "image": "/pacific-war-game/img/mission_5.jpg",
+    "requiredGroundPower": 40,
+    "requiredSeaPower": 0,
+    "requiredAirDefense": 0,
+    "requiredAirSuperiority": 0,
     "reward": {
-      "description": "夺取硫磺岛，战斗机可护航轰炸日本，获得战场优势：战斗机护航",
-      "battlefieldBuffId": "fighter_escort"
+      "description": "夺取硫磺岛，战斗机可护航轰炸日本，回合+3，战场优势：战斗机护航",
+      "battlefieldBuffId": "fighter_escort",
+      "extraTurns": 3
     },
     "loss": {
-      "description": "随机损失3张参战卡牌",
-      "randomLoss": 8
+      "description": "随机损失参战卡牌",
+      "randomLoss": 10
     },
     "missionConstraints": [],
     "flavor": "太平洋的绞肉机，星条旗插上折钵山"
@@ -76,8 +78,8 @@
     "type": "mission",
     "missionType": "side",
     "phase": 4,
-    "difficulty": "normal",
-    "image": "/pacific-war-game/img/Mission_normal.jpeg",
+    "difficulty": "hard",
+    "image": "/pacific-war-game/img/mission_ent_1.jpg",
     "requiredGroundPower": 30,
     "requiredSeaPower": 0,
     "requiredAirDefense": 16,
@@ -88,16 +90,25 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 4
+      "randomLoss": 8
     },
     "missionConstraints": [
       {
         "type": "restrict_unit_type",
-        "unitTypes": ["army", "navy"],
+        "unitTypes": ["army"],
         "shortName": "战略轰炸",
         "name": "战略轰炸任务",
-        "message": "战略轰炸任务，陆军和海军无法参战",
-        "description": "这是纯空军战略轰炸任务，陆军和海军无法参与"
+        "message": "战略轰炸任务，陆军无法参战",
+        "description": "这是纯空军战略轰炸任务，陆军无法参与"
+      },
+      {
+        "type": "modify_unit_power",
+        "unitTypes": ["navy"],
+        "powerType": "ground",
+        "multiplier": 0,
+        "shortName": "海军对地=0",
+        "name": "海军对地火力归零",
+        "description": "这是纯空军战略轰炸任务，海军单位对地火力归零"
       }
     ],
     "flavor": "一夜之间，东京化为火海"

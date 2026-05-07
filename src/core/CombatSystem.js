@@ -167,6 +167,18 @@ export function calculateAllFirePowers(cards, context = null) {
           affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
         }
 
+        // 对于减益效果，只影响初始火力 > 0 的卡牌
+        if (isReduction) {
+          if (powerType === 'ground') {
+            affectedCards = affectedCards.filter(card => (card.groundPower || 0) > 0);
+          } else if (powerType === 'sea') {
+            affectedCards = affectedCards.filter(card => (card.seaPower || 0) > 0);
+          } else if (powerType === 'air') {
+            affectedCards = affectedCards.filter(card => (card.airPower || 0) > 0);
+          }
+          // 'all' 类型不做额外过滤，因为很难定义"有火力"
+        }
+
         // 计算加成或减益（每张受影响的卡牌获得value加成/减益）
         const modification = value * affectedCards.length * (isReduction ? -1 : 1);
 

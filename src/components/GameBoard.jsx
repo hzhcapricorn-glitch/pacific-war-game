@@ -96,13 +96,29 @@ function GameBoard() {
       }
       // 弃牌阶段：自动弃牌和清理
       else if (currentPhase === GamePhase.DISCARD) {
-        if (phaseTransitionInProgress.current) return;
+        if (phaseTransitionInProgress.current) {
+          console.log('[DEBUG] Discard phase: transition already in progress, skipping');
+          return;
+        }
+        console.log('[DEBUG] Discard phase: starting auto-execution');
         phaseTransitionInProgress.current = true;
-        setTimeout(() => {
-          actions.endTurn();
-          actions.nextPhase();
-          phaseTransitionInProgress.current = false;
+        const timerId = setTimeout(() => {
+          console.log('[DEBUG] Discard phase: executing endTurn and nextPhase');
+          try {
+            actions.endTurn();
+            actions.nextPhase();
+          } catch (error) {
+            console.error('[DEBUG] Discard phase execution error:', error);
+          } finally {
+            phaseTransitionInProgress.current = false;
+            console.log('[DEBUG] Discard phase: auto-execution complete');
+          }
         }, 500);
+        // Store timer ID for cleanup
+        return () => {
+          clearTimeout(timerId);
+          phaseTransitionInProgress.current = false;
+        };
       }
     };
 
@@ -139,7 +155,7 @@ function GameBoard() {
 
   // Check for phase completion - will be called after combat report is closed
   const checkForPhaseTransition = useCallback(() => {
-    if (!gameInitialized || !state.phaseData) return;
+    if (!state.phaseData) return;
 
     // Check if main mission is complete
     const phaseKey = `phase_${state.currentPhase}`;
@@ -294,9 +310,12 @@ function GameBoard() {
     } else if (currentPhase === GamePhase.DISCARD) {
       // 弃牌阶段：防止重复执行（可能已经自动执行了）
       if (phaseTransitionInProgress.current) {
-        return; // 正在自动执行，跳过手动触发
+        console.log('[DEBUG] handleNextPhase: discard phase transition in progress, forcing unlock');
+        // Force unlock if stuck
+        phaseTransitionInProgress.current = false;
       }
       // 弃掉所有手牌，清除超限补给
+      console.log('[DEBUG] handleNextPhase: executing endTurn for discard phase');
       actions.endTurn();
     }
 

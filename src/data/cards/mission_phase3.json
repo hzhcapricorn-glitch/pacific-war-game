@@ -86,11 +86,11 @@
     "missionType": "side",
     "phase": 3,
     "difficulty": "hell",
-    "image": "/pacific-war-game/img/mission_10.jpg",
+    "image": "/pacific-war-game/img/mission_okinawa_1.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 24,
     "requiredAirDefense": 8,
-    "requiredAirSuperiority": 6,
+    "requiredAirSuperiority": 0,
     "reward": {
       "description": "回合+3，获得武藏号战列舰，战场优势：封锁莱特湾",
       "card": "musashi_battleship",

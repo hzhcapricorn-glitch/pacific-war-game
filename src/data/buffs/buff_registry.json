@@ -103,7 +103,7 @@
     "landing_raid": {
       "id": "landing_raid",
       "name": "登陆袭扰",
-      "description": "成功袭扰日军登陆舰队，削弱其护航能力，仅对主线任务生效：防空需求-8，制空需求-4",
+      "description": "成功袭扰日军登陆舰队，削弱其护航能力，仅对主线任务生效：对地需求-8，对海需求-4",
       "category": "tactical_advantage",
       "isBuff": true,
       "effects": [
@@ -111,13 +111,13 @@
           "type": "reduce_mission_requirement",
           "stat": "groundPower",
           "value": 8,
-          "description": "对海需求-8"
+          "description": "对地需求-8"
         },
         {
           "type": "reduce_mission_requirement",
           "stat": "seaPower",
           "value": 4,
-          "description": "对海需求-8"
+          "description": "对海需求-4"
         }
       ],
       "scope": "current_main_only",
@@ -180,6 +180,25 @@
       "tags": ["naval", "tactical"]
     },
 
+    "block_japan_islands": {
+      "id": "block_japan_islands",
+      "name": "封锁日本岛",
+      "description": "全歼日本海军，仅对主线任务生效：对海需求-30",
+      "category": "tactical_advantage",
+      "isBuff": true,
+      "effects": [
+        {
+          "type": "reduce_mission_requirement",
+          "stat": "seaPower",
+          "value": 30,
+          "description": "对海需求-30"
+        }
+      ],
+      "scope": "current_main_only",
+      "duration": "until_phase_end",
+      "tags": ["naval", "tactical"]
+    },
+
     "ground_bombarment": {
       "id": "ground_bombarment",
       "name": "陆航轰炸",
@@ -202,15 +221,15 @@
     "tokyo_bbq": {
       "id": "tokyo_bbq",
       "name": "东京大火",
-      "description": "大规模战略轰炸摧毁日本工业，仅对主线任务生效：对陆地需求-20",
+      "description": "大规模战略轰炸摧毁日本工业，仅对主线任务生效：对陆地需求-30",
       "category": "tactical_advantage",
       "isBuff": true,
       "effects": [
         {
           "type": "reduce_mission_requirement",
           "stat": "groundPower",
-          "value": 20,
-          "description": "对陆地需求-20"
+          "value": 30,
+          "description": "对陆地需求-30"
         }
       ],
       "scope": "main_mission_only",

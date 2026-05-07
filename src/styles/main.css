@@ -1572,7 +1572,7 @@ button:disabled {
   display: flex;
   gap: 20px;
   padding: 20px;
-  height: 550px; /* Fixed height to prevent jumping */
+  height: 600px; /* Fixed height to prevent jumping */
   overflow: hidden;
 }
 
@@ -1611,7 +1611,7 @@ button:disabled {
 
 .leader-detail-panel {
   width: 350px;
-  height: 500px;
+  height: 550px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1621,7 +1621,7 @@ button:disabled {
 
 .leader-detail-panel .card {
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: unset;
 }
 

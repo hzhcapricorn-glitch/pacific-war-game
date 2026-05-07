@@ -369,8 +369,6 @@
     "flavor": "日本航母的噩梦",
     "image": "/pacific-war-game/img/tbm_avenger.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
-    "appearInEssentialPhase": 4,
-    "essentialShopCopies": 6,
     "appearInRandomPhase": 2,
     "randomShopCopies": 4
   },
@@ -396,6 +394,8 @@
     "flavor": "杜立特空袭的传奇机型",
     "image": "/pacific-war-game/img/b25_mitchell.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
+    "appearInEssentialPhase": 4,
+    "essentialShopCopies": 6,
     "appearInRandomPhase": 1,
     "randomShopCopies": 3
   },
