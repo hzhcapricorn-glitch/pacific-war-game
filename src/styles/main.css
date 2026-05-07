@@ -1436,7 +1436,7 @@ button:disabled {
   display: flex;
   gap: 20px;
   padding: 20px 24px;
-  min-height: 500px;
+  min-height: 600px;
 }
 
 .mission-list-section {
