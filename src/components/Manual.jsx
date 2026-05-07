@@ -38,6 +38,18 @@ function Manual({ isOpen, onClose }) {
           </div>
         );
 
+      case 'image':
+        return (
+          <div key={JSON.stringify(item)} className="manual-image-container">
+            {item.caption && <p className="manual-image-caption">{item.caption}</p>}
+            <img
+              src={item.src}
+              alt={item.alt || item.caption || '说明图片'}
+              className="manual-image"
+            />
+          </div>
+        );
+
       default:
         return null;
     }
