@@ -577,6 +577,11 @@ export function getCombatSummary(combatResult) {
                ability.effect?.lossReduction === 'return_to_discard'
   );
 
+  // 检查斯普鲁恩斯的重甲损管能力（移动船坞）
+  const keepDamagedHeavyArmor = leader?.abilities?.some(
+    ability => ability.type === 'keep_damaged_heavy_armor'
+  );
+
   let summary = victory ? '🎉 战斗胜利！\n\n' : '❌ 战斗失败...\n\n';
 
   summary += '己方火力:\n';
@@ -631,7 +636,12 @@ export function getCombatSummary(combatResult) {
             summary += `  - ${cardName} 被重创${hits}次并击沉 🛡️💥\n`;
           }
         } else {
-          summary += `  - ${cardName} 被重创${hits}次，返回基地修复 🛡️🔧\n`;
+          // 根据斯普鲁恩斯能力显示不同文本
+          if (keepDamagedHeavyArmor) {
+            summary += `  - ${cardName} 被重创${hits}次，在移动船坞中维修 🛡️⚙️\n`;
+          } else {
+            summary += `  - ${cardName} 被重创${hits}次，返回基地修复 🛡️🔧\n`;
+          }
         }
       } else if (hasReturnAbility) {
         // 有返航能力的空军

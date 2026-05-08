@@ -94,7 +94,8 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
         ability.type === 'supply_per_turn' ||
         ability.type === 'reduce_combat_loss' ||
         ability.type === 'submarine_boost' ||
-        ability.type === 'random_leader_selection'
+        ability.type === 'random_leader_selection' ||
+        ability.type === 'keep_damaged_heavy_armor'
       )) {
         names.push(ability.name);
         return;

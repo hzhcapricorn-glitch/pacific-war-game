@@ -829,15 +829,26 @@ function gameStateReducer(state, action) {
       // 从 combatResult 获取制空权状态
       const airSuperiorityAchieved = combatResult?.airSuperiorityAchieved ?? false;
 
-      // 处理重创但未击沉的重甲单位：从部署区移除，放入弃牌堆
+      // 检查斯普鲁恩斯的 keep_damaged_heavy_armor 能力（移动船坞）
+      const keepDamagedHeavyArmor = state.leader?.abilities?.some(
+        ability => ability.type === 'keep_damaged_heavy_armor'
+      );
+
+      // 处理重创但未击沉的重甲单位
       const damagedCards = combatResult?.damagedButNotDestroyed || [];
       if (damagedCards.length > 0) {
         damagedCards.forEach(damagedCardId => {
           const cardIndex = newDeployed.findIndex(c => c.instanceId === damagedCardId);
           if (cardIndex !== -1) {
-            const damagedCard = { ...newDeployed[cardIndex], status: 'ready' };
-            newDiscard.push(damagedCard);
-            newDeployed.splice(cardIndex, 1);
+            if (keepDamagedHeavyArmor) {
+              // 斯普鲁恩斯能力：重创单位留在部署区，只需将状态改为 tapped（已在前面设置）
+              // 不做任何操作，让卡牌留在 newDeployed 中
+            } else {
+              // 默认行为：从部署区移除，放入弃牌堆
+              const damagedCard = { ...newDeployed[cardIndex], status: 'ready' };
+              newDiscard.push(damagedCard);
+              newDeployed.splice(cardIndex, 1);
+            }
           }
         });
       }
