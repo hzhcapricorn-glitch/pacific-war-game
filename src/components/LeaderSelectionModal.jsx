@@ -29,7 +29,16 @@ function LeaderSelectionModal({
 
   const handleConfirm = () => {
     if (selectedLeaderId) {
-      const leader = leaders.find(l => l.id === selectedLeaderId);
+      let leader = leaders.find(l => l.id === selectedLeaderId);
+
+      // 如果选择了"随机"领袖，则从所有其他领袖中随机选择一个
+      if (leader.id === 'leader_random') {
+        const availableLeaders = leaders.filter(l => l.id !== 'leader_random');
+        const randomIndex = Math.floor(Math.random() * availableLeaders.length);
+        leader = availableLeaders[randomIndex];
+        console.log(`[Random Leader] 随机选择了: ${leader.name}`);
+      }
+
       onSelectLeader(leader);
     }
   };

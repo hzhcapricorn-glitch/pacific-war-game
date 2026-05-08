@@ -445,5 +445,38 @@
       }
     ],
     "flavor": "卡尔·邓尼茨，U艇之父，发明“狼群战术”，大西洋上的阴影，英国人午夜梦回时的噩梦"
+  },
+  {
+    "id": "leader_random",
+    "type": "leader",
+    "name": "随机",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_n5.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "random_leader_selection",
+        "trigger": "on_game_start",
+        "name": "命运的选择",
+        "description": "游戏开始时，从所有领袖中随机选择一位"
+      }
+    ],
+    "flavor": "听天由命，或许命运会给你一个惊喜"
   }
 ]
