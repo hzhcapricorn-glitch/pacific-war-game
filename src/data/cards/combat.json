@@ -243,7 +243,7 @@
     "name": "SBD轰炸机\n”无畏式“",
     "cardCategory": "combat",
     "rarity": "R",
-    "retirePhase": null,
+    "retirePhase": 4,
     "unitType": "air",
     "cost": 2,
     "redeployCost": 1,

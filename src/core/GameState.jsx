@@ -304,6 +304,12 @@ function gameStateReducer(state, action) {
           if (supplyAbility.value === 'current_phase') {
             // 游戏开始时，使用初始战略阶段数（默认为1，因为START_PHASE尚未调用）
             supplyGain = 1;
+          } else if (typeof supplyAbility.value === 'string' && supplyAbility.value.startsWith('random_')) {
+            // 随机值：格式为 "random_min_max"
+            const parts = supplyAbility.value.split('_');
+            const min = parseInt(parts[1]) || 0;
+            const max = parseInt(parts[2]) || 0;
+            supplyGain = Math.floor(Math.random() * (max - min + 1)) + min;
           } else {
             supplyGain = supplyAbility.value || 0;
           }
@@ -350,6 +356,12 @@ function gameStateReducer(state, action) {
           if (supplyAbility.value === 'current_phase') {
             // 根据当前战略阶段数给予补给（1-4）
             supplyGain = state.currentPhase || 1;
+          } else if (typeof supplyAbility.value === 'string' && supplyAbility.value.startsWith('random_')) {
+            // 随机值：格式为 "random_min_max"
+            const parts = supplyAbility.value.split('_');
+            const min = parseInt(parts[1]) || 0;
+            const max = parseInt(parts[2]) || 0;
+            supplyGain = Math.floor(Math.random() * (max - min + 1)) + min;
           } else {
             supplyGain = supplyAbility.value || 0;
           }

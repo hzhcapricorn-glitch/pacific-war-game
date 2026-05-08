@@ -99,6 +99,7 @@ export function createCard(cardData, instanceId) {
     rarity: cardData.rarity || CardRarity.N,
     shopType: cardData.shopType,
     shopCopies: cardData.shopCopies,
+    retirePhase: cardData.retirePhase,
     // 任务卡特有属性
     difficulty: cardData.difficulty,
     requiredGroundPower: cardData.requiredGroundPower,
