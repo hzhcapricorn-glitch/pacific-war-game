@@ -853,13 +853,21 @@ function gameStateReducer(state, action) {
               // 返航成功或领袖保护：进入弃牌堆
               newDiscard.push(lostCard);
             } else {
-              // 正常损失：根据shopType返回商店
-              if (lostCard.shopType === 'essential') {
-                newEssentialShop.push(lostCard);
-              } else if (lostCard.shopType === 'random') {
-                newRandomShopDeck.push(lostCard);
+              // 正常损失：检查是否已退役
+              const isRetired = lostCard.retirePhase && lostCard.retirePhase <= state.currentPhase;
+
+              if (isRetired) {
+                // 已退役的卡牌直接移除，不返回商店
+                // 卡牌从部署区移除即可
+              } else {
+                // 未退役：根据shopType返回商店
+                if (lostCard.shopType === 'essential') {
+                  newEssentialShop.push(lostCard);
+                } else if (lostCard.shopType === 'random') {
+                  newRandomShopDeck.push(lostCard);
+                }
+                // 如果没有shopType（如战术卡），则移除
               }
-              // 如果没有shopType（如战术卡），则移除
             }
 
             newDeployed.splice(cardIndex, 1);
