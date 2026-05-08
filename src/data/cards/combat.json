@@ -183,31 +183,6 @@
     "randomShopCopies": 3
   },
   {
-    "id": "basic_navy_airforce",
-    "type": "combat",
-    "name": "TBD鱼雷机\n“破坏者”",
-    "cardCategory": "combat",
-    "rarity": "N",
-    "retirePhase": 3,
-    "unitType": "air",
-    "cost": 2,
-    "redeployCost": 1,
-    "groundPower": 0,
-    "seaPower": 1,
-    "airPower": 1,
-    "abilities": [
-      {
-        "type": "return_to_base",
-        "trigger": "on_combat_loss"
-      }
-    ],
-    "flavor": "飞行的棺材",
-    "image": "/pacific-war-game/img/basic_navy_airforce.png",
-    "backgroundImage": "/pacific-war-game/img/background_air.jpg",
-    "appearInEssentialPhase": 1,
-    "essentialShopCopies": 10
-  },
-  {
     "id": "f4f_wildcat",
     "type": "combat",
     "name": "F4F战斗机\n“野猫”",

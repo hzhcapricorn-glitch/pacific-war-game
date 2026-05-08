@@ -777,6 +777,8 @@ function GameBoard() {
                 }
               }}
               onOpenManual={() => setShowManual(true)}
+              allCombatCards={combatCardsData}
+              gameState={state}
             />
           </div>
 

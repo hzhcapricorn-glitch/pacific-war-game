@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import Card from './Card';
 import gameConfig from '../data/config.json';
 
@@ -24,7 +25,9 @@ function Shop({
   onDebugSwitchMission,
   onDebugSaveSnapshot,
   onDebugLoadSnapshot,
-  onOpenManual
+  onOpenManual,
+  allCombatCards,
+  gameState
 }) {
   // 保存所有见过的必要卡牌种类
   const [knownEssentialTypes, setKnownEssentialTypes] = useState([]);
@@ -36,6 +39,8 @@ function Shop({
   const fileInputRef = React.createRef();
   // 防止快照双击保存
   const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
+  // 库存信息弹窗
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
 
   // 初始化时从所有卡牌中提取必要卡牌种类
   useEffect(() => {
@@ -199,6 +204,9 @@ function Shop({
                 Buff面板
               </button>
             )}
+            <button onClick={() => setShowInventoryModal(true)} className="btn-debug-inline">
+              📊 库存信息
+            </button>
           </div>
           )}
         </div>
@@ -271,7 +279,142 @@ function Shop({
           </div>
         </div>
       </div>
+
+      {/* 库存信息弹窗 */}
+      {showInventoryModal && gameState && allCombatCards && (
+        <InventoryModal
+          gameState={gameState}
+          allCombatCards={allCombatCards}
+          currentPhase={currentPhase}
+          onClose={() => setShowInventoryModal(false)}
+        />
+      )}
     </div>
+  );
+}
+
+// 库存信息弹窗组件
+function InventoryModal({ gameState, allCombatCards, currentPhase, onClose }) {
+  // 计算库存信息
+  const getInventoryInfo = () => {
+    const inventory = {};
+
+    // 遍历所有战斗卡牌定义
+    allCombatCards.forEach(cardDef => {
+      const cardId = cardDef.id;
+
+      // 计算应有数量（essential + random）
+      const essentialCopies = cardDef.essentialShopCopies !== undefined
+        ? cardDef.essentialShopCopies
+        : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0);
+      const randomCopies = cardDef.randomShopCopies !== undefined
+        ? cardDef.randomShopCopies
+        : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0);
+      const totalShould = essentialCopies + randomCopies;
+
+      // 计算当前在商店的数量
+      const essentialShopCount = (gameState.zones.essentialShop || []).filter(c => c.id === cardId).length;
+      const randomShopCount = (gameState.zones.randomShop || []).filter(c => c.id === cardId).length;
+      const randomShopDeckCount = (gameState.zones.randomShopDeck || []).filter(c => c.id === cardId).length;
+      const inShop = essentialShopCount + randomShopCount + randomShopDeckCount;
+
+      // 计算玩家拥有的数量（部署区、手牌、牌库、弃牌堆）
+      const deployedCount = (gameState.zones.deployed || []).filter(c => c.id === cardId).length;
+      const handCount = (gameState.zones.hand || []).filter(c => c.id === cardId).length;
+      const deckCount = (gameState.zones.deck || []).filter(c => c.id === cardId).length;
+      const discardCount = (gameState.zones.discard || []).filter(c => c.id === cardId).length;
+      const owned = deployedCount + handCount + deckCount + discardCount;
+
+      // 总计
+      const total = inShop + owned;
+      const diff = totalShould - total;
+
+      inventory[cardId] = {
+        name: cardDef.name,
+        essentialShould: essentialCopies,
+        randomShould: randomCopies,
+        totalShould,
+        essentialShopCount,
+        randomShopCount,
+        randomShopDeckCount,
+        inShop,
+        deployedCount,
+        handCount,
+        deckCount,
+        discardCount,
+        owned,
+        total,
+        diff
+      };
+    });
+
+    return inventory;
+  };
+
+  const inventory = getInventoryInfo();
+
+  // 按差值排序（缺少的在前）
+  const sortedCards = Object.entries(inventory).sort((a, b) => a[1].diff - b[1].diff);
+
+  return ReactDOM.createPortal(
+    <div className="inventory-panel-overlay" onClick={onClose}>
+      <div className="inventory-panel" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="inventory-panel-header">
+          <h2>📊 商店库存信息</h2>
+          <button className="close-button" onClick={onClose}>×</button>
+        </div>
+
+        {/* Inventory Table */}
+        <div className="inventory-panel-body">
+          <div className="inventory-table-container">
+            <table className="inventory-table">
+              <thead>
+                <tr>
+                  <th>卡牌</th>
+                  <th>应有总数</th>
+                  <th>E商店</th>
+                  <th>R商店</th>
+                  <th>R牌堆</th>
+                  <th>商店合计</th>
+                  <th>玩家拥有</th>
+                  <th>实际总数</th>
+                  <th>差值</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedCards.map(([cardId, info]) => (
+                  <tr key={cardId} className={info.diff < 0 ? 'inventory-row-missing' : info.diff > 0 ? 'inventory-row-extra' : ''}>
+                    <td>{info.name.replace(/\n/g, '')}</td>
+                    <td>{info.totalShould} <span className="inventory-detail">({info.essentialShould}E+{info.randomShould}R)</span></td>
+                    <td>{info.essentialShopCount}</td>
+                    <td>{info.randomShopCount}</td>
+                    <td>{info.randomShopDeckCount}</td>
+                    <td><strong>{info.inShop}</strong></td>
+                    <td>
+                      <div className="inventory-owned">
+                        {info.owned}
+                        <span className="inventory-detail">
+                          {info.deployedCount > 0 && `部署${info.deployedCount} `}
+                          {info.handCount > 0 && `手${info.handCount} `}
+                          {info.deckCount > 0 && `库${info.deckCount} `}
+                          {info.discardCount > 0 && `弃${info.discardCount}`}
+                        </span>
+                      </div>
+                    </td>
+                    <td><strong>{info.total}</strong></td>
+                    <td className={info.diff < 0 ? 'inventory-diff-negative' : info.diff > 0 ? 'inventory-diff-positive' : ''}>
+                      {info.diff > 0 ? '+' : ''}{info.diff}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 

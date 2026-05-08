@@ -385,7 +385,7 @@ function gameStateReducer(state, action) {
         }
       }
 
-      // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
+      // 在准备阶段刷新随机商店并补充缺失卡牌（除了游戏开始的第一回合）
       if (isNewTurn && state.turn >= 1) {
         // 计算实际槽位数量：基础槽位 + 部署区中expand_shop能力的总和 + 领袖increase_shop_slots能力
         let baseSlots = state.randomShopSlots || 6;
@@ -406,16 +406,75 @@ function gameStateReducer(state, action) {
         }, 0);
         const actualSlots = baseSlots + expandShopBonus;
 
+        // 补充缺失的卡牌到商店
+        const allCombatCards = state.allCombatCards || [];
+        let newEssentialShop = [...state.zones.essentialShop];
+        let newRandomShopDeck = [...state.zones.randomShopDeck];
+        let addedCount = 0;
+
+        allCombatCards.forEach(cardDef => {
+          const cardId = cardDef.id;
+
+          // 计算应有数量
+          const essentialCopies = cardDef.essentialShopCopies !== undefined
+            ? cardDef.essentialShopCopies
+            : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0);
+          const randomCopies = cardDef.randomShopCopies !== undefined
+            ? cardDef.randomShopCopies
+            : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0);
+
+          // 计算当前在商店的数量
+          const essentialShopCount = newEssentialShop.filter(c => c.id === cardId).length;
+          const randomShopCount = (state.zones.randomShop || []).filter(c => c.id === cardId).length;
+          const randomShopDeckCount = newRandomShopDeck.filter(c => c.id === cardId).length;
+
+          // 计算玩家拥有的数量
+          const deployedCount = (state.zones.deployed || []).filter(c => c.id === cardId).length;
+          const handCount = (state.zones.hand || []).filter(c => c.id === cardId).length;
+          const deckCount = (state.zones.deck || []).filter(c => c.id === cardId).length;
+          const discardCount = (state.zones.discard || []).filter(c => c.id === cardId).length;
+          const owned = deployedCount + handCount + deckCount + discardCount;
+
+          // 计算essential商店需要补充的数量
+          const essentialTotal = essentialShopCount + owned;
+          const essentialMissing = essentialCopies - essentialTotal;
+          if (essentialMissing > 0) {
+            for (let i = 0; i < essentialMissing; i++) {
+              newEssentialShop.push({
+                ...cardDef,
+                instanceId: `${cardId}_${Date.now()}_${Math.random()}`,
+                status: 'ready'
+              });
+              addedCount++;
+            }
+          }
+
+          // 计算random商店需要补充的数量
+          const randomTotal = randomShopCount + randomShopDeckCount + owned;
+          const randomMissing = randomCopies - randomTotal;
+          if (randomMissing > 0) {
+            for (let i = 0; i < randomMissing; i++) {
+              newRandomShopDeck.push({
+                ...cardDef,
+                instanceId: `${cardId}_${Date.now()}_${Math.random()}`,
+                status: 'ready'
+              });
+              addedCount++;
+            }
+          }
+        });
+
         // 将当前随机商店中未购买的卡牌送回随机商店堆
         const returnedCards = state.zones.randomShop || [];
-        const newRandomDeck = shuffleDeck([...state.zones.randomShopDeck, ...returnedCards]);
+        const shuffledRandomDeck = shuffleDeck([...newRandomShopDeck, ...returnedCards]);
 
         // 从随机商店堆中抽取新卡牌
-        const newRandomShop = newRandomDeck.slice(0, actualSlots);
-        const remainingDeck = newRandomDeck.slice(actualSlots);
+        const newRandomShop = shuffledRandomDeck.slice(0, actualSlots);
+        const remainingDeck = shuffledRandomDeck.slice(actualSlots);
 
         newState.zones = {
           ...newState.zones,
+          essentialShop: newEssentialShop,
           randomShop: newRandomShop,
           randomShopDeck: remainingDeck
         };
@@ -426,6 +485,9 @@ function gameStateReducer(state, action) {
         let logMessage = `🔄 随机商店已刷新 (${newRandomShop.length}/${actualSlots} 张卡牌)`;
         if (totalBonus > 0) {
           logMessage += ` [+${totalBonus}]`;
+        }
+        if (addedCount > 0) {
+          logMessage += ` [补充${addedCount}张]`;
         }
         newState.battleLog = addLogEntry(newState, logMessage, 'system');
       }
@@ -637,13 +699,18 @@ function gameStateReducer(state, action) {
         newRandomShop = result.newFromZone;
       }
 
+      // 给购买的卡牌添加shopType标记，这样损失后能返回正确的商店
+      const purchasedCard = { ...result.movedCard, shopType };
+      const newDiscard = [...result.newToZone];
+      newDiscard[newDiscard.length - 1] = purchasedCard;
+
       const newState = {
         ...state,
         zones: {
           ...state.zones,
           essentialShop: newEssentialShop,
           randomShop: newRandomShop,
-          discard: result.newToZone
+          discard: newDiscard
         },
         stats: {
           ...state.stats,

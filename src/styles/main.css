@@ -2108,3 +2108,7 @@ button:disabled {
   top: 50%;
   transform: translateY(-50%);
 }
+
+.leader-selection-header .btn-manual:hover {
+  transform: translateY(-50%) !important;
+}
