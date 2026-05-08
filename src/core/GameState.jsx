@@ -829,6 +829,19 @@ function gameStateReducer(state, action) {
       // 从 combatResult 获取制空权状态
       const airSuperiorityAchieved = combatResult?.airSuperiorityAchieved ?? false;
 
+      // 处理重创但未击沉的重甲单位：从部署区移除，放入弃牌堆
+      const damagedCards = combatResult?.damagedButNotDestroyed || [];
+      if (damagedCards.length > 0) {
+        damagedCards.forEach(damagedCardId => {
+          const cardIndex = newDeployed.findIndex(c => c.instanceId === damagedCardId);
+          if (cardIndex !== -1) {
+            const damagedCard = { ...newDeployed[cardIndex], status: 'ready' };
+            newDiscard.push(damagedCard);
+            newDeployed.splice(cardIndex, 1);
+          }
+        });
+      }
+
       // 检查邓尼茨的 submarine_return_to_discard 能力
       const submarineReturnToDiscard = state.leader?.abilities?.find(
         ability => ability.type === 'submarine_boost'

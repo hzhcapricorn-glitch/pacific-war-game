@@ -322,11 +322,11 @@ export function applyReward(reward, gameState) {
  * @param {Array} participatingCards - 参战卡牌数组
  * @param {Object} loss - 损失对象 { randomLoss, description }
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
- * @returns {Object} { lostCardIds: Array, damageDetails: Array, abilitiesDisabled: Object }
+ * @returns {Object} { lostCardIds: Array, damagedButNotDestroyed: Array, damageDetails: Array, abilitiesDisabled: Object }
  */
 export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = [], airSuperiorityAchieved = true, gameState = null) {
   if (!loss || !loss.randomLoss || loss.randomLoss === 0 || participatingCards.length === 0) {
-    return { lostCardIds: [], damageDetails: [], abilitiesDisabled: { heavyArmor: false, lucky: false } };
+    return { lostCardIds: [], damagedButNotDestroyed: [], damageDetails: [], abilitiesDisabled: { heavyArmor: false, lucky: false } };
   }
 
   // 检查是否有禁用能力的效果（神风威胁）
@@ -449,6 +449,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
 
   // 生成损伤详情
   const damageDetails = [];
+  const damagedButNotDestroyed = []; // 重创但未击沉的重甲单位
   participatingCards.forEach(card => {
     const hits = hitTracker.get(card.instanceId);
     if (hits > 0) {
@@ -466,11 +467,17 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
         requiredHits,
         isDestroyed
       });
+
+      // 如果是重甲单位（有原始装甲值）且受损但未击沉，加入列表
+      if (originalArmorValue > 0 && !isDestroyed) {
+        damagedButNotDestroyed.push(card.instanceId);
+      }
     }
   });
 
   return {
     lostCardIds: lostCards,
+    damagedButNotDestroyed, // 新增：重创但未击沉的卡牌ID
     damageDetails,
     abilitiesDisabled: {
       heavyArmor: disableHeavyArmor,
@@ -484,7 +491,7 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
  * @param {Array} selectedCards - 选中参战的卡牌
  * @param {Object} mission - 当前任务
  * @param {Object} gameState - 当前游戏状态
- * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, lostCards, damageDetails, airDefenseSufficient, airSuperiorityAchieved, abilitiesDisabled }
+ * @returns {Object} 战斗结果 { victory, attackPowers, requiredPowers, rewards, lostCardIds, damagedButNotDestroyed, lostCards, damageDetails, airDefenseSufficient, airSuperiorityAchieved, abilitiesDisabled }
  */
 export function resolveCombat(selectedCards, mission, gameState) {
   // 计算己方火力（包括combat_boost能力和任务约束）
@@ -527,6 +534,7 @@ export function resolveCombat(selectedCards, mission, gameState) {
     requiredPowers,
     rewards,
     lostCardIds: lossResult.lostCardIds,
+    damagedButNotDestroyed: lossResult.damagedButNotDestroyed, // 重创但未击沉的卡牌
     lostCards,
     damageDetails: lossResult.damageDetails,
     airDefenseSufficient,
@@ -623,7 +631,7 @@ export function getCombatSummary(combatResult) {
             summary += `  - ${cardName} 被重创${hits}次并击沉 🛡️💥\n`;
           }
         } else {
-          summary += `  - ${cardName} 被重创${hits}次但未被击沉 🛡️\n`;
+          summary += `  - ${cardName} 被重创${hits}次，返回基地修复 🛡️🔧\n`;
         }
       } else if (hasReturnAbility) {
         // 有返航能力的空军
