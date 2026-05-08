@@ -241,7 +241,7 @@
         "description": "拥有重甲的单位受到重创而非沉没时，停留在部署区而非返回弃牌堆"
       }
     ],
-    "flavor": "雷蒙德·斯普鲁恩斯，“沉默的提督”，计算精确的战术大师。"
+    "flavor": "雷蒙德·斯普鲁恩斯，“沉默的提督”，计算精确的战术大师，创立前线服务中队。"
   },
   {
     "id": "leader_mitscher",
@@ -355,6 +355,44 @@
       }
     ],
     "flavor": "柯蒂斯·李梅，疯狂的鹰派，如果您觉得东京太冷，他能帮您把室温调高一千度"
+  },
+  {
+    "id": "leader_kuznetsov",
+    "type": "leader",
+    "name": "库兹涅佐夫",
+    "rarity": "SR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/ship_6.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "combat_boost",
+        "trigger": "during_combat",
+        "name": "黎明炮击",
+        "description": "战斗阶段，如果海军单位对地战斗力不为0，则其对地战斗力额外+1",
+        "effect": {
+          "target": "navy_units_with_ground_power",
+          "stat": "groundPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "苏联海军的救星，当整个国家都在沉睡时，只有他的炮火在向黎明前的敌军咆哮"
   },
   {
     "id": "leader_yamamoto",

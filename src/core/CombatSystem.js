@@ -161,6 +161,9 @@ export function calculateAllFirePowers(cards, context = null) {
         // 海军单位且对海战斗力≥3（近藤信武）
         const minSeaPower = modifier.condition?.minSeaPower || 3;
         targetCards = cards.filter(c => c.unitType === 'navy' && (c.seaPower || 0) >= minSeaPower);
+      } else if (target === 'navy_units_with_ground_power') {
+        // 海军单位且对地战斗力不为0（库兹涅佐夫）
+        targetCards = cards.filter(c => c.unitType === 'navy' && (c.groundPower || 0) > 0);
       } else if (target === 'all') {
         targetCards = cards;
       }
