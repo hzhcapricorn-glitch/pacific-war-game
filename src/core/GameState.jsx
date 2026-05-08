@@ -418,13 +418,24 @@ function gameStateReducer(state, action) {
         allCombatCards.forEach(cardDef => {
           const cardId = cardDef.id;
 
+          // 检查卡牌是否在当前阶段可用
+          const currentPhaseNumber = newState.currentPhase || 1;
+          const isEssentialAvailable = cardDef.appearInEssentialPhase && cardDef.appearInEssentialPhase <= currentPhaseNumber;
+          const isRandomAvailable = cardDef.appearInRandomPhase && cardDef.appearInRandomPhase <= currentPhaseNumber;
+          const isRetired = cardDef.retirePhase && cardDef.retirePhase <= currentPhaseNumber;
+
+          // 如果卡牌未到出现阶段或已退役，跳过
+          if (isRetired || (!isEssentialAvailable && !isRandomAvailable)) {
+            return;
+          }
+
           // 计算应有数量
-          const essentialCopies = cardDef.essentialShopCopies !== undefined
+          const essentialCopies = isEssentialAvailable ? (cardDef.essentialShopCopies !== undefined
             ? cardDef.essentialShopCopies
-            : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0);
-          const randomCopies = cardDef.randomShopCopies !== undefined
+            : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0)) : 0;
+          const randomCopies = isRandomAvailable ? (cardDef.randomShopCopies !== undefined
             ? cardDef.randomShopCopies
-            : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0);
+            : (cardDef.shopCopies !== undefined ? cardDef.shopCopies : 0)) : 0;
 
           // 计算当前在商店的数量
           const essentialShopCount = newEssentialShop.filter(c => c.id === cardId).length;

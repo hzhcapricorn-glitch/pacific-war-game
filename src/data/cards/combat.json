@@ -977,7 +977,7 @@
     "rarity": "SR",
     "retirePhase": null,
     "unitType": "navy",
-    "cost": 2,
+    "cost": 3,
     "redeployCost": 0,
     "groundPower": 0,
     "seaPower": 0,
@@ -999,6 +999,6 @@
     "flavor": "战场上的军工奇迹",
     "image": "/pacific-war-game/img/frontline_factory.png",
     "appearInRandomPhase": 1,
-    "randomShopCopies": 3
+    "randomShopCopies": 2
   }
 ]
