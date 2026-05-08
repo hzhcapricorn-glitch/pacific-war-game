@@ -511,7 +511,7 @@
     "randomShopCopies": 8
   },
   {
-    "id": "gato_submarine",
+    "id": "balao_submarine",
     "type": "combat",
     "name": "白杨鱼级\n潜艇",
     "cardCategory": "combat",
@@ -533,6 +533,31 @@
     "image": "/pacific-war-game/img/submarine_1.jpg",
     "appearInRandomPhase": 3,
     "randomShopCopies": 6
+  },
+  {
+    "id": "y400_carrier",
+    "type": "combat",
+    "name": "伊400\n潜水航母",
+    "cardCategory": "combat",
+    "rarity": "UR",
+    "retirePhase": null,
+    "unitType": "navy",
+    "cost": 6,
+    "redeployCost": 1,
+    "groundPower": 0,
+    "seaPower": 1,
+    "airPower": 0,
+    "airSlots": 1,
+    "abilities": [
+      {
+        "type": "protect",
+        "trigger": "during_combat_loss"
+      }
+    ],
+    "flavor": "史上唯一一艘真正的“潜水航母”",
+    "image": "/pacific-war-game/img/carrier_submarine.jpeg",
+    "appearInEssentialPhase": 4,
+    "essentialShopCopies": 0
   },
   {
     "id": "basic_cruiser",

@@ -261,7 +261,18 @@ export function processAbilities(card, trigger, context) {
   const applicableAbilities = card.abilities.filter(ability => {
     // 如果没有指定trigger，默认为on_play
     const abilityTrigger = ability.trigger || 'on_play';
-    return abilityTrigger === trigger;
+
+    // 直接匹配
+    if (abilityTrigger === trigger) {
+      return true;
+    }
+
+    // 对于multi类型能力（如submarine_boost），检查effects数组中是否有匹配的子效果
+    if (abilityTrigger === 'multi' && ability.effects) {
+      return ability.effects.some(effect => effect.trigger === trigger);
+    }
+
+    return false;
   });
 
   const results = [];
@@ -274,6 +285,27 @@ export function processAbilities(card, trigger, context) {
         // 约束不满足，跳过此能力
         continue;
       }
+    }
+
+    // 处理multi类型能力（如submarine_boost）
+    if (ability.trigger === 'multi' && ability.effects) {
+      // 只处理匹配当前trigger的子效果
+      const matchingEffects = ability.effects.filter(effect => effect.trigger === trigger);
+
+      for (const effect of matchingEffects) {
+        // 对于combat_boost类型的子效果，直接返回combat_modifier格式
+        if (effect.type === 'combat_boost') {
+          results.push({
+            type: 'combat_modifier',
+            modifier: {
+              target: effect.target,
+              stat: effect.stat,
+              value: effect.value
+            }
+          });
+        }
+      }
+      continue;
     }
 
     // 执行能力处理器

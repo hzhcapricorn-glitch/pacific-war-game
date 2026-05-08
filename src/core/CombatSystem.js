@@ -91,7 +91,39 @@ export function calculateAllFirePowers(cards, context = null) {
   // 获取所有部署区卡牌（包括未参战的，如领袖）
   const allDeployedCards = context.state?.zones?.deployed || cards;
 
-  // 处理combat_boost能力（从所有部署区卡牌中检查）
+  // === 第一步：应用战场 buff 的 multiply_combat_power 效果（如 fighter_escort） ===
+  const battlefieldConditions = context.state?.battlefieldConditions || [];
+  battlefieldConditions.forEach(condition => {
+    const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+
+    effects.forEach(effect => {
+      if (effect && effect.type === 'multiply_combat_power') {
+        const { powerType, multiplier, unitTypes } = effect;
+
+        // 筛选受影响的单位
+        let affectedCards = cards;
+        if (unitTypes && unitTypes.length > 0) {
+          affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
+        }
+
+        // 对每张卡牌计算倍增效果（仅对原本有火力的卡牌生效）
+        if (powerType === 'air') {
+          // 防空和制空能力加倍
+          affectedCards.forEach(card => {
+            const cardAirPower = getCardFirePower(card, 'air');
+            if (cardAirPower > 0) {
+              const boost = cardAirPower * (multiplier - 1);
+              basePowers.airPower += boost;
+              basePowers.airDefense += boost;
+              basePowers.airSuperiority += boost;
+            }
+          });
+        }
+      }
+    });
+  });
+
+  // === 第二步：处理领袖 combat_boost 能力（如精确截击、地毯式轰炸） ===
   const combatModifiers = allDeployedCards.flatMap(card =>
     processAbilities(card, 'during_combat', {
       state: context.state,
@@ -111,8 +143,20 @@ export function calculateAllFirePowers(cards, context = null) {
       // 根据目标类型筛选卡牌
       let targetCards = [];
       if (target === 'air_units_with_sea_power') {
-        // 空军单位且对海战斗力不为0
+        // 空军单位且对海战斗力不为0（哈尔西）
         targetCards = cards.filter(c => c.unitType === 'air' && (c.seaPower || 0) > 0);
+      } else if (target === 'army_units') {
+        // 陆军单位（麦克阿瑟）
+        targetCards = cards.filter(c => c.unitType === 'army');
+      } else if (target === 'air_units_with_air_power') {
+        // 空军单位且对空战斗力不为0（斯普鲁恩斯）
+        targetCards = cards.filter(c => c.unitType === 'air' && (c.airPower || 0) > 0);
+      } else if (target === 'air_units_with_ground_power') {
+        // 空军单位且对地战斗力不为0（李梅）
+        targetCards = cards.filter(c => c.unitType === 'air' && (c.groundPower || 0) > 0);
+      } else if (target === 'submarines') {
+        // 潜艇（邓尼茨）
+        targetCards = cards.filter(c => ['gato_submarine', 'balao_submarine'].includes(c.id));
       } else if (target === 'all') {
         targetCards = cards;
       }
@@ -151,8 +195,8 @@ export function calculateAllFirePowers(cards, context = null) {
     }
   });
 
-  // 应用战场buff的add_combat_power和reduce_combat_power效果
-  const battlefieldConditions = context.state?.battlefieldConditions || [];
+  // === 第三步：应用战场 buff 的 add_combat_power 效果 ===
+  // === 第四步：应用战场 buff 的 reduce_combat_power 效果（如 fortified_positions） ===
   battlefieldConditions.forEach(condition => {
     const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
 
@@ -196,46 +240,6 @@ export function calculateAllFirePowers(cards, context = null) {
           basePowers.airPower += modification;
           basePowers.airDefense += modification;
           basePowers.airSuperiority += modification;
-        }
-      }
-
-      // 处理 multiply_combat_power 效果（倍增）
-      if (effect && effect.type === 'multiply_combat_power') {
-        const { powerType, multiplier, unitTypes } = effect;
-
-        // 筛选受影响的单位
-        let affectedCards = cards;
-        if (unitTypes && unitTypes.length > 0) {
-          affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
-        }
-
-        // 对每张卡牌计算倍增效果（仅对原本有火力的卡牌生效）
-        if (powerType === 'air') {
-          // 防空和制空能力加倍
-          affectedCards.forEach(card => {
-            const cardAirPower = getCardFirePower(card, 'air');
-            if (cardAirPower > 0) {
-              // 加成 = 原值 * (multiplier - 1)
-              const boost = cardAirPower * (multiplier - 1);
-              basePowers.airPower += boost;
-              basePowers.airDefense += boost;
-              basePowers.airSuperiority += boost;
-            }
-          });
-        } else if (powerType === 'ground') {
-          affectedCards.forEach(card => {
-            const cardGroundPower = getCardFirePower(card, 'ground');
-            if (cardGroundPower > 0) {
-              basePowers.groundPower += cardGroundPower * (multiplier - 1);
-            }
-          });
-        } else if (powerType === 'sea') {
-          affectedCards.forEach(card => {
-            const cardSeaPower = getCardFirePower(card, 'sea');
-            if (cardSeaPower > 0) {
-              basePowers.seaPower += cardSeaPower * (multiplier - 1);
-            }
-          });
         }
       }
     });
@@ -316,7 +320,7 @@ export function applyReward(reward, gameState) {
  * @param {boolean} airDefenseSufficient - 对空火力是否满足
  * @returns {Object} { lostCardIds: Array, damageDetails: Array, abilitiesDisabled: Object }
  */
-export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = [], airSuperiorityAchieved = true) {
+export function calculateLosses(participatingCards, loss, airDefenseSufficient, battlefieldConditions = [], airSuperiorityAchieved = true, gameState = null) {
   if (!loss || !loss.randomLoss || loss.randomLoss === 0 || participatingCards.length === 0) {
     return { lostCardIds: [], damageDetails: [], abilitiesDisabled: { heavyArmor: false, lucky: false } };
   }
@@ -343,6 +347,16 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
 
   // 应用战场buff修改损失数量
   let baseLoss = applyBuffsToLossCount(loss.randomLoss, battlefieldConditions);
+
+  // 小泽治三郎的 reduce_combat_loss 能力
+  if (gameState?.leader) {
+    const reduceLossAbility = gameState.leader.abilities?.find(
+      ability => ability.type === 'reduce_combat_loss' && ability.trigger === 'during_combat_loss'
+    );
+    if (reduceLossAbility) {
+      baseLoss = Math.max(0, baseLoss - (reduceLossAbility.value || 0));
+    }
+  }
 
   // 对空火力不足时损失加倍
   let lossCount = baseLoss;
@@ -490,7 +504,8 @@ export function resolveCombat(selectedCards, mission, gameState) {
     mission.loss,
     airDefenseSufficient,
     gameState.battlefieldConditions || [],
-    airSuperiorityAchieved
+    airSuperiorityAchieved,
+    gameState
   );
 
   // 获取损失的卡牌对象（用于显示具体卡牌名称）
@@ -525,8 +540,17 @@ export function getCombatSummary(combatResult) {
     damageDetails,
     airDefenseSufficient,
     airSuperiorityAchieved,
-    abilitiesDisabled
+    abilitiesDisabled,
+    leader
   } = combatResult;
+
+  // 检查邓尼茨的潜艇保护能力
+  const submarineReturnToDiscard = leader?.abilities?.find(
+    ability => ability.type === 'submarine_boost'
+  )?.effects?.find(
+    effect => effect.type === 'submarine_return_to_discard'
+  );
+  const protectedSubmarineIds = submarineReturnToDiscard?.cardIds || [];
 
   let summary = victory ? '🎉 战斗胜利！\n\n' : '❌ 战斗失败...\n\n';
 
@@ -592,19 +616,27 @@ export function getCombatSummary(combatResult) {
           summary += `  - ${cardName} 被击中并坠毁 ✈️💥\n`;
         }
       } else {
-        // 普通单位：根据单位类型使用不同的词汇
-        let lossText = '损失';
-        if (card.unitType === 'navy') {
-          lossText = '沉没';
-        } else if (card.unitType === 'army') {
-          lossText = '阵亡';
-        }
+        // 检查是否是邓尼茨保护的潜艇
+        const isProtectedSubmarine = protectedSubmarineIds.includes(card.id);
 
-        // 如果神风威胁禁用了幸运且该单位有幸运能力，使用特殊描述
-        if (kamikazeActive && abilitiesDisabled.lucky && hasLucky && isDestroyed) {
-          summary += `  - ${cardName} 被神风特攻击沉 ☠️\n`;
+        if (isProtectedSubmarine) {
+          // 邓尼茨保护的潜艇/潜水航母
+          summary += `  - ${cardName} 重创但潜航回到基地 🔱\n`;
         } else {
-          summary += `  - ${cardName} ${lossText}\n`;
+          // 普通单位：根据单位类型使用不同的词汇
+          let lossText = '损失';
+          if (card.unitType === 'navy') {
+            lossText = '沉没';
+          } else if (card.unitType === 'army') {
+            lossText = '阵亡';
+          }
+
+          // 如果神风威胁禁用了幸运且该单位有幸运能力，使用特殊描述
+          if (kamikazeActive && abilitiesDisabled.lucky && hasLucky && isDestroyed) {
+            summary += `  - ${cardName} 被神风特攻击沉 ☠️\n`;
+          } else {
+            summary += `  - ${cardName} ${lossText}\n`;
+          }
         }
       }
     });
@@ -613,13 +645,21 @@ export function getCombatSummary(combatResult) {
     summary += `\n损失卡牌 (${lostCards.length}张):\n`;
     lostCards.forEach(card => {
       const cardName = card.name.replace(/\n/g, '');
-      let lossText = '损失';
-      if (card.unitType === 'navy') {
-        lossText = '沉没';
-      } else if (card.unitType === 'army') {
-        lossText = '阵亡';
+
+      // 检查是否是邓尼茨保护的潜艇
+      const isProtectedSubmarine = protectedSubmarineIds.includes(card.id);
+
+      if (isProtectedSubmarine) {
+        summary += `  - ${cardName} 重创但潜航回到基地 🔱\n`;
+      } else {
+        let lossText = '损失';
+        if (card.unitType === 'navy') {
+          lossText = '沉没';
+        } else if (card.unitType === 'army') {
+          lossText = '阵亡';
+        }
+        summary += `  - ${cardName} ${lossText}\n`;
       }
-      summary += `  - ${cardName} ${lossText}\n`;
     });
   }
 

@@ -491,6 +491,7 @@ function GameBoard() {
       timestamp: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
       mission: state.currentMission,
       participatingCards: selectedCards,
+      leader: state.leader, // 添加领袖信息用于判断潜艇返回基地
       ...combatResult
     };
     setCurrentReport(combatReport);

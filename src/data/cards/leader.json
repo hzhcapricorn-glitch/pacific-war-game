@@ -35,7 +35,223 @@
         }
       }
     ],
-    "flavor": "威廉·哈尔西，美国海军五星上将，以激进的战术风格著称"
+    "flavor": "威廉·哈尔西，勇猛的攻击型将领，绰号“蛮牛”"
+  },
+  {
+    "id": "leader_macarthur",
+    "type": "leader",
+    "name": "麦克阿瑟",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_army_1.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "combat_boost",
+        "trigger": "during_combat",
+        "name": "我必归来",
+        "description": "战斗阶段，陆军单位对地战斗力额外+1",
+        "effect": {
+          "target": "army_units",
+          "stat": "groundPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "道格拉斯·麦克阿瑟，驻日美军总司令，总爱撂狠话的太上皇"
+  },
+  {
+    "id": "leader_nimitz",
+    "type": "leader",
+    "name": "尼米兹",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_n2.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "increase_scout_limit",
+        "trigger": "passive",
+        "name": "运筹帷幄",
+        "description": "侦查上限+1",
+        "value": 1
+      }
+    ],
+    "flavor": "切斯特·尼米兹，美国海军五星上将，太平洋战争的实际指挥官，卓越的战略家"
+  },
+  {
+    "id": "leader_king",
+    "type": "leader",
+    "name": "恩斯特·金",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_12.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "increase_shop_slots",
+        "trigger": "passive",
+        "name": "全球调配",
+        "description": "商店刷新时+1张卡牌",
+        "value": 1
+      }
+    ],
+    "flavor": "恩斯特·金，美国海军作战部长，统筹全球海军资源"
+  },
+  {
+    "id": "leader_spruance",
+    "type": "leader",
+    "name": "斯普鲁恩斯",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_13.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "combat_boost",
+        "trigger": "during_combat",
+        "name": "精确截击",
+        "description": "战斗阶段，如果空军单位对空战斗力不为0，则其对空战斗力额外+1",
+        "effect": {
+          "target": "air_units_with_air_power",
+          "stat": "airPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "雷蒙德·斯普鲁恩斯，“沉默的提督”，计算精确的战术大师。"
+  },
+  {
+    "id": "leader_LeMay",
+    "type": "leader",
+    "name": "李梅",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/army_3.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "combat_boost",
+        "trigger": "during_combat",
+        "name": "地毯式轰炸",
+        "description": "战斗阶段，如果空军单位对地战斗力不为0，则其对地战斗力额外+1",
+        "effect": {
+          "target": "air_units_with_ground_power",
+          "stat": "groundPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "柯蒂斯·李梅，疯狂的鹰派，通过低空地毯式燃烧弹轰炸摧毁日本工业"
+  },
+  {
+    "id": "leader_yamamoto",
+    "type": "leader",
+    "name": "山本五十六",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_n4.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "supply_per_turn",
+        "trigger": "on_prepare_phase",
+        "name": "联合舰队",
+        "description": "每回合准备阶段补给+X，X为当前战略阶段数（1-4）",
+        "value": "current_phase"
+      }
+    ],
+    "flavor": "山本五十六，日本海军联合舰队司令长官，太平洋战争的实际指挥官，卓越的战略家"
   },
   {
     "id": "leader_ozawa",
@@ -62,13 +278,60 @@
         }
       },
       {
-        "type": "increase_scout_limit",
-        "trigger": "passive",
-        "name": "战术家",
-        "description": "侦查上限+1",
+        "type": "reduce_combat_loss",
+        "trigger": "during_combat_loss",
+        "name": "临危不乱",
+        "description": "任务战斗损失-1",
         "value": 1
       }
     ],
-    "flavor": "小泽治三郎，日本海军中将，航空战术专家"
+    "flavor": "小泽治三郎，日本海军中将，航空战术专家，最后一位有大局观的提督"
+  },
+  {
+    "id": "leader_dornitz",
+    "type": "leader",
+    "name": "邓尼茨",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_n3.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "submarine_boost",
+        "trigger": "multi",
+        "name": "狼群捕杀",
+        "description": "潜艇对海战斗力额外+1，获得卡牌：伊400潜水航母",
+        "effects": [
+          {
+            "trigger": "during_combat",
+            "type": "combat_boost",
+            "target": "submarines",
+            "stat": "seaPower",
+            "value": 1
+          },
+          {
+            "trigger": "on_deploy",
+            "type": "grant_card",
+            "cardId": "y400_carrier"
+          }
+        ]
+      }
+    ],
+    "flavor": "卡尔·邓尼茨，U艇之父，发明并指挥“狼群战术”，几乎绞杀英国"
   }
 ]

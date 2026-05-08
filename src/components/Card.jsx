@@ -86,7 +86,15 @@ function Card({ card, onClick, onHover, onHoverEnd, className = '', showDetailed
       }
 
       // 领袖特殊能力：使用能力的 name 字段
-      if (ability.name && (ability.type === 'combat_boost' || ability.type === 'modify_draw_count' || ability.type === 'increase_scout_limit')) {
+      if (ability.name && (
+        ability.type === 'combat_boost' ||
+        ability.type === 'modify_draw_count' ||
+        ability.type === 'increase_scout_limit' ||
+        ability.type === 'increase_shop_slots' ||
+        ability.type === 'supply_per_turn' ||
+        ability.type === 'reduce_combat_loss' ||
+        ability.type === 'submarine_boost'
+      )) {
         names.push(ability.name);
         return;
       }

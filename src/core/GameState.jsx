@@ -212,10 +212,21 @@ function gameStateReducer(state, action) {
     case ActionTypes.INIT_GAME: {
       const { starterCards, missions, essentialShopCards, randomShopDeck, randomShopSlots, leader, allCombatCards } = action.payload;
 
+      // 计算初始商店槽位数（基础槽位 + 领袖能力）
+      let actualRandomShopSlots = randomShopSlots || 6;
+      if (leader) {
+        const increaseShopAbility = leader.abilities?.find(
+          ability => ability.type === 'increase_shop_slots'
+        );
+        if (increaseShopAbility) {
+          actualRandomShopSlots += increaseShopAbility.value || 0;
+        }
+      }
+
       // 从随机商店堆中抽取初始卡牌
       const shuffledRandomDeck = shuffleDeck([...randomShopDeck]);
-      const initialRandomShop = shuffledRandomDeck.slice(0, randomShopSlots);
-      const remainingRandomDeck = shuffledRandomDeck.slice(randomShopSlots);
+      const initialRandomShop = shuffledRandomDeck.slice(0, actualRandomShopSlots);
+      const remainingRandomDeck = shuffledRandomDeck.slice(actualRandomShopSlots);
 
       // Leader card is deployed immediately and already ready (not tapped)
       const initialDeployed = leader ? [{ ...leader, status: 'ready' }] : [];
@@ -254,6 +265,55 @@ function gameStateReducer(state, action) {
 
       if (leader) {
         newState.battleLog = addLogEntry(newState, `👑 ${leader.name}加入指挥！`, 'system');
+
+        // 处理 grant_card 效果（邓尼茨的狼群捕杀能力）
+        leader.abilities?.forEach(ability => {
+          if (ability.type === 'submarine_boost' && ability.effects) {
+            ability.effects.forEach(effect => {
+              if (effect.type === 'grant_card' && effect.cardId) {
+                // 从 allCombatCards 中找到对应的卡牌定义
+                const grantedCardDef = allCombatCards?.find(c => c.id === effect.cardId);
+                if (grantedCardDef) {
+                  // 创建新卡牌实例并添加到手牌
+                  const newCard = {
+                    ...grantedCardDef,
+                    instanceId: `${grantedCardDef.id}_${Date.now()}_granted`,
+                    status: 'ready'
+                  };
+                  newState.zones.hand = [...(newState.zones.hand || []), newCard];
+                  newState.battleLog = addLogEntry(
+                    newState,
+                    `🎁 ${leader.name} - ${ability.name}：获得卡牌「${grantedCardDef.name}」`,
+                    'system'
+                  );
+                }
+              }
+            });
+          }
+        });
+
+        // 处理 supply_per_turn 效果（山本五十六的联合舰队能力）
+        const supplyAbility = leader.abilities?.find(
+          ability => ability.type === 'supply_per_turn' && ability.trigger === 'on_prepare_phase'
+        );
+        if (supplyAbility) {
+          let supplyGain = 0;
+          if (supplyAbility.value === 'current_phase') {
+            // 游戏开始时，使用初始战略阶段数（默认为1，因为START_PHASE尚未调用）
+            supplyGain = 1;
+          } else {
+            supplyGain = supplyAbility.value || 0;
+          }
+
+          if (supplyGain > 0) {
+            newState.supply = supplyGain;
+            newState.battleLog = addLogEntry(
+              newState,
+              `⚡ ${leader.name} - ${supplyAbility.name}：初始补给 +${supplyGain}`,
+              'system'
+            );
+          }
+        }
       }
       newState.battleLog = addLogEntry(newState, '🎮 游戏开始！准备迎接挑战...', 'system');
       return newState;
@@ -276,6 +336,31 @@ function gameStateReducer(state, action) {
         scoutUsed: isNewTurn ? 0 : state.scoutUsed, // 准备阶段重置侦查次数
         selectedForCombat: [] // 清除战斗选择状态
       };
+
+      // 山本五十六的 supply_per_turn 能力（准备阶段开始时触发）
+      if (isNewTurn && state.leader) {
+        const supplyAbility = state.leader.abilities?.find(
+          ability => ability.type === 'supply_per_turn' && ability.trigger === 'on_prepare_phase'
+        );
+        if (supplyAbility) {
+          let supplyGain = 0;
+          if (supplyAbility.value === 'current_phase') {
+            // 根据当前战略阶段数给予补给（1-4）
+            supplyGain = state.currentPhase || 1;
+          } else {
+            supplyGain = supplyAbility.value || 0;
+          }
+
+          if (supplyGain > 0) {
+            newState.supply = (newState.supply || 0) + supplyGain;
+            newState.battleLog = addLogEntry(
+              newState,
+              `⚡ ${state.leader.name} - ${supplyAbility.name}：补给 +${supplyGain}`,
+              'system'
+            );
+          }
+        }
+      }
 
       // Check for phase completion at start of new turn
       if (isNewTurn && state.phaseData) {
@@ -302,8 +387,19 @@ function gameStateReducer(state, action) {
 
       // 在准备阶段刷新随机商店（除了游戏开始的第一回合）
       if (isNewTurn && state.turn >= 1) {
-        // 计算实际槽位数量：基础槽位 + 部署区中expand_shop能力的总和
-        const baseSlots = state.randomShopSlots || 6;
+        // 计算实际槽位数量：基础槽位 + 部署区中expand_shop能力的总和 + 领袖increase_shop_slots能力
+        let baseSlots = state.randomShopSlots || 6;
+
+        // 检查恩斯特·金的 increase_shop_slots 能力
+        if (state.leader) {
+          const increaseShopAbility = state.leader.abilities?.find(
+            ability => ability.type === 'increase_shop_slots'
+          );
+          if (increaseShopAbility) {
+            baseSlots += increaseShopAbility.value || 0;
+          }
+        }
+
         const expandShopBonus = (state.zones.deployed || []).reduce((total, card) => {
           const expandAbility = card.abilities?.find(ab => ab.type === 'expand_shop');
           return total + (expandAbility?.value || 0);
@@ -325,9 +421,11 @@ function gameStateReducer(state, action) {
         };
 
         // 添加日志
+        const leaderBonus = (state.leader?.abilities?.find(ab => ab.type === 'increase_shop_slots')?.value || 0);
+        const totalBonus = leaderBonus + expandShopBonus;
         let logMessage = `🔄 随机商店已刷新 (${newRandomShop.length}/${actualSlots} 张卡牌)`;
-        if (expandShopBonus > 0) {
-          logMessage += ` [+${expandShopBonus}]`;
+        if (totalBonus > 0) {
+          logMessage += ` [+${totalBonus}]`;
         }
         newState.battleLog = addLogEntry(newState, logMessage, 'system');
       }
@@ -638,6 +736,13 @@ function gameStateReducer(state, action) {
       // 从 combatResult 获取制空权状态
       const airSuperiorityAchieved = combatResult?.airSuperiorityAchieved ?? false;
 
+      // 检查邓尼茨的 submarine_return_to_discard 能力
+      const submarineReturnToDiscard = state.leader?.abilities?.find(
+        ability => ability.type === 'submarine_boost'
+      )?.effects?.find(
+        effect => effect.type === 'submarine_return_to_discard'
+      );
+
       if (cardsLost.length > 0) {
         cardsLost.forEach(lostCardId => {
           const cardIndex = newDeployed.findIndex(c => c.instanceId === lostCardId);
@@ -647,8 +752,12 @@ function gameStateReducer(state, action) {
             // 检查是否有返航能力且制空权满足
             const canReturnToBase = hasReturnToBaseAbility(lostCard) && airSuperiorityAchieved;
 
-            if (canReturnToBase) {
-              // 返航成功：进入弃牌堆
+            // 检查是否是邓尼茨能力保护的潜艇/潜水航母
+            const isProtectedSubmarine = submarineReturnToDiscard &&
+              submarineReturnToDiscard.cardIds?.includes(lostCard.id);
+
+            if (canReturnToBase || isProtectedSubmarine) {
+              // 返航成功或邓尼茨保护：进入弃牌堆
               newDiscard.push(lostCard);
             } else {
               // 正常损失：根据shopType返回商店
@@ -876,7 +985,17 @@ function gameStateReducer(state, action) {
       };
 
     case ActionTypes.REFRESH_RANDOM_SHOP: {
-      const randomShopSlots = action.payload || 6;
+      let randomShopSlots = action.payload || 6;
+
+      // 检查恩斯特·金的 increase_shop_slots 能力
+      if (state.leader) {
+        const increaseShopAbility = state.leader.abilities?.find(
+          ability => ability.type === 'increase_shop_slots'
+        );
+        if (increaseShopAbility) {
+          randomShopSlots += increaseShopAbility.value || 0;
+        }
+      }
 
       // 将当前随机商店中未购买的卡牌送回随机商店堆
       const returnedCards = state.zones.randomShop || [];
