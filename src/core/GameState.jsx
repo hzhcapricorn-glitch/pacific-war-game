@@ -104,7 +104,10 @@ const ActionTypes = {
   DEBUG_ADD_BUFF: 'DEBUG_ADD_BUFF',
   DEBUG_REMOVE_BUFF: 'DEBUG_REMOVE_BUFF',
   DEBUG_SAVE_SNAPSHOT: 'DEBUG_SAVE_SNAPSHOT',
-  DEBUG_LOAD_SNAPSHOT: 'DEBUG_LOAD_SNAPSHOT'
+  DEBUG_LOAD_SNAPSHOT: 'DEBUG_LOAD_SNAPSHOT',
+  // Save/Load Actions (non-debug)
+  SAVE_GAME: 'SAVE_GAME',
+  LOAD_GAME: 'LOAD_GAME'
 };
 
 /**
@@ -1589,6 +1592,97 @@ function gameStateReducer(state, action) {
       return restoredState;
     }
 
+    case ActionTypes.SAVE_GAME: {
+      // Reducer只负责状态更新，文件下载由action creator处理
+      const leaderName = state.leader?.name || '未知领袖';
+      const turnNum = state.turn || 0;
+
+      const newState = { ...state };
+      newState.battleLog = addLogEntry(
+        newState,
+        `💾 游戏已保存 (${leaderName}, 回合 ${turnNum})`,
+        'system'
+      );
+
+      return newState;
+    }
+
+    case ActionTypes.LOAD_GAME: {
+      const { saveData } = action.payload;
+
+      // Validation
+      if (!saveData.version || !saveData.zones || !saveData.gameState) {
+        alert('存档加载失败：文件格式错误');
+        console.error('[LOAD] Invalid save format', saveData);
+        return state;
+      }
+
+      // Version check
+      if (!saveData.version.startsWith('3.0')) {
+        const proceed = window.confirm(
+          `存档版本不匹配：${saveData.version}\n` +
+          '这是旧版本存档，可能无法正常加载。是否继续？'
+        );
+        if (!proceed) {
+          return state;
+        }
+      }
+
+      // Validate required zones
+      const requiredZones = ['deck', 'hand', 'deployed', 'discard', 'essentialShop', 'randomShop', 'randomShopDeck'];
+      const missingZones = requiredZones.filter(zone => !saveData.zones[zone]);
+      if (missingZones.length > 0) {
+        alert(`存档加载失败：缺少必需区域 - ${missingZones.join(', ')}`);
+        console.error('[LOAD] Missing zones:', missingZones);
+        return state;
+      }
+
+      // Restore complete state
+      const restoredState = {
+        ...state,
+        turn: saveData.metadata.turn || 1,
+        phase: saveData.metadata.phase || 'PREPARE',
+        currentPhase: saveData.metadata.currentPhase || 1,
+        turnsRemaining: saveData.metadata.turnsRemaining,
+        zones: {
+          deck: saveData.zones.deck || [],
+          hand: saveData.zones.hand || [],
+          deployed: saveData.zones.deployed || [],
+          discard: saveData.zones.discard || [],
+          essentialShop: saveData.zones.essentialShop || [],
+          randomShop: saveData.zones.randomShop || [],
+          randomShopDeck: saveData.zones.randomShopDeck || [],
+          removed: saveData.zones.removed || []
+        },
+        supply: saveData.gameState.supply || 0,
+        maxSupplyRetention: saveData.gameState.maxSupplyRetention || 10,
+        scoutLimit: saveData.gameState.scoutLimit || 1,
+        scoutUsed: saveData.gameState.scoutUsed || 0,
+        randomShopSlots: saveData.gameState.randomShopSlots || 6,
+        leader: saveData.leader || null,
+        missions: saveData.missions || [],
+        currentMission: saveData.currentMission || null,
+        availableMissions: saveData.availableMissions || [],
+        completedMissions: saveData.completedMissions || {},
+        phaseData: saveData.phaseData || null,
+        battlefieldConditions: saveData.battlefieldConditions || [],
+        stats: saveData.stats || state.stats,
+        selectedForCombat: [],
+        retireUsedThisTurn: false,
+        usedAbilitiesThisTurn: {}
+      };
+
+      // Add log entry
+      const leaderName = saveData.metadata.leaderName || '未知';
+      restoredState.battleLog = addLogEntry(
+        restoredState,
+        `📂 游戏已加载 (${leaderName}, 回合 ${saveData.metadata.turn})`,
+        'system'
+      );
+
+      return restoredState;
+    }
+
     default:
       return state;
   }
@@ -1739,6 +1833,14 @@ export function GameStateProvider({ children }) {
 
     debugLoadSnapshot: useCallback((snapshot, reloadPhase = false) => {
       dispatch({ type: ActionTypes.DEBUG_LOAD_SNAPSHOT, payload: { snapshot, reloadPhase } });
+    }, []),
+
+    saveGame: useCallback(() => {
+      dispatch({ type: ActionTypes.SAVE_GAME });
+    }, []),
+
+    loadGame: useCallback((saveData) => {
+      dispatch({ type: ActionTypes.LOAD_GAME, payload: { saveData } });
     }, [])
   };
 

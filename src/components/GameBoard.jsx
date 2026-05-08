@@ -777,6 +777,8 @@ function GameBoard() {
                 }
               }}
               onOpenManual={() => setShowManual(true)}
+              onSaveGame={() => actions.saveGame()}
+              onLoadGame={(saveData) => actions.loadGame(saveData)}
               allCombatCards={combatCardsData}
               gameState={state}
             />

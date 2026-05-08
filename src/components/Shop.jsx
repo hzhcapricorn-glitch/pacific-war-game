@@ -26,6 +26,8 @@ function Shop({
   onDebugSaveSnapshot,
   onDebugLoadSnapshot,
   onOpenManual,
+  onSaveGame,
+  onLoadGame,
   allCombatCards,
   gameState
 }) {
@@ -39,6 +41,8 @@ function Shop({
   const fileInputRef = React.createRef();
   // 防止快照双击保存
   const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
+  // 防止游戏保存重复
+  const [isSavingGame, setIsSavingGame] = useState(false);
   // 库存信息弹窗
   const [showInventoryModal, setShowInventoryModal] = useState(false);
 
@@ -112,9 +116,58 @@ function Shop({
         <div className="shop-header-buttons">
           {onOpenManual && (
             <button onClick={onOpenManual} className="btn-manual-inline" title="游戏手册">
-              📖
+              📖 游戏手册
             </button>
           )}
+          {/* 暂时隐藏保存/读取按钮
+          {onSaveGame && (
+            <button
+              onClick={() => {
+                if (isSavingGame) return;
+                setIsSavingGame(true);
+                onSaveGame();
+                setTimeout(() => setIsSavingGame(false), 1000);
+              }}
+              className="btn-save-inline"
+              title="保存游戏"
+              disabled={isSavingGame}
+            >
+              💾 保存
+            </button>
+          )}
+          {onLoadGame && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      try {
+                        const saveData = JSON.parse(event.target.result);
+                        onLoadGame(saveData);
+                      } catch (error) {
+                        alert('存档加载失败：文件格式错误\n' + error.message);
+                      }
+                    };
+                    reader.onerror = () => {
+                      alert('存档加载失败：文件读取错误');
+                    };
+                    reader.readAsText(file);
+                  }
+                  e.target.value = '';
+                }}
+              />
+              <button onClick={() => fileInputRef.current?.click()} className="btn-load-inline" title="读取游戏">
+                📂 读取
+              </button>
+            </>
+          )}
+          */}
           {isDebugEnabled && (onDebugAddSupply || onDebugRefreshShop || onDebugDrawCard || onDebugUntapAll || onDebugToggleBuffPanel || onDebugSwitchMission) && (
             <div className="debug-controls-inline">
             {onDebugAddSupply && (

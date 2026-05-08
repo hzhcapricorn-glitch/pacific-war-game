@@ -2070,6 +2070,26 @@ button:disabled {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
+.btn-save-inline,
+.btn-load-inline {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: 2px solid #34d399;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-save-inline:hover,
+.btn-load-inline:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
 .debug-controls-inline {
   display: flex;
   gap: 6px;
