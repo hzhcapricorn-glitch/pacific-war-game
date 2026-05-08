@@ -19,7 +19,7 @@
       "randomLoss": 6
     },
     "missionConstraints": [],
-    "flavor": "太平洋战争的转折点，消耗战的地狱"
+    "flavor": "太平洋战争的转折点，在这里，如果你没得疟疾，那就是被炮弹炸飞了"
   },
   {
     "id": "mission_eastern_solomons",
@@ -85,7 +85,7 @@
         "description": "夜间视线受限，空军单位无法参与战斗"
       }
     ],
-    "flavor": "黑暗中的殊死搏斗，无数军舰葬身铁底湾"
+    "flavor": "黑暗中的殊死搏斗，无数军舰葬身铁底湾。这里的罗盘不管用，因为海底的钢铁比山还多"
   },
   {
     "id": "mission_tokyo_express",

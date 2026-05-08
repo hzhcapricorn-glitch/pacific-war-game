@@ -358,7 +358,13 @@ export function calculateLosses(participatingCards, loss, airDefenseSufficient, 
       ability => ability.type === 'reduce_combat_loss' && ability.trigger === 'during_combat_loss'
     );
     if (reduceLossAbility) {
-      baseLoss = Math.max(0, baseLoss - (reduceLossAbility.value || 0));
+      let lossReduction = 0;
+      if (reduceLossAbility.value === 'current_phase') {
+        lossReduction = gameState.currentPhase || 1;
+      } else {
+        lossReduction = reduceLossAbility.value || 0;
+      }
+      baseLoss = Math.max(0, baseLoss - lossReduction);
     }
   }
 

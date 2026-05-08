@@ -46,7 +46,7 @@
         "trigger": "after_play"
       }
     ],
-    "flavor": "分段建造的奇迹，大洋丑小鸭",
+    "flavor": "分段建造的奇迹，大洋丑小鸭，它们造得比日军击沉得还快",
     "image": "/pacific-war-game/img/medium_supply.png",
     "appearInEssentialPhase": 1,
     "essentialShopCopies": 7
@@ -139,7 +139,7 @@
         "trigger": "after_play"
       }
     ],
-    "flavor": "老兵不死，只是逐渐凋零",
+    "flavor": "老兵永远不死，他们只是回厂重造了",
     "image": "/pacific-war-game/img/retirement_office.png",
     "appearInRandomPhase": 1,
     "randomShopCopies": 6
@@ -231,7 +231,7 @@
         "trigger": "on_tap"
       }
     ],
-    "flavor": "猎火鸡啦，猎火鸡啦",
+    "flavor": "猎火鸡大赛第一名，日军飞行员眼中的“蓝色大板砖”，撞上就碎",
     "image": "/pacific-war-game/img/f6f_hellcat.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInRandomPhase": 3,
@@ -261,7 +261,7 @@
         "trigger": "on_tap"
       }
     ],
-    "flavor": "日本航母的噩梦，六边形战士",
+    "flavor": "日本航母的噩梦，哪怕只剩一个机翼，它也要把炸弹投进日军烟囱",
     "image": "/pacific-war-game/img/sbd_dauntless.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInRandomPhase": 1,
@@ -291,7 +291,7 @@
         "trigger": "on_tap"
       }
     ],
-    "flavor": "四引擎轰炸机，太平洋的恶魔",
+    "flavor": "四引擎轰炸机，太平洋的恶魔，连飞行员都怕它的地狱俯冲者",
     "image": "/pacific-war-game/img/sb2c_helldiver.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInRandomPhase": 3,
@@ -316,7 +316,7 @@
         "trigger": "on_combat_loss"
       }
     ],
-    "flavor": "飞行的棺材",
+    "flavor": "飞行的棺材，它的名字是指破坏它自己",
     "image": "/pacific-war-game/img/basic_navy_airforce.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInEssentialPhase": 1,
@@ -341,7 +341,7 @@
         "trigger": "on_combat_loss"
       }
     ],
-    "flavor": "日本航母的噩梦",
+    "flavor": "在中途岛受的气，今天全还给你们",
     "image": "/pacific-war-game/img/tbm_avenger.png",
     "backgroundImage": "/pacific-war-game/img/background_air.jpg",
     "appearInRandomPhase": 2,
@@ -393,7 +393,7 @@
         "trigger": "on_combat_loss"
       }
     ],
-    "flavor": "点燃地狱的火种",
+    "flavor": "从三万英尺高空降下的工业神罚，点燃地狱的火种",
     "image": "/pacific-war-game/img/b-29.jpg",
     "appearInRandomPhase": 4,
     "randomShopCopies": 0
@@ -435,7 +435,7 @@
     "seaPower": 2,
     "airPower": 0,
     "abilities": [],
-    "flavor": "二战美军最成功的驱逐舰，太平洋劳模",
+    "flavor": "二战美军最成功的驱逐舰，太平洋劳模。哪里需要打杂，哪里就有弗莱彻",
     "image": "/pacific-war-game/img/advanced_destroyer.png",
     "backgroundImage": "/pacific-war-game/img/Background_sea.jpeg"
   },
@@ -480,7 +480,7 @@
         "trigger": "on_tap"
       }
     ],
-    "flavor": "太平洋战场的静默猎手",
+    "flavor": "太平洋战场的静默猎手，日军运输船队的“静默死神”。包邮，但不保命",
     "image": "/pacific-war-game/img/gato_submarine.jpeg",
     "appearInRandomPhase": 1,
     "randomShopCopies": 8
@@ -548,7 +548,7 @@
     "seaPower": 1,
     "airPower": 1,
     "abilities": [],
-    "flavor": "装满127mm高平两用炮的“刺猬”",
+    "flavor": "装满127mm高平两用炮的“刺猬”。如果你在它对面，请祈祷你不是一架飞机",
     "image": "/pacific-war-game/img/basic_cruiser.jpg",
     "appearInRandomPhase": 1,
     "randomShopCopies": 10
@@ -712,7 +712,7 @@
     "airPower": 1,
     "airSlots": 1,
     "abilities": [],
-    "flavor": "巡洋舰舰体紧急改装而成的“备胎”",
+    "flavor": "虽然是巡洋舰改的，但它的舰载机可不是闹着玩的",
     "image": "/pacific-war-game/img/basic_carrier.jpg",
     "appearInEssentialPhase": 1,
     "essentialShopCopies": 10
@@ -738,7 +738,7 @@
         "trigger": "during_combat_loss"
       }
     ],
-    "flavor": "战争后期的“饺子级”航母",
+    "flavor": "战争后期的“饺子级”航母，每个礼拜下水一艘，这就是美国的工业民主",
     "image": "/pacific-war-game/img/advanced_carrier.jpg",
     "appearInEssentialPhase": 4,
     "essentialShopCopies": 6,
@@ -813,7 +813,7 @@
         "trigger": "during_combat_loss"
       }
     ],
-    "flavor": "仅存在与图纸上的存在",
+    "flavor": "仅存在与图纸上的存在，苏联人的脑洞，美国人的噩梦，造船厂的笑话",
     "appearInRandomPhase": 4,
     "randomShopCopies": 1
   },
@@ -850,7 +850,7 @@
     "seaPower": 0,
     "airPower": 0,
     "abilities": [],
-    "flavor": "硫磺岛、瓜岛，他们战无不胜",
+    "flavor": "如果地狱有守卫，那一定是陆战1师",
     "image": "/pacific-war-game/img/marines.jpeg",
     "appearInRandomPhase": 3,
     "randomShopCopies": 6

@@ -34,82 +34,6 @@
     "flavor": "坐在轮椅上重塑世界的巨人，‘炉边谈话’凝聚民心，‘民主兵工厂’彻底淹没法西斯"
   },
   {
-    "id": "leader_halsey",
-    "type": "leader",
-    "name": "哈尔西",
-    "rarity": "UR",
-    "unitType": "navy",
-    "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_1.jpeg",
-    "groundPower": 0,
-    "seaPower": 0,
-    "airPower": 0,
-    "cost": 0,
-    "redeployCost": 0,
-    "airSlots": 0,
-    "abilities": [
-      {
-        "type": "cannot_participate_in_combat",
-        "trigger": "always",
-        "name": "领袖",
-        "description": "领袖不能参加战斗",
-        "ui": {
-          "blockMessage": "领袖不能参加战斗！"
-        }
-      },
-      {
-        "type": "combat_boost",
-        "trigger": "during_combat",
-        "name": "蛮牛",
-        "description": "战斗阶段，如果空军单位对海战斗力不为0，则其对海战斗力额外+1",
-        "effect": {
-          "target": "air_units_with_sea_power",
-          "stat": "seaPower",
-          "value": 1
-        }
-      }
-    ],
-    "flavor": "威廉·哈尔西，绰号“蛮牛”。如果能在地狱里杀日本鬼子，他绝不去天堂"
-  },
-  {
-    "id": "leader_macarthur",
-    "type": "leader",
-    "name": "麦克阿瑟",
-    "rarity": "UR",
-    "unitType": "navy",
-    "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_army_1.jpg",
-    "groundPower": 0,
-    "seaPower": 0,
-    "airPower": 0,
-    "cost": 0,
-    "redeployCost": 0,
-    "airSlots": 0,
-    "abilities": [
-      {
-        "type": "cannot_participate_in_combat",
-        "trigger": "always",
-        "name": "领袖",
-        "description": "领袖不能参加战斗",
-        "ui": {
-          "blockMessage": "领袖不能参加战斗！"
-        }
-      },
-      {
-        "type": "combat_boost",
-        "trigger": "during_combat",
-        "name": "我必归来",
-        "description": "战斗阶段，陆军单位对地战斗力额外+1",
-        "effect": {
-          "target": "army_units",
-          "stat": "groundPower",
-          "value": 1
-        }
-      }
-    ],
-    "flavor": "道格拉斯·麦克阿瑟，他确实回来了，带着墨镜、烟斗和一整支舰队"
-  },
-  {
     "id": "leader_nimitz",
     "type": "leader",
     "name": "尼米兹",
@@ -178,10 +102,86 @@
     "flavor": "美国海军作战部长，统筹全球海军资源，一个连镜子里的自己都要骂两句的狠角色"
   },
   {
+    "id": "leader_halsey",
+    "type": "leader",
+    "name": "哈尔西",
+    "rarity": "SR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_1.jpeg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "combat_boost",
+        "trigger": "during_combat",
+        "name": "蛮牛",
+        "description": "战斗阶段，如果空军单位对海战斗力不为0，则其对海战斗力额外+1",
+        "effect": {
+          "target": "air_units_with_sea_power",
+          "stat": "seaPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "威廉·哈尔西，绰号“蛮牛”。如果能在地狱里杀日本鬼子，他绝不去天堂"
+  },
+  {
+    "id": "leader_macarthur",
+    "type": "leader",
+    "name": "麦克阿瑟",
+    "rarity": "SR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_army_1.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "combat_boost",
+        "trigger": "during_combat",
+        "name": "我必归来",
+        "description": "战斗阶段，陆军单位对地战斗力额外+1",
+        "effect": {
+          "target": "army_units",
+          "stat": "groundPower",
+          "value": 1
+        }
+      }
+    ],
+    "flavor": "道格拉斯·麦克阿瑟，他确实回来了，带着墨镜、烟斗和一整支舰队"
+  },
+  {
     "id": "leader_spruance",
     "type": "leader",
     "name": "斯普鲁恩斯",
-    "rarity": "UR",
+    "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
     "image": "/pacific-war-game/img/leader_13.jpg",
@@ -219,7 +219,7 @@
     "id": "leader_fletcher",
     "type": "leader",
     "name": "弗莱彻",
-    "rarity": "UR",
+    "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
     "image": "/pacific-war-game/img/leader_10.jpg",
@@ -256,7 +256,7 @@
     "id": "leader_LeMay",
     "type": "leader",
     "name": "李梅",
-    "rarity": "UR",
+    "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
     "image": "/pacific-war-game/img/army_3.jpg",
@@ -325,10 +325,44 @@
     "flavor": "日本海军联合舰队司令长官，日本海军最清醒的赌徒，但他还是输掉了最后一局"
   },
   {
-    "id": "leader_nakaokahiroshi",
+    "id": "leader_ozawa",
     "type": "leader",
-    "name": "近藤信武",
+    "name": "小泽治三郎",
     "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_6.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "reduce_combat_loss",
+        "trigger": "during_combat_loss",
+        "name": "临危不乱",
+        "description": "任务战斗损失-X，X为当前战略阶段数（1-4）",
+        "value": "current_phase"
+      }
+    ],
+    "flavor": "日本海军中将，航空战术专家，最后一位有大局观的提督"
+  },
+  {
+    "id": "leader_nishimura",
+    "type": "leader",
+    "name": "西村祥治",
+    "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
     "image": "/pacific-war-game/img/mission_takao_2.jpg",
@@ -363,47 +397,13 @@
         }
       }
     ],
-    "flavor": "第二舰队司令，多次指挥夜战与战列舰对决"
-  },
-  {
-    "id": "leader_ozawa",
-    "type": "leader",
-    "name": "小泽治三郎",
-    "rarity": "UR",
-    "unitType": "navy",
-    "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_6.jpg",
-    "groundPower": 0,
-    "seaPower": 0,
-    "airPower": 0,
-    "cost": 0,
-    "redeployCost": 0,
-    "airSlots": 0,
-    "abilities": [
-      {
-        "type": "cannot_participate_in_combat",
-        "trigger": "always",
-        "name": "领袖",
-        "description": "领袖不能参加战斗",
-        "ui": {
-          "blockMessage": "领袖不能参加战斗！"
-        }
-      },
-      {
-        "type": "reduce_combat_loss",
-        "trigger": "during_combat_loss",
-        "name": "临危不乱",
-        "description": "任务战斗损失-1",
-        "value": 1
-      }
-    ],
-    "flavor": "日本海军中将，航空战术专家，最后一位有大局观的提督"
+    "flavor": "西村舰队司令，大炮巨舰时代最凄美的落幕者"
   },
   {
     "id": "leader_dornitz",
     "type": "leader",
     "name": "邓尼茨",
-    "rarity": "UR",
+    "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
     "image": "/pacific-war-game/img/leader_n3.jpg",

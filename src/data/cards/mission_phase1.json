@@ -28,7 +28,7 @@
       "description": "该任务为纯海战，陆军单位无法参战"
     }
   ],
-    "flavor": "决定太平洋战争走向的关键一战"
+    "flavor": "决定太平洋战争走向的关键一战，命运女神在那个上午只微笑了五分钟"
   },
   {
     "id": "mission_coral_sea",
@@ -116,7 +116,16 @@
       "description": "随机损失参战卡牌",
       "randomLoss": 3
     },
-    "missionConstraints": [],
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army"],
+        "shortName": "仅海战",
+        "name": "纯海战环境",
+        "message": "纯海战环境，不允许陆军参战",
+        "description": "该任务为纯海战，陆军单位无法参战"
+      }
+    ],
     "flavor": "即便是佯攻，也要寸土必争！"
   }
 ]
