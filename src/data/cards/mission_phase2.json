@@ -16,7 +16,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 4
+      "randomLoss": 6
     },
     "missionConstraints": [],
     "flavor": "太平洋战争的转折点，消耗战的地狱"
@@ -106,7 +106,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 2
+      "randomLoss": 3
     },
     "missionConstraints": [
       {

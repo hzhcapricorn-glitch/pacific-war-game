@@ -94,7 +94,7 @@ function Manual({ isOpen, onClose }) {
 
         <div className="manual-footer">
           <span>版本 {manualData.version}</span>
-          <span>使用 ← → 或点击左侧导航切换章节</span>
+          <span>点击左侧导航切换章节</span>
         </div>
       </div>
     </div>

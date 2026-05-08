@@ -935,7 +935,7 @@
     "flavor": "战士们前线的家园",
     "image": "/pacific-war-game/img/factory.jpg",
     "appearInRandomPhase": 1,
-    "randomShopCopies": 6
+    "randomShopCopies": 5
   },
   {
     "id": "forward_base_lion",
@@ -967,7 +967,7 @@
     "flavor": "舰队的生命线",
     "image": "/pacific-war-game/img/forward_base.jpg",
     "appearInRandomPhase": 3,
-    "randomShopCopies": 4
+    "randomShopCopies": 2
   },
   {
     "id": "frontline_factory",
@@ -977,7 +977,7 @@
     "rarity": "SR",
     "retirePhase": null,
     "unitType": "navy",
-    "cost": 3,
+    "cost": 2,
     "redeployCost": 0,
     "groundPower": 0,
     "seaPower": 0,

@@ -157,6 +157,10 @@ export function calculateAllFirePowers(cards, context = null) {
       } else if (target === 'submarines') {
         // 潜艇（邓尼茨）
         targetCards = cards.filter(c => ['gato_submarine', 'balao_submarine'].includes(c.id));
+      } else if (target === 'navy_units_with_high_sea_power') {
+        // 海军单位且对海战斗力≥3（近藤信武）
+        const minSeaPower = modifier.condition?.minSeaPower || 3;
+        targetCards = cards.filter(c => c.unitType === 'navy' && (c.seaPower || 0) >= minSeaPower);
       } else if (target === 'all') {
         targetCards = cards;
       }
@@ -552,6 +556,13 @@ export function getCombatSummary(combatResult) {
   );
   const protectedSubmarineIds = submarineReturnToDiscard?.cardIds || [];
 
+  // 检查弗莱彻的航母保护能力
+  const hasCarrierProtection = leader?.abilities?.some(
+    ability => ability.type === 'reduce_combat_loss' &&
+               ability.effect?.target === 'carriers' &&
+               ability.effect?.lossReduction === 'return_to_discard'
+  );
+
   let summary = victory ? '🎉 战斗胜利！\n\n' : '❌ 战斗失败...\n\n';
 
   summary += '己方火力:\n';
@@ -619,9 +630,17 @@ export function getCombatSummary(combatResult) {
         // 检查是否是邓尼茨保护的潜艇
         const isProtectedSubmarine = protectedSubmarineIds.includes(card.id);
 
+        // 检查是否是弗莱彻保护的航空母舰
+        const isProtectedCarrier = hasCarrierProtection &&
+          card.unitType === 'navy' &&
+          (card.airSlots || 0) > 0;
+
         if (isProtectedSubmarine) {
           // 邓尼茨保护的潜艇/潜水航母
           summary += `  - ${cardName} 重创但潜航回到基地 🔱\n`;
+        } else if (isProtectedCarrier) {
+          // 弗莱彻保护的航空母舰
+          summary += `  - ${cardName} 重创但抢修后返回基地 🛠️\n`;
         } else {
           // 普通单位：根据单位类型使用不同的词汇
           let lossText = '损失';
@@ -649,8 +668,15 @@ export function getCombatSummary(combatResult) {
       // 检查是否是邓尼茨保护的潜艇
       const isProtectedSubmarine = protectedSubmarineIds.includes(card.id);
 
+      // 检查是否是弗莱彻保护的航空母舰
+      const isProtectedCarrier = hasCarrierProtection &&
+        card.unitType === 'navy' &&
+        (card.airSlots || 0) > 0;
+
       if (isProtectedSubmarine) {
         summary += `  - ${cardName} 重创但潜航回到基地 🔱\n`;
+      } else if (isProtectedCarrier) {
+        summary += `  - ${cardName} 重创但抢修后返回基地 🛠️\n`;
       } else {
         let lossText = '损失';
         if (card.unitType === 'navy') {

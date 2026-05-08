@@ -18,7 +18,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 10
+      "randomLoss": 16
     },
     "missionConstraints": [],
     "flavor": "战争的终结，和平的开始"
@@ -43,7 +43,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 10
+      "randomLoss": 12
     },
     "missionConstraints": [],
     "flavor": "神风特攻队的疯狂反扑，太平洋战争中最血腥的战役"
@@ -67,7 +67,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 10
+      "randomLoss": 12
     },
     "missionConstraints": [],
     "flavor": "太平洋的绞肉机，星条旗插上折钵山"

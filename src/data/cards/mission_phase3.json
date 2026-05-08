@@ -41,7 +41,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 6
+      "randomLoss": 8
     },
     "missionConstraints": [],
     "flavor": "进攻日本本土的跳板"
@@ -99,7 +99,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 6
+      "randomLoss": 8
     },
     "missionConstraints": [
       {

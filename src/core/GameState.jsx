@@ -292,7 +292,7 @@ function gameStateReducer(state, action) {
           }
         });
 
-        // 处理 supply_per_turn 效果（山本五十六的联合舰队能力）
+        // 处理 supply_per_turn 效果（山本五十六/罗斯福的能力）
         const supplyAbility = leader.abilities?.find(
           ability => ability.type === 'supply_per_turn' && ability.trigger === 'on_prepare_phase'
         );
@@ -337,7 +337,7 @@ function gameStateReducer(state, action) {
         selectedForCombat: [] // 清除战斗选择状态
       };
 
-      // 山本五十六的 supply_per_turn 能力（准备阶段开始时触发）
+      // supply_per_turn 能力（准备阶段开始时触发）
       if (isNewTurn && state.leader) {
         const supplyAbility = state.leader.abilities?.find(
           ability => ability.type === 'supply_per_turn' && ability.trigger === 'on_prepare_phase'
@@ -810,6 +810,13 @@ function gameStateReducer(state, action) {
         effect => effect.type === 'submarine_return_to_discard'
       );
 
+      // 检查弗莱彻的 reduce_combat_loss 能力（航母损管）
+      const carrierProtectionAbility = state.leader?.abilities?.find(
+        ability => ability.type === 'reduce_combat_loss' &&
+                   ability.effect?.target === 'carriers' &&
+                   ability.effect?.lossReduction === 'return_to_discard'
+      );
+
       if (cardsLost.length > 0) {
         cardsLost.forEach(lostCardId => {
           const cardIndex = newDeployed.findIndex(c => c.instanceId === lostCardId);
@@ -823,8 +830,13 @@ function gameStateReducer(state, action) {
             const isProtectedSubmarine = submarineReturnToDiscard &&
               submarineReturnToDiscard.cardIds?.includes(lostCard.id);
 
-            if (canReturnToBase || isProtectedSubmarine) {
-              // 返航成功或邓尼茨保护：进入弃牌堆
+            // 检查是否是弗莱彻能力保护的航空母舰
+            const isProtectedCarrier = carrierProtectionAbility &&
+              lostCard.unitType === 'navy' &&
+              (lostCard.airSlots || 0) > 0;
+
+            if (canReturnToBase || isProtectedSubmarine || isProtectedCarrier) {
+              // 返航成功或领袖保护：进入弃牌堆
               newDiscard.push(lostCard);
             } else {
               // 正常损失：根据shopType返回商店
