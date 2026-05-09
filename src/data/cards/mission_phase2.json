@@ -31,7 +31,7 @@
     "image": "/pacific-war-game/img/mission_sho_1.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 10,
-    "requiredAirDefense": 8,
+    "requiredAirDefense": 16,
     "requiredAirSuperiority": 8,
     "reward": {
       "description": "回合+3，获得战场优势：黑云压城",
@@ -43,7 +43,16 @@
       "description": "随机损失2张参战卡牌",
       "randomLoss": 6
     },
-    "missionConstraints": [],
+    "missionConstraints": [
+      {
+        "type": "restrict_unit_type",
+        "unitTypes": ["army"],
+        "shortName": "仅海战",
+        "name": "纯海战环境",
+        "message": "纯海战环境，不允许陆军参战",
+        "description": "该任务为纯海战，陆军单位无法参战"
+      }
+    ],
     "flavor": "调离日军机动舰队，削弱其护航能力"
   },
   {
@@ -93,7 +102,7 @@
     "type": "mission",
     "missionType": "side",
     "phase": 2,
-    "difficulty": "easy",
+    "difficulty": "normal",
     "image": "/pacific-war-game/img/Mission_easy.jpeg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 8,
@@ -106,7 +115,7 @@
     },
     "loss": {
       "description": "随机损失参战卡牌",
-      "randomLoss": 3
+      "randomLoss": 4
     },
     "missionConstraints": [
       {

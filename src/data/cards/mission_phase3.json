@@ -56,7 +56,7 @@
     "image": "/pacific-war-game/img/mission_6.jpg",
     "requiredGroundPower": 0,
     "requiredSeaPower": 9,
-    "requiredAirDefense": 16,
+    "requiredAirDefense": 20,
     "requiredAirSuperiority": 12,
     "reward": {
       "description": "回合+3，获得战场优势：绝对制空",

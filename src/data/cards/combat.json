@@ -352,12 +352,12 @@
     "type": "combat",
     "name": "B-25轰炸机",
     "cardCategory": "combat",
-    "rarity": "SR",
+    "rarity": "R",
     "retirePhase": null,
     "unitType": "air",
     "cost": 3,
     "redeployCost": 1,
-    "groundPower": 5,
+    "groundPower": 4,
     "seaPower": 0,
     "airPower": 0,
     "abilities": [
@@ -379,12 +379,12 @@
     "type": "combat",
     "name": "B-29轰炸机\n“超级堡垒”",
     "cardCategory": "combat",
-    "rarity": "UR",
+    "rarity": "SR",
     "retirePhase": null,
     "unitType": "air",
-    "cost": 5,
+    "cost": 6,
     "redeployCost": 2,
-    "groundPower": 10,
+    "groundPower": 8,
     "seaPower": 0,
     "airPower": 0,
     "abilities": [
@@ -396,7 +396,7 @@
     "flavor": "从三万英尺高空降下的工业神罚，点燃地狱的火种",
     "image": "/pacific-war-game/img/b-29.jpg",
     "appearInRandomPhase": 4,
-    "randomShopCopies": 0
+    "randomShopCopies": 4
   },
   {
     "id": "basic_destroyer",

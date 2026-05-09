@@ -6,7 +6,7 @@
     "rarity": "UR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_n5.jpg",
+    "image": "/pacific-war-game/img/leader_random2.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -39,7 +39,7 @@
     "rarity": "UR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_n6.jpg",
+    "image": "/pacific-war-game/img/leader_n11.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -73,7 +73,7 @@
     "rarity": "UR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_n2.jpg",
+    "image": "/pacific-war-game/img/leader_n10.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -107,7 +107,7 @@
     "rarity": "UR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_12.jpg",
+    "image": "/pacific-war-game/img/leader_n14.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -133,6 +133,39 @@
       }
     ],
     "flavor": "美国海军作战部长，统筹全球海军资源，一个连镜子里的自己都要骂两句的狠角色"
+  },
+  {
+    "id": "leader_spruance",
+    "type": "leader",
+    "name": "斯普鲁恩斯",
+    "rarity": "UR",
+    "unitType": "navy",
+    "cardCategory": "unit",
+    "image": "/pacific-war-game/img/leader_n8.jpg",
+    "groundPower": 0,
+    "seaPower": 0,
+    "airPower": 0,
+    "cost": 0,
+    "redeployCost": 0,
+    "airSlots": 0,
+    "abilities": [
+      {
+        "type": "cannot_participate_in_combat",
+        "trigger": "always",
+        "name": "领袖",
+        "description": "领袖不能参加战斗",
+        "ui": {
+          "blockMessage": "领袖不能参加战斗！"
+        }
+      },
+      {
+        "type": "keep_damaged_heavy_armor",
+        "trigger": "after_combat",
+        "name": "移动船坞",
+        "description": "拥有重甲的单位受到重创而非损失时，停留在部署区而非返回弃牌堆"
+      }
+    ],
+    "flavor": "雷蒙德·斯普鲁恩斯，“沉默的提督”，计算精确的战术大师，创立前线服务中队。"
   },
   {
     "id": "leader_halsey",
@@ -179,7 +212,7 @@
     "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_army_1.jpg",
+    "image": "/pacific-war-game/img/leader_n12.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -211,46 +244,13 @@
     "flavor": "道格拉斯·麦克阿瑟，他确实回来了，带着墨镜、烟斗和一整支舰队"
   },
   {
-    "id": "leader_spruance",
-    "type": "leader",
-    "name": "斯普鲁恩斯",
-    "rarity": "SR",
-    "unitType": "navy",
-    "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_13.jpg",
-    "groundPower": 0,
-    "seaPower": 0,
-    "airPower": 0,
-    "cost": 0,
-    "redeployCost": 0,
-    "airSlots": 0,
-    "abilities": [
-      {
-        "type": "cannot_participate_in_combat",
-        "trigger": "always",
-        "name": "领袖",
-        "description": "领袖不能参加战斗",
-        "ui": {
-          "blockMessage": "领袖不能参加战斗！"
-        }
-      },
-      {
-        "type": "keep_damaged_heavy_armor",
-        "trigger": "after_combat",
-        "name": "移动船坞",
-        "description": "拥有重甲的单位受到重创而非沉没时，停留在部署区而非返回弃牌堆"
-      }
-    ],
-    "flavor": "雷蒙德·斯普鲁恩斯，“沉默的提督”，计算精确的战术大师，创立前线服务中队。"
-  },
-  {
     "id": "leader_mitscher",
     "type": "leader",
     "name": "米切尔",
     "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/carrier_2.jpg",
+    "image": "/pacific-war-game/img/leader_n15.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -325,7 +325,7 @@
     "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/army_3.jpg",
+    "image": "/pacific-war-game/img/leader_n7.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -363,7 +363,7 @@
     "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/ship_6.jpg",
+    "image": "/pacific-war-game/img/leader_n17.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -401,7 +401,7 @@
     "rarity": "UR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_n4.jpg",
+    "image": "/pacific-war-game/img/leader_n18.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -435,7 +435,7 @@
     "rarity": "UR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/leader_6.jpg",
+    "image": "/pacific-war-game/img/leader_n9.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,
@@ -469,7 +469,7 @@
     "rarity": "SR",
     "unitType": "navy",
     "cardCategory": "unit",
-    "image": "/pacific-war-game/img/mission_takao_2.jpg",
+    "image": "/pacific-war-game/img/leader_n13.jpg",
     "groundPower": 0,
     "seaPower": 0,
     "airPower": 0,

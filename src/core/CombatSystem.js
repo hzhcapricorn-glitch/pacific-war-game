@@ -59,40 +59,12 @@ export function calculateAllFirePowers(cards, context = null) {
     return basePowers;
   }
 
-  // 应用任务约束的火力调整
+  // 获取任务和战场条件
   const mission = context.mission || context.state?.currentMission;
-  if (mission && mission.missionConstraints) {
-    const powerModifiers = mission.missionConstraints.filter(c => c.type === 'modify_unit_power');
-
-    powerModifiers.forEach(constraint => {
-      const { unitTypes, powerType, multiplier } = constraint;
-
-      // 筛选出受影响的单位
-      const affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
-
-      // 计算调整量（原值 * (multiplier - 1)，因为基础火力已经计算过了）
-      affectedCards.forEach(card => {
-        const originalPower = getCardFirePower(card, powerType);
-        const adjustment = originalPower * (multiplier - 1);
-
-        if (powerType === 'ground') {
-          basePowers.groundPower += adjustment;
-        } else if (powerType === 'sea') {
-          basePowers.seaPower += adjustment;
-        } else if (powerType === 'air') {
-          basePowers.airPower += adjustment;
-          basePowers.airDefense += adjustment;
-          basePowers.airSuperiority += adjustment;
-        }
-      });
-    });
-  }
-
-  // 获取所有部署区卡牌（包括未参战的，如领袖）
+  const battlefieldConditions = context.state?.battlefieldConditions || [];
   const allDeployedCards = context.state?.zones?.deployed || cards;
 
   // === 第一步：应用战场 buff 的 multiply_combat_power 效果（如 fighter_escort） ===
-  const battlefieldConditions = context.state?.battlefieldConditions || [];
   battlefieldConditions.forEach(condition => {
     const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
 
@@ -202,8 +174,7 @@ export function calculateAllFirePowers(cards, context = null) {
     }
   });
 
-  // === 第三步：应用战场 buff 的 add_combat_power 效果 ===
-  // === 第四步：应用战场 buff 的 reduce_combat_power 效果（如 fortified_positions） ===
+  // === 第三步：应用战场 buff 的 add_combat_power 和 reduce_combat_power 效果（如 fortified_positions） ===
   battlefieldConditions.forEach(condition => {
     const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
 
@@ -227,7 +198,6 @@ export function calculateAllFirePowers(cards, context = null) {
           } else if (powerType === 'air') {
             affectedCards = affectedCards.filter(card => (card.airPower || 0) > 0);
           }
-          // 'all' 类型不做额外过滤，因为很难定义"有火力"
         }
 
         // 计算加成或减益（每张受影响的卡牌获得value加成/减益）
@@ -251,6 +221,126 @@ export function calculateAllFirePowers(cards, context = null) {
       }
     });
   });
+
+  // === 第四步：最后应用任务限制的 multiplier/modifier（确保归零效果的最高优先级） ===
+  // 关键：multiplier需要重新计算受影响单位的总火力贡献
+  if (mission && mission.missionConstraints) {
+    const powerModifiers = mission.missionConstraints.filter(c => c.type === 'modify_unit_power');
+
+    powerModifiers.forEach(constraint => {
+      const { unitTypes, powerType, multiplier, modifier } = constraint;
+
+      // 筛选出受影响的单位
+      const affectedCards = cards.filter(card => unitTypes.includes(card.unitType));
+
+      if (multiplier !== undefined) {
+        // multiplier（乘法）：作用于卡牌的总贡献（基础+所有buff）
+        // 例如：multiplier=0 表示归零整张卡的所有贡献
+
+        // 第1步：计算这些卡牌在应用所有buff后的当前总火力
+        let affectedCardsCurrentTotal = 0;
+        affectedCards.forEach(card => {
+          const originalPower = getCardFirePower(card, powerType);
+          // 每张卡的基础贡献
+          let cardContribution = originalPower;
+
+          // 加上领袖能力对这张卡的加成
+          combatModifiers.forEach(modifierResult => {
+            const mod = modifierResult.modifier;
+            if (mod.target && mod.stat) {
+              const { target, stat, value } = mod;
+
+              // 检查这张卡是否是目标之一
+              let isTarget = false;
+              if (target === 'navy_units_with_high_sea_power' && powerType === 'sea') {
+                const minSeaPower = mod.condition?.minSeaPower || 3;
+                isTarget = card.unitType === 'navy' && (card.seaPower || 0) >= minSeaPower;
+              } else if (target === 'air_units_with_ground_power' && powerType === 'ground') {
+                isTarget = card.unitType === 'air' && (card.groundPower || 0) > 0;
+              } else if (target === 'navy_units_with_ground_power' && powerType === 'ground') {
+                isTarget = card.unitType === 'navy' && (card.groundPower || 0) > 0;
+              } else if (target === 'air_units_with_sea_power' && powerType === 'sea') {
+                isTarget = card.unitType === 'air' && (card.seaPower || 0) > 0;
+              } else if (target === 'army_units' && powerType === 'ground') {
+                isTarget = card.unitType === 'army';
+              } else if (target === 'air_units_with_air_power' && powerType === 'air') {
+                isTarget = card.unitType === 'air' && (card.airPower || 0) > 0;
+              } else if (target === 'submarines' && powerType === 'sea') {
+                isTarget = ['gato_submarine', 'balao_submarine'].includes(card.id);
+              }
+
+              if (isTarget &&
+                  ((stat === 'groundPower' && powerType === 'ground') ||
+                   (stat === 'seaPower' && powerType === 'sea') ||
+                   (stat === 'airPower' && powerType === 'air'))) {
+                cardContribution += value;
+              }
+            }
+          });
+
+          // 加上 reduce_combat_power 的影响（坚固工事等）
+          battlefieldConditions.forEach(condition => {
+            const effects = Array.isArray(condition.effect) ? condition.effect : [condition.effect].filter(Boolean);
+            effects.forEach(effect => {
+              if (effect && effect.type === 'reduce_combat_power') {
+                const { powerType: effectPowerType, value: effectValue, unitTypes: effectUnitTypes } = effect;
+
+                if (effectPowerType === powerType || effectPowerType === 'all') {
+                  if (!effectUnitTypes || effectUnitTypes.length === 0 || effectUnitTypes.includes(card.unitType)) {
+                    if (originalPower > 0) {
+                      cardContribution -= effectValue;
+                    }
+                  }
+                }
+              }
+            });
+          });
+
+          affectedCardsCurrentTotal += Math.max(0, cardContribution);
+        });
+
+        // 第2步：计算应该保留的火力（multiplier * 当前总火力）
+        const newTotal = affectedCardsCurrentTotal * multiplier;
+
+        // 第3步：计算需要调整的量
+        const adjustment = newTotal - affectedCardsCurrentTotal;
+
+        if (powerType === 'ground') {
+          basePowers.groundPower += adjustment;
+        } else if (powerType === 'sea') {
+          basePowers.seaPower += adjustment;
+        } else if (powerType === 'air') {
+          basePowers.airPower += adjustment;
+          basePowers.airDefense += adjustment;
+          basePowers.airSuperiority += adjustment;
+        }
+      } else if (modifier !== undefined) {
+        // modifier（加法）：每张卡牌加减固定值，确保不会变成负数
+        affectedCards.forEach(card => {
+          const originalPower = getCardFirePower(card, powerType);
+          // 加法修正，确保单个卡牌火力不会变成负数
+          const adjustment = Math.max(modifier, -originalPower);
+
+          if (powerType === 'ground') {
+            basePowers.groundPower += adjustment;
+          } else if (powerType === 'sea') {
+            basePowers.seaPower += adjustment;
+          } else if (powerType === 'air') {
+            basePowers.airPower += adjustment;
+            basePowers.airDefense += adjustment;
+            basePowers.airSuperiority += adjustment;
+          }
+        });
+      }
+    });
+  }
+
+  // 确保最终火力不会是负数（保底保护）
+  basePowers.groundPower = Math.max(0, basePowers.groundPower);
+  basePowers.seaPower = Math.max(0, basePowers.seaPower);
+  basePowers.airPower = Math.max(0, basePowers.airPower);
+  basePowers.airDefense = Math.max(0, basePowers.airDefense);
+  basePowers.airSuperiority = Math.max(0, basePowers.airSuperiority);
 
   return basePowers;
 }
