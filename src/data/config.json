@@ -8,7 +8,7 @@
     "randomShopSlots": 6
   },
   "debug": {
-    "enabled": true
+    "enabled": false
   },
   "phases": {
     "drawCount": 5
